@@ -9,7 +9,7 @@
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
 
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -22,19 +22,19 @@
         :root {
             --gh-navy:       #0F172A;
             --gh-navy-soft:  #1E293B;
-            --gh-indigo:     #4F46E5;
-            --gh-indigo-lt:  #EEF2FF;
+            --gh-amber:      #D97706;
+            --gh-amber-lt:   #FEF3C7;
             --gh-slate:      #F8FAFC;
-            --gh-border:     #E2E8F0;
-            --gh-muted:      #64748B;
-            --gh-text:       #0F172A;
+            --gh-border:     #E7E2D8;
+            --gh-muted:      #78716C;
+            --gh-text:       #1C1917;
             --gh-success:    #10B981;
             --gh-warning:    #F59E0B;
             --gh-danger:     #EF4444;
             --gh-info:       #3B82F6;
 
             --font-display:  'Plus Jakarta Sans', sans-serif;
-            --font-body:     'Inter', sans-serif;
+            --font-body:     'DM Sans', sans-serif;
 
             --nav-height:    64px;
             --sidebar-w:     240px;
@@ -91,7 +91,7 @@
         .gh-navbar-brand .brand-icon {
             width: 30px;
             height: 30px;
-            background: var(--gh-indigo);
+            background: var(--gh-amber);
             border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
@@ -134,7 +134,7 @@
             width: 34px;
             height: 34px;
             border-radius: 50%;
-            background: var(--gh-indigo);
+            background: var(--gh-amber);
             color: #fff;
             font-size: 0.8rem;
             font-weight: 600;
@@ -201,9 +201,9 @@
         }
 
         .gh-sidebar-link.active {
-            background: var(--gh-indigo-lt);
-            color: var(--gh-indigo);
-            border-left-color: var(--gh-indigo);
+            background: var(--gh-amber-lt);
+            color: var(--gh-amber);
+            border-left-color: var(--gh-amber);
             font-weight: 600;
         }
 
@@ -216,7 +216,7 @@
 
         .gh-sidebar-badge {
             margin-left: auto;
-            background: var(--gh-indigo);
+            background: var(--gh-amber);
             color: #fff;
             font-size: 0.7rem;
             font-weight: 600;
@@ -297,6 +297,19 @@
             line-height: 1;
         }
 
+        /* ─── Stat Card Color Modifiers ──────────────────────────── */
+        .gh-stat-success { background: #D1FAE5; border-color: #A7F3D0; }
+        .gh-stat-success .gh-stat-label, .gh-stat-success .gh-stat-value { color: #065F46; }
+
+        .gh-stat-warning { background: #FEF9C3; border-color: #FEF08A; }
+        .gh-stat-warning .gh-stat-label, .gh-stat-warning .gh-stat-value { color: #854D0E; }
+
+        .gh-stat-danger  { background: #FEE2E2; border-color: #FECACA; }
+        .gh-stat-danger .gh-stat-label, .gh-stat-danger .gh-stat-value { color: #991B1B; }
+
+        .gh-stat-info    { background: #DBEAFE; border-color: #BFDBFE; }
+        .gh-stat-info .gh-stat-label, .gh-stat-info .gh-stat-value { color: #1D4ED8; }
+
         /* ─── Status Badges ──────────────────────────────────────── */
         .gh-badge {
             display: inline-flex;
@@ -326,7 +339,7 @@
 
         /* ─── Buttons ────────────────────────────────────────────── */
         .btn-gh-primary {
-            background: var(--gh-indigo);
+            background: var(--gh-amber);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
@@ -342,7 +355,7 @@
             gap: 6px;
         }
 
-        .btn-gh-primary:hover  { background: #4338CA; color: #fff; }
+        .btn-gh-primary:hover  { background: #B45309; color: #fff; }
         .btn-gh-primary:active { transform: scale(0.98); }
 
         .btn-gh-outline {
@@ -362,26 +375,41 @@
             gap: 6px;
         }
 
-        .btn-gh-outline:hover { border-color: var(--gh-indigo); color: var(--gh-indigo); background: var(--gh-indigo-lt); }
+        .gh-navbar .btn-gh-outline {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .gh-navbar .btn-gh-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .btn-gh-outline:hover { border-color: var(--gh-amber); color: var(--gh-amber); background: var(--gh-amber-lt); }
 
         /* ─── Tables ─────────────────────────────────────────────── */
         .gh-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 0.875rem;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--gh-border);
         }
 
-        .gh-table th {
+        .gh-table thead th {
+            background: var(--gh-navy-soft);
+            color: #fff;
             font-family: var(--font-display);
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.07em;
-            color: var(--gh-muted);
-            padding: 0.75rem 1rem;
-            background: var(--gh-slate);
-            border-bottom: 1px solid var(--gh-border);
+            letter-spacing: 0.05em;
+            padding: 0.875rem 1rem;
             text-align: left;
+            border-bottom: none;
         }
 
         .gh-table td {
@@ -389,10 +417,13 @@
             border-bottom: 1px solid var(--gh-border);
             color: var(--gh-navy);
             vertical-align: middle;
+            background: #fff;
         }
 
         .gh-table tr:last-child td { border-bottom: none; }
-        .gh-table tbody tr:hover { background: var(--gh-slate); }
+        
+        .gh-table tbody tr td { transition: background 0.15s; }
+        .gh-table tbody tr:hover td { background: var(--gh-indigo-lt); }
 
         /* ─── Form Controls ──────────────────────────────────────── */
         .gh-input {
@@ -409,8 +440,8 @@
         }
 
         .gh-input:focus {
-            border-color: var(--gh-indigo);
-            box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+            border-color: var(--gh-amber);
+            box-shadow: 0 0 0 3px rgba(217,119,6,0.15);
         }
 
         .gh-label {
@@ -434,6 +465,7 @@
         }
 
         .gh-alert-success { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+        .gh-alert-warning  { background: #FEF9C3; color: #854D0E; border: 1px solid #FEF08A; }
         .gh-alert-danger  { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
         .gh-alert-info    { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
 
@@ -450,8 +482,8 @@
         }
 
         .gh-job-card:hover {
-            border-color: var(--gh-indigo);
-            box-shadow: 0 4px 20px rgba(79,70,229,0.08);
+            border-color: var(--gh-amber);
+            box-shadow: 0 4px 20px rgba(217,119,6,0.10);
             color: inherit;
         }
 
@@ -459,7 +491,7 @@
             width: 44px;
             height: 44px;
             border-radius: var(--radius-sm);
-            background: var(--gh-indigo-lt);
+            background: var(--gh-amber-lt);
             border: 1px solid var(--gh-border);
             display: flex;
             align-items: center;
@@ -467,7 +499,7 @@
             font-family: var(--font-display);
             font-size: 0.75rem;
             font-weight: 700;
-            color: var(--gh-indigo);
+            color: var(--gh-amber);
             flex-shrink: 0;
         }
 
@@ -642,6 +674,13 @@
                 <div class="gh-alert gh-alert-success">
                     <i class="bi bi-check-circle-fill"></i>
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div class="gh-alert gh-alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    {{ session('warning') }}
                 </div>
             @endif
 
