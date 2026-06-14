@@ -1,6 +1,5 @@
 # 📋 Job Portal System — Laravel Blueprint
-**Tech Stack:** PHP Laravel · Bootstrap · MySQL · Blade Templates
-**Purpose:** Structure planning only — no code, no migrations, no Blade logic yet.
+**Tech Stack:** PHP Laravel · Bootstrap · MySQL
 
 ---
 
@@ -402,44 +401,138 @@ Phase 5 — Polish
 
 ### Step 2 — How to Divide Work in a Team
 
-Suggested team split (adjust for your group size):
+Suggested team split :
 
 | Member | Area |
 |---|---|
 | Member 1 | Auth system + layouts + partials |
-| Member 2 | Public pages + job browsing + search |
-| Member 3 | Applicant module (profile, resume, applications) |
-| Member 4 | Employer module (job CRUD, view applicants, update status) |
-| Member 5 | Admin panel (moderation, user management) |
+| Member 1 | Public pages + job browsing + search |
+| Member 2 | Applicant module (profile, resume, applications) |
+| Member 3 | Employer module (job CRUD, view applicants, update status) |
+| Member 4 | Admin panel (moderation, user management) |
 
 > 💡 Tip: If you have fewer than 5 members, combine Member 1+2 or Member 4+5.
 
 ---
 
-### Step 3 — How to Avoid Git Conflicts
+## Step 3 — How to Avoid Git Conflicts
 
-Follow these simple Git rules:
+We will use a development workflow based on a shared `dev` branch.
 
-1. **Each person works on their own branch.**
-   Name branches clearly: `feature/auth`, `feature/employer-jobs`, `feature/admin-panel`
+### Branch Structure
+
+```text
+main
+│
+└── dev
+    ├── feature/auth
+    ├── feature/applicant
+    ├── feature/employer
+    └── feature/admin
+```
+
+### Git Rules
+
+1. **Each member works on their own feature branch.**
+
+   Examples:
+
+   ```text
+   feature/auth
+   feature/applicant
+   feature/employer
+   feature/admin
+   ```
 
 2. **Never commit directly to `main`.**
-   Always work on your feature branch, then open a Pull Request to merge.
 
-3. **Pull from `main` before starting new work.**
-   Run `git pull origin main` each time you begin a session.
+   Workflow:
 
-4. **Divide files by role — one person owns one folder.**
-   Member 3 only touches `resources/views/applicant/` and `app/Http/Controllers/Applicant/`.
-   This prevents two people from editing the same file.
+   ```text
+   feature branch
+         ↓
+         dev
+         ↓
+        main
+   ```
 
-5. **Communicate before touching shared files.**
-   Shared files like `web.php`, `app.blade.php`, and `navbar.blade.php` should be edited
-   by one designated person (Member 1), or changes should be coordinated via chat first.
+3. **Pull from `dev` before starting work.**
 
-6. **Commit small and often.**
-   Don't save up a week of work into one giant commit. Small commits = smaller conflicts.
+   ```bash
+   git checkout dev
+   git pull origin dev
+   ```
 
+4. **Keep your feature branch updated.**
+
+   ```bash
+   git checkout feature/applicant
+   git merge dev
+   ```
+
+5. **Respect file ownership.**
+
+   Members should primarily work only within their assigned folders and controllers.
+
+6. **Communicate before modifying shared files.**
+
+   Shared files include:
+
+   ```text
+   routes/web.php
+   resources/views/layouts/app.blade.php
+   resources/views/partials/navbar.blade.php
+   database/migrations/
+   ```
+
+7. **Commit small and often.**
+
+   Good example:
+
+   ```bash
+   git commit -m "Add applicant dashboard view"
+   git commit -m "Create employer job routes"
+   ```
+
+   Avoid saving several days of work into one massive commit.
+
+
+Use clear and consistent commit messages following the format:
+
+```text
+type: short description
+```
+
+Common commit types:
+
+| Type | Purpose |
+|--------|--------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `refactor` | Code improvement without changing functionality |
+| `style` | Formatting, spacing, UI adjustments |
+| `docs` | Documentation updates |
+| `chore` | Project maintenance, configuration changes |
+| `test` | Adding or updating tests |
+
+Avoid saving several days of work into one massive commit.
+
+
+9. **Merge feature branches into `dev` first.**
+
+   Do not merge feature branches directly into `main`.
+
+10. **Test before merging.**
+
+   Verify that:
+   - Pages load correctly
+   - Routes work
+   - Forms submit properly
+   - No existing features are broken
+
+11. **Use Pull Requests when possible.**
+
+    This allows teammates to review changes before they are merged into `dev`.
 ---
 
 ### Step 4 — How Routing + Views Connect Logically
