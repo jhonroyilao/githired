@@ -79,11 +79,11 @@ All views live under `resources/views/`. They are organized by role.
 ---
 
 ### 🧱 Shared / Layout Files
-`resources/views/layouts/`
+`resources/views/common/`
 
 | File | Purpose |
 |---|---|
-| `app.blade.php` | Main layout — navbar, footer, Bootstrap CDN |
+| `main.blade.php` | Main layout — navbar, footer, Bootstrap CDN |
 | `guest.blade.php` | Minimal layout for auth pages (login/register) |
 | `admin.blade.php` | Admin-specific layout with sidebar |
 
@@ -345,8 +345,8 @@ app/
 │   └── EmployerProfile.php
 resources/
 └── views/
-    ├── layouts/
-    │   ├── app.blade.php
+    ├── common/
+    │   ├── main.blade.php
     │   ├── guest.blade.php
     │   └── admin.blade.php
     ├── partials/
@@ -480,7 +480,7 @@ main
 
    ```text
    routes/web.php
-   resources/views/layouts/app.blade.php
+   resources/views/common/main.blade.php
    resources/views/partials/navbar.blade.php
    database/migrations/
    ```
@@ -570,7 +570,7 @@ Did the route exist? → Did it point to the right controller? → Did the contr
 ### Step 5 — Best Practices for Laravel Teams
 
 1. **Use `@extends` and `@section` in every Blade file.**
-   Every page should extend a layout (`layouts/app`) and yield content into `@section('content')`.
+   Every page should extend a layout (`common.main`) and yield content into `@section('content')`.
 
 2. **Keep controllers thin.**
    Controllers should only receive input, talk to models, and return views.
@@ -592,6 +592,6 @@ Did the route exist? → Did it point to the right controller? → Did the contr
    Database name, app URL, and mail settings all go in `.env`, not in PHP files.
 
 7. **Keep the `public/` folder tidy.**
-   Put Bootstrap CSS/JS links in your layout file. Put any custom CSS in `public/css/app.css`.
+   Put Bootstrap CSS/JS links in your commom\main file. Put any custom CSS in `public/css/app.css`.
 
 ---
