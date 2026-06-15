@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
-
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,600,700,800&display=swap" rel="stylesheet">
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
@@ -54,7 +54,8 @@
             /* Status: Draft */
             --s-draft-bg:    #F1F1F1;
             --s-draft-color: #575757;
-
+            
+            --font-heading: 'Cabinet Grotesk', sans-serif;
             --font-body: 'Inter', sans-serif;
 
             --nav-height:  62px;
@@ -78,11 +79,10 @@
         }
 
         h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-body);
+            font-family: var(--font-heading);
             font-weight: 700;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.03em;
         }
-
         /* ─── Top Navbar ─────────────────────────────────────────── */
         .gh-navbar {
             position: sticky;
@@ -92,8 +92,8 @@
             background: var(--gh-black);
             display: flex;
             align-items: center;
-            padding: 0 1.5rem;
-            gap: 1.5rem;
+            padding: 0 3.5rem;
+            gap: 1.0rem;
             border-bottom: 1px solid rgba(255,255,255,0.07);
         }
 
@@ -587,8 +587,7 @@
     {{-- ═══ TOP NAVBAR ═════════════════════════════════════════════ --}}
     <nav class="gh-navbar">
         <a href="{{ url('/') }}" class="gh-navbar-brand">
-            <span class="brand-icon"><i class="fa-solid fa-briefcase" style="font-size:0.8rem;"></i></span>
-            GitHired
+            <img src="gh-logo-main.svg" alt="Logo" width="35" height="35"> GitHired
         </a>
 
         <div class="gh-nav-links d-none d-md-flex">
