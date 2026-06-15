@@ -6,41 +6,62 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'GitHired') — Find Your Next Role</title>
 
-    {{-- Google Fonts --}}
+    {{-- Fonts: Inter only --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+
+    {{-- Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    {{-- Bootstrap Icons --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
     <style>
         /* ─── Design Tokens ─────────────────────────────────────── */
         :root {
-            --gh-navy:       #0F172A;
-            --gh-navy-soft:  #1E293B;
-            --gh-amber:      #D97706;
-            --gh-amber-lt:   #FEF3C7;
-            --gh-slate:      #F8FAFC;
-            --gh-border:     #E7E2D8;
-            --gh-muted:      #78716C;
-            --gh-text:       #1C1917;
-            --gh-success:    #10B981;
-            --gh-warning:    #F59E0B;
-            --gh-danger:     #EF4444;
-            --gh-info:       #3B82F6;
+            /* Brand palette */
+            --gh-black:      #141414;
+            --gh-blue:       #1A73E9;
+            --gh-blue-dark:  #1558b0;
+            --gh-blue-lt:    #EAF2FF;
+            --gh-gray:       #575757;
+            --gh-surface:    #F6F4F5;
+            --gh-white:      #ffffff;
+            --gh-border:     #E4E2E3;
+            --gh-muted:      #8A8A8A;
 
-            --font-display:  'Plus Jakarta Sans', sans-serif;
-            --font-body:     'DM Sans', sans-serif;
+            /* Status: Pending */
+            --s-pending-bg:     #FCF5DB;
+            --s-pending-color:  #D48B24;
 
-            --nav-height:    64px;
-            --sidebar-w:     240px;
-            --radius-sm:     6px;
-            --radius-md:     10px;
-            --radius-lg:     14px;
+            /* Status: Interview */
+            --s-interview-bg:    #EFEAFF;
+            --s-interview-color: #693FE8;
+
+            /* Status: Active */
+            --s-active-bg:    #E2F3FF;
+            --s-active-color: #0083F1;
+
+            /* Status: Hired */
+            --s-hired-bg:    #E1FAE7;
+            --s-hired-color: #31B74B;
+
+            /* Status: Rejected */
+            --s-rejected-bg:    #FDEFEE;
+            --s-rejected-color: #C14F34;
+
+            /* Status: Draft */
+            --s-draft-bg:    #F1F1F1;
+            --s-draft-color: #575757;
+
+            --font-body: 'Inter', sans-serif;
+
+            --nav-height:  62px;
+            --sidebar-w:   228px;
+            --radius-sm:   6px;
+            --radius-md:   10px;
+            --radius-lg:   14px;
         }
 
         /* ─── Base ───────────────────────────────────────────────── */
@@ -48,17 +69,18 @@
 
         body {
             font-family: var(--font-body);
-            background: var(--gh-slate);
-            color: var(--gh-text);
-            font-size: 15px;
-            line-height: 1.6;
-            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            background: var(--gh-surface);
+            color: var(--gh-black);
+            -webkit-font-smoothing: antialiased;
         }
 
         h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-display);
+            font-family: var(--font-body);
             font-weight: 700;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.025em;
         }
 
         /* ─── Top Navbar ─────────────────────────────────────────── */
@@ -67,52 +89,52 @@
             top: 0;
             z-index: 1000;
             height: var(--nav-height);
-            background: var(--gh-navy);
+            background: var(--gh-black);
             display: flex;
             align-items: center;
             padding: 0 1.5rem;
             gap: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
         }
 
         .gh-navbar-brand {
-            font-family: var(--font-display);
-            font-size: 1.2rem;
+            font-family: var(--font-body);
+            font-size: 1.1rem;
             font-weight: 700;
             color: #fff;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
-            letter-spacing: -0.03em;
+            gap: 9px;
+            letter-spacing: -0.04em;
             flex-shrink: 0;
         }
 
         .gh-navbar-brand .brand-icon {
-            width: 30px;
-            height: 30px;
-            background: var(--gh-amber);
+            width: 28px;
+            height: 28px;
+            background: var(--gh-blue);
             border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #fff;
         }
 
         .gh-nav-links {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.15rem;
             flex: 1;
         }
 
         .gh-nav-link {
-            color: rgba(255,255,255,0.65);
+            color: rgba(255,255,255,0.55);
             text-decoration: none;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
-            padding: 0.4rem 0.75rem;
+            padding: 0.4rem 0.8rem;
             border-radius: var(--radius-sm);
             transition: color 0.15s, background 0.15s;
         }
@@ -120,7 +142,7 @@
         .gh-nav-link:hover,
         .gh-nav-link.active {
             color: #fff;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.07);
         }
 
         .gh-nav-actions {
@@ -131,19 +153,19 @@
         }
 
         .gh-avatar {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: var(--gh-amber);
+            background: var(--gh-blue);
             color: #fff;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: var(--font-display);
             cursor: pointer;
-            border: 2px solid rgba(255,255,255,0.12);
+            border: 2px solid rgba(255,255,255,0.1);
+            letter-spacing: 0;
         }
 
         /* ─── Page Layout ────────────────────────────────────────── */
@@ -156,9 +178,9 @@
         .gh-sidebar {
             width: var(--sidebar-w);
             flex-shrink: 0;
-            background: #fff;
+            background: var(--gh-white);
             border-right: 1px solid var(--gh-border);
-            padding: 1.5rem 0;
+            padding: 1.25rem 0;
             position: sticky;
             top: var(--nav-height);
             height: calc(100vh - var(--nav-height));
@@ -166,59 +188,56 @@
         }
 
         .gh-sidebar-section {
-            padding: 0 1rem 1rem;
+            padding: 0 0.75rem 1rem;
         }
 
         .gh-sidebar-label {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.09em;
             color: var(--gh-muted);
-            padding: 0 0.75rem;
-            margin-bottom: 0.5rem;
+            padding: 0 0.625rem;
+            margin-bottom: 0.4rem;
         }
 
         .gh-sidebar-link {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 0.5rem 0.75rem;
+            gap: 9px;
+            padding: 0.45rem 0.625rem;
             border-radius: var(--radius-sm);
-            color: var(--gh-muted);
-            font-size: 0.875rem;
+            color: var(--gh-gray);
+            font-size: 0.85rem;
             font-weight: 500;
             text-decoration: none;
             transition: all 0.15s;
-            border-left: 2px solid transparent;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .gh-sidebar-link:hover {
-            background: var(--gh-slate);
-            color: var(--gh-navy);
-            border-left-color: var(--gh-border);
+            background: var(--gh-surface);
+            color: var(--gh-black);
         }
 
         .gh-sidebar-link.active {
-            background: var(--gh-amber-lt);
-            color: var(--gh-amber);
-            border-left-color: var(--gh-amber);
+            background: var(--gh-blue-lt);
+            color: var(--gh-blue);
             font-weight: 600;
         }
 
         .gh-sidebar-link i {
-            font-size: 1rem;
-            width: 18px;
+            font-size: 0.9rem;
+            width: 16px;
             text-align: center;
             flex-shrink: 0;
         }
 
         .gh-sidebar-badge {
             margin-left: auto;
-            background: var(--gh-amber);
+            background: var(--gh-blue);
             color: #fff;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 600;
             padding: 1px 7px;
             border-radius: 99px;
@@ -227,13 +246,13 @@
         /* ─── Main Content ───────────────────────────────────────── */
         .gh-main {
             flex: 1;
-            padding: 2rem 2.5rem;
+            padding: 2rem 2.25rem;
             min-width: 0;
         }
 
         /* ─── Page Header ────────────────────────────────────────── */
         .gh-page-header {
-            margin-bottom: 2rem;
+            margin-bottom: 1.75rem;
             padding-bottom: 1.25rem;
             border-bottom: 1px solid var(--gh-border);
             display: flex;
@@ -243,109 +262,118 @@
         }
 
         .gh-page-title {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--gh-navy);
+            color: var(--gh-black);
             margin: 0;
             line-height: 1.2;
         }
 
         .gh-page-subtitle {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--gh-muted);
-            margin: 0.25rem 0 0;
+            margin: 0.2rem 0 0;
+            font-weight: 400;
         }
 
         /* ─── Cards ──────────────────────────────────────────────── */
         .gh-card {
-            background: #fff;
+            background: var(--gh-white);
             border: 1px solid var(--gh-border);
             border-radius: var(--radius-lg);
             padding: 1.5rem;
         }
 
         .gh-card-title {
-            font-family: var(--font-display);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: var(--gh-navy);
+            color: var(--gh-black);
             margin-bottom: 1rem;
         }
 
         /* ─── Stat Cards ─────────────────────────────────────────── */
         .gh-stat {
-            background: #fff;
+            background: var(--gh-white);
             border: 1px solid var(--gh-border);
             border-radius: var(--radius-md);
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem 1.4rem;
         }
 
         .gh-stat-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.07em;
             color: var(--gh-muted);
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.35rem;
         }
 
         .gh-stat-value {
-            font-family: var(--font-display);
-            font-size: 2rem;
+            font-size: 1.9rem;
             font-weight: 700;
-            color: var(--gh-navy);
+            color: var(--gh-black);
             line-height: 1;
+            letter-spacing: -0.04em;
         }
 
-        /* ─── Stat Card Color Modifiers ──────────────────────────── */
-        .gh-stat-success { background: #D1FAE5; border-color: #A7F3D0; }
-        .gh-stat-success .gh-stat-label, .gh-stat-success .gh-stat-value { color: #065F46; }
+        /* Stat card status-matched modifiers */
+        .gh-stat-pending  { background: var(--s-pending-bg);  border-color: var(--s-pending-color); }
+        .gh-stat-pending  .gh-stat-label,
+        .gh-stat-pending  .gh-stat-value  { color: var(--s-pending-color); }
 
-        .gh-stat-warning { background: #FEF9C3; border-color: #FEF08A; }
-        .gh-stat-warning .gh-stat-label, .gh-stat-warning .gh-stat-value { color: #854D0E; }
+        .gh-stat-interview { background: var(--s-interview-bg); border-color: var(--s-interview-color); }
+        .gh-stat-interview .gh-stat-label,
+        .gh-stat-interview .gh-stat-value { color: var(--s-interview-color); }
 
-        .gh-stat-danger  { background: #FEE2E2; border-color: #FECACA; }
-        .gh-stat-danger .gh-stat-label, .gh-stat-danger .gh-stat-value { color: #991B1B; }
+        .gh-stat-active   { background: var(--s-active-bg);   border-color: var(--s-active-color); }
+        .gh-stat-active   .gh-stat-label,
+        .gh-stat-active   .gh-stat-value   { color: var(--s-active-color); }
 
-        .gh-stat-info    { background: #DBEAFE; border-color: #BFDBFE; }
-        .gh-stat-info .gh-stat-label, .gh-stat-info .gh-stat-value { color: #1D4ED8; }
+        .gh-stat-hired    { background: var(--s-hired-bg);    border-color: var(--s-hired-color); }
+        .gh-stat-hired    .gh-stat-label,
+        .gh-stat-hired    .gh-stat-value    { color: var(--s-hired-color); }
 
-        /* ─── Status Badges ──────────────────────────────────────── */
+        .gh-stat-rejected { background: var(--s-rejected-bg); border-color: var(--s-rejected-color); }
+        .gh-stat-rejected .gh-stat-label,
+        .gh-stat-rejected .gh-stat-value { color: var(--s-rejected-color); }
+
+        .gh-stat-draft    { background: var(--s-draft-bg);    border-color: var(--s-draft-color); }
+        .gh-stat-draft    .gh-stat-label,
+        .gh-stat-draft    .gh-stat-value    { color: var(--s-draft-color); }
+
+        /* ─── Status Labels/Badges ───────────────────────────────── */
         .gh-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.75rem;
+            gap: 6px;
+            font-size: 0.72rem;
             font-weight: 600;
-            padding: 3px 10px;
+            padding: 3px 10px 3px 8px;
             border-radius: 99px;
-            letter-spacing: 0.02em;
+            border: 1px solid;
+            letter-spacing: 0.01em;
         }
 
-        .gh-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
+        .gh-badge i {
+            font-size: 0.72rem;
         }
 
-        .gh-badge-pending  { background: #FEF9C3; color: #854D0E; }
-        .gh-badge-interview{ background: #DBEAFE; color: #1D4ED8; }
-        .gh-badge-hired    { background: #D1FAE5; color: #065F46; }
-        .gh-badge-rejected { background: #FEE2E2; color: #991B1B; }
-        .gh-badge-active   { background: #D1FAE5; color: #065F46; }
-        .gh-badge-draft    { background: var(--gh-border); color: var(--gh-muted); }
+        .gh-badge-pending   { background: var(--s-pending-bg);   color: var(--s-pending-color);   border-color: var(--s-pending-color); }
+        .gh-badge-interview { background: var(--s-interview-bg);  color: var(--s-interview-color); border-color: var(--s-interview-color); }
+        .gh-badge-active    { background: var(--s-active-bg);    color: var(--s-active-color);    border-color: var(--s-active-color); }
+        .gh-badge-hired     { background: var(--s-hired-bg);     color: var(--s-hired-color);     border-color: var(--s-hired-color); }
+        .gh-badge-rejected  { background: var(--s-rejected-bg);  color: var(--s-rejected-color);  border-color: var(--s-rejected-color); }
+        .gh-badge-draft     { background: var(--s-draft-bg);     color: var(--s-draft-color);     border-color: var(--s-draft-color); }
 
         /* ─── Buttons ────────────────────────────────────────────── */
         .btn-gh-primary {
-            background: var(--gh-amber);
+            background: var(--gh-blue);
             color: #fff;
             border: none;
             border-radius: var(--radius-sm);
-            padding: 0.5rem 1.25rem;
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-body);
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
             transition: background 0.15s, transform 0.1s;
@@ -355,75 +383,72 @@
             gap: 6px;
         }
 
-        .btn-gh-primary:hover  { background: #B45309; color: #fff; }
+        .btn-gh-primary:hover  { background: var(--gh-blue-dark); color: #fff; }
         .btn-gh-primary:active { transform: scale(0.98); }
 
         .btn-gh-outline {
             background: transparent;
-            color: var(--gh-navy);
+            color: var(--gh-black);
             border: 1px solid var(--gh-border);
             border-radius: var(--radius-sm);
-            padding: 0.5rem 1.25rem;
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-body);
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
-            transition: border-color 0.15s, background 0.15s;
+            transition: border-color 0.15s, background 0.15s, color 0.15s;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
 
+        .btn-gh-outline:hover { border-color: var(--gh-blue); color: var(--gh-blue); background: var(--gh-blue-lt); }
+
         .gh-navbar .btn-gh-outline {
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.4);
+            color: rgba(255,255,255,0.75);
+            border-color: rgba(255,255,255,0.2);
         }
 
         .gh-navbar .btn-gh-outline:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.08);
             color: #fff;
-            border-color: #fff;
+            border-color: rgba(255,255,255,0.4);
         }
-
-        .btn-gh-outline:hover { border-color: var(--gh-amber); color: var(--gh-amber); background: var(--gh-amber-lt); }
 
         /* ─── Tables ─────────────────────────────────────────────── */
         .gh-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             border-radius: var(--radius-md);
             overflow: hidden;
             border: 1px solid var(--gh-border);
         }
 
         .gh-table thead th {
-            background: var(--gh-navy-soft);
-            color: #fff;
-            font-family: var(--font-display);
-            font-size: 0.75rem;
+            background: var(--gh-black);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0.875rem 1rem;
+            letter-spacing: 0.07em;
+            padding: 0.825rem 1rem;
             text-align: left;
             border-bottom: none;
         }
 
         .gh-table td {
-            padding: 0.875rem 1rem;
+            padding: 0.825rem 1rem;
             border-bottom: 1px solid var(--gh-border);
-            color: var(--gh-navy);
+            color: var(--gh-black);
             vertical-align: middle;
-            background: #fff;
+            background: var(--gh-white);
         }
 
         .gh-table tr:last-child td { border-bottom: none; }
-        
-        .gh-table tbody tr td { transition: background 0.15s; }
-        .gh-table tbody tr:hover td { background: var(--gh-indigo-lt); }
+        .gh-table tbody tr:hover td { background: var(--gh-surface); }
 
         /* ─── Form Controls ──────────────────────────────────────── */
         .gh-input {
@@ -433,48 +458,49 @@
             padding: 0.5rem 0.875rem;
             font-family: var(--font-body);
             font-size: 0.875rem;
-            color: var(--gh-navy);
-            background: #fff;
+            color: var(--gh-black);
+            background: var(--gh-white);
             transition: border-color 0.15s, box-shadow 0.15s;
             outline: none;
         }
 
         .gh-input:focus {
-            border-color: var(--gh-amber);
-            box-shadow: 0 0 0 3px rgba(217,119,6,0.15);
+            border-color: var(--gh-blue);
+            box-shadow: 0 0 0 3px rgba(26,115,233,0.12);
         }
 
         .gh-label {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
-            color: var(--gh-navy);
+            color: var(--gh-black);
             margin-bottom: 0.35rem;
             display: block;
         }
 
         /* ─── Flash Alerts ───────────────────────────────────────── */
         .gh-alert {
-            padding: 0.875rem 1.25rem;
+            padding: 0.825rem 1.1rem;
             border-radius: var(--radius-md);
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 1.25rem;
+            border: 1px solid;
         }
 
-        .gh-alert-success { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
-        .gh-alert-warning  { background: #FEF9C3; color: #854D0E; border: 1px solid #FEF08A; }
-        .gh-alert-danger  { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
-        .gh-alert-info    { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
+        .gh-alert-success { background: var(--s-hired-bg);    color: var(--s-hired-color);    border-color: var(--s-hired-color); }
+        .gh-alert-warning { background: var(--s-pending-bg);  color: var(--s-pending-color);  border-color: var(--s-pending-color); }
+        .gh-alert-danger  { background: var(--s-rejected-bg); color: var(--s-rejected-color); border-color: var(--s-rejected-color); }
+        .gh-alert-info    { background: var(--s-active-bg);   color: var(--s-active-color);   border-color: var(--s-active-color); }
 
-        /* ─── Job Card (reusable) ─────────────────────────────────── */
+        /* ─── Job Card ───────────────────────────────────────────── */
         .gh-job-card {
-            background: #fff;
+            background: var(--gh-white);
             border: 1px solid var(--gh-border);
             border-radius: var(--radius-lg);
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem 1.4rem;
             transition: border-color 0.15s, box-shadow 0.15s;
             text-decoration: none;
             color: inherit;
@@ -482,26 +508,37 @@
         }
 
         .gh-job-card:hover {
-            border-color: var(--gh-amber);
-            box-shadow: 0 4px 20px rgba(217,119,6,0.10);
+            border-color: var(--gh-blue);
+            box-shadow: 0 4px 18px rgba(26,115,233,0.09);
             color: inherit;
         }
 
         .gh-job-company-logo {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border-radius: var(--radius-sm);
-            background: var(--gh-amber-lt);
+            background: var(--gh-blue-lt);
             border: 1px solid var(--gh-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: var(--font-display);
             font-size: 0.75rem;
             font-weight: 700;
-            color: var(--gh-amber);
+            color: var(--gh-blue);
             flex-shrink: 0;
         }
+
+        /* ─── Dropdown tweaks ────────────────────────────────────── */
+        .dropdown-menu {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            border: 1px solid var(--gh-border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+        }
+
+        .dropdown-item:hover { background: var(--gh-surface); }
+        .dropdown-item.text-danger:hover { background: var(--s-rejected-bg); color: var(--s-rejected-color) !important; }
 
         /* ─── Divider ────────────────────────────────────────────── */
         .gh-divider {
@@ -512,13 +549,28 @@
 
         /* ─── Footer ─────────────────────────────────────────────── */
         .gh-footer {
-            background: var(--gh-navy);
-            color: rgba(255,255,255,0.45);
+            background: var(--gh-black);
+            color: rgba(255,255,255,0.35);
             text-align: center;
-            font-size: 0.8rem;
-            padding: 1.25rem;
+            font-size: 0.78rem;
+            padding: 1.1rem;
             margin-top: auto;
         }
+
+        /* ─── Bell icon button ───────────────────────────────────── */
+        .gh-icon-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 5px 7px;
+            border-radius: var(--radius-sm);
+            transition: color 0.15s, background 0.15s;
+            line-height: 1;
+        }
+
+        .gh-icon-btn:hover { color: #fff; background: rgba(255,255,255,0.07); }
 
         /* ─── Responsive ─────────────────────────────────────────── */
         @media (max-width: 768px) {
@@ -535,7 +587,7 @@
     {{-- ═══ TOP NAVBAR ═════════════════════════════════════════════ --}}
     <nav class="gh-navbar">
         <a href="{{ url('/') }}" class="gh-navbar-brand">
-            <span class="brand-icon"><i class="bi bi-briefcase-fill"></i></span>
+            <span class="brand-icon"><i class="fa-solid fa-briefcase" style="font-size:0.8rem;"></i></span>
             GitHired
         </a>
 
@@ -561,28 +613,26 @@
 
         <div class="gh-nav-actions">
             @guest
-                <a href="{{ route('login') }}" class="btn-gh-outline" style="padding: 0.375rem 1rem; font-size:0.825rem;">
+                <a href="{{ route('login') }}" class="btn-gh-outline" style="padding: 0.375rem 0.9rem;">
                     Sign in
                 </a>
-                <a href="{{ route('register') }}" class="btn-gh-primary" style="padding: 0.375rem 1rem; font-size:0.825rem;">
+                <a href="{{ route('register') }}" class="btn-gh-primary" style="padding: 0.375rem 0.9rem;">
                     Get started
                 </a>
             @endguest
 
             @auth
-                {{-- Notification Bell --}}
-                <button style="background:none;border:none;color:rgba(255,255,255,0.65);font-size:1.1rem;cursor:pointer;padding:4px;">
-                    <i class="bi bi-bell"></i>
+                <button class="gh-icon-btn">
+                    <i class="fa-regular fa-bell"></i>
                 </button>
 
-                {{-- Avatar Dropdown --}}
                 <div class="dropdown">
-                    <div class="gh-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="gh-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer;">
                         {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                     </div>
-                    <ul class="dropdown-menu dropdown-menu-end" style="font-size:0.875rem; min-width:180px; border: 1px solid var(--gh-border); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width:190px;">
                         <li>
-                            <span class="dropdown-item-text" style="font-weight:600; color: var(--gh-navy);">
+                            <span class="dropdown-item-text" style="font-weight:600; color: var(--gh-black); font-size:0.85rem;">
                                 {{ auth()->user()->name }}
                             </span>
                             <span class="dropdown-item-text" style="font-size:0.75rem; color:var(--gh-muted); padding-top:0;">
@@ -592,12 +642,12 @@
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="{{ route(auth()->user()->role . '.dashboard') }}">
-                                <i class="bi bi-grid me-2"></i> Dashboard
+                                <i class="fa-regular fa-grid-2 me-2" style="width:14px;"></i> Dashboard
                             </a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#">
-                                <i class="bi bi-person me-2"></i> Profile
+                                <i class="fa-regular fa-circle-user me-2" style="width:14px;"></i> Profile
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -605,7 +655,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Sign out
+                                    <i class="fa-regular fa-arrow-right-from-bracket me-2" style="width:14px;"></i> Sign out
                                 </button>
                             </form>
                         </li>
@@ -625,17 +675,16 @@
                 <div class="gh-sidebar-section">
                     <div class="gh-sidebar-label">Applicant</div>
                     <a href="{{ route('applicant.dashboard') }}" class="gh-sidebar-link {{ request()->routeIs('applicant.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-grid-1x2"></i> Dashboard
+                        <i class="fa-regular fa-grid-2"></i> Dashboard
                     </a>
                     <a href="{{ route('applicant.applications.index') }}" class="gh-sidebar-link {{ request()->routeIs('applicant.applications.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text"></i> Applications
-                        {{-- <span class="gh-sidebar-badge">3</span> --}}
+                        <i class="fa-regular fa-file-lines"></i> Applications
                     </a>
                     <a href="{{ route('applicant.resume') }}" class="gh-sidebar-link {{ request()->routeIs('applicant.resume*') ? 'active' : '' }}">
-                        <i class="bi bi-upload"></i> Resume
+                        <i class="fa-regular fa-file-arrow-up"></i> Resume
                     </a>
                     <a href="{{ route('applicant.profile.edit') }}" class="gh-sidebar-link {{ request()->routeIs('applicant.profile*') ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i> Profile
+                        <i class="fa-regular fa-circle-user"></i> Profile
                     </a>
                 </div>
             @endif
@@ -644,23 +693,23 @@
                 <div class="gh-sidebar-section">
                     <div class="gh-sidebar-label">Employer</div>
                     <a href="{{ route('employer.dashboard') }}" class="gh-sidebar-link {{ request()->routeIs('employer.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-grid-1x2"></i> Dashboard
+                        <i class="fa-regular fa-grid-2"></i> Dashboard
                     </a>
                     <a href="{{ route('employer.jobs.index') }}" class="gh-sidebar-link {{ request()->routeIs('employer.jobs.*') ? 'active' : '' }}">
-                        <i class="bi bi-briefcase"></i> Job Postings
+                        <i class="fa-regular fa-briefcase"></i> Job Postings
                     </a>
                     <a href="{{ route('employer.applicants.index') }}" class="gh-sidebar-link {{ request()->routeIs('employer.applicants.*') ? 'active' : '' }}">
-                        <i class="bi bi-people"></i> Applicants
+                        <i class="fa-regular fa-users"></i> Applicants
                     </a>
                     <a href="{{ route('employer.profile.edit') }}" class="gh-sidebar-link {{ request()->routeIs('employer.profile*') ? 'active' : '' }}">
-                        <i class="bi bi-building"></i> Company Profile
+                        <i class="fa-regular fa-building"></i> Company Profile
                     </a>
                 </div>
             @endif
 
-            <div class="gh-sidebar-section" style="margin-top:auto; border-top: 1px solid var(--gh-border); padding-top:1rem;">
+            <div class="gh-sidebar-section" style="border-top: 1px solid var(--gh-border); padding-top: 0.875rem; margin-top: 0.5rem;">
                 <a href="{{ route('jobs.index') }}" class="gh-sidebar-link">
-                    <i class="bi bi-search"></i> Browse Jobs
+                    <i class="fa-regular fa-magnifying-glass"></i> Browse Jobs
                 </a>
             </div>
         </aside>
@@ -672,28 +721,28 @@
             {{-- Flash Messages --}}
             @if(session('success'))
                 <div class="gh-alert gh-alert-success">
-                    <i class="bi bi-check-circle-fill"></i>
+                    <i class="fa-regular fa-circle-check"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('warning'))
                 <div class="gh-alert gh-alert-warning">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <i class="fa-solid fa-hourglass-half"></i>
                     {{ session('warning') }}
                 </div>
             @endif
 
             @if(session('error'))
                 <div class="gh-alert gh-alert-danger">
-                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <i class="fa-regular fa-circle-xmark"></i>
                     {{ session('error') }}
                 </div>
             @endif
 
             @if(session('info'))
                 <div class="gh-alert gh-alert-info">
-                    <i class="bi bi-info-circle-fill"></i>
+                    <i class="fa-regular fa-toggle-on"></i>
                     {{ session('info') }}
                 </div>
             @endif
