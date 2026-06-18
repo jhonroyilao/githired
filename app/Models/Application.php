@@ -34,6 +34,11 @@ class Application extends Model
         return $this->belongsTo(JobListing::class);
     }
 
+    public function statusLogs()
+    {
+        return $this->hasMany(ApplicationStatusLog::class)->orderBy('created_at');
+    }
+
     // ── Helpers ─────────────────────────────────────────────
     public function statusLabel(): string
     {
