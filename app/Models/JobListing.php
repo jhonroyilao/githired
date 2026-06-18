@@ -14,13 +14,13 @@ class JobListing extends Model
     protected $fillable = [
         'user_id',
         'company_id',
+        'category_id',
         'title',
         'slug',
         'location',
         'location_type',
         'type',
         'experience_level',
-        'category',
         'description',
         'requirements',
         'skills_required',
@@ -48,6 +48,11 @@ class JobListing extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(JobCategory::class, 'category_id');
     }
 
     public function applications(): HasMany
