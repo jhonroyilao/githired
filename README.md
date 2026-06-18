@@ -1,597 +1,528 @@
-# 📋 Job Portal System — Laravel Blueprint
-**Tech Stack:** PHP Laravel · Bootstrap · MySQL
+# GitHired
 
----
+GitHired is a Laravel job portal for applicants, employers, and moderation-only
+admins. The database has been extended to support the core job portal workflow
+plus a future applicant-facing AI job matching feature.
 
-## 1. 📄 Views Structure (Blade Files)
+Last reviewed: 2026-06-19
 
-All views live under `resources/views/`. They are organized by role.
+## Features
 
----
+### Applicant
 
-### 🌐 Guest / Public Pages
-`resources/views/public/`
+- Role-based account support for applicants.
+- Applicant profile data: headline, bio, location, contact links, avatar, and
+  skills.
+- PDF resume document model with extracted text support for future AI matching.
+- Approved job browsing data model with category, location, type, experience,
+  salary, and full-text search support.
+- Job applications with cover letters, resume references, unique applicant/job
+  constraint, and status tracking.
+- Application status history through `application_status_logs`.
+- In-app notifications for application and moderation events.
+- Saved jobs schema and model support.
 
-| File | Purpose |
-|---|---|
-| `home.blade.php` | Landing page — hero banner, featured jobs, CTA buttons |
-| `jobs/index.blade.php` | Browse all job listings with search bar and filters |
-| `jobs/show.blade.php` | Single job details page — description, employer info, Apply button |
-| `about.blade.php` | About the platform — optional static page |
-| `contact.blade.php` | Contact form for general inquiries |
+### Employer
 
----
+- Role-based account support for employers.
+- Company profile model with slug, logo, website, industry, size, location, and
+  description.
+- Employer-owned job listings.
+- Job moderation lifecycle fields for submitted, approved, rejected, closed,
+  published, expired, and soft-deleted jobs.
+- Applicant review data through applications, employer notes, and status
+  updates.
 
-### 🔐 Auth Pages
-`resources/views/auth/`
+### Admin
 
-| File | Purpose |
-|---|---|
-| `login.blade.php` | Login form (shared for all roles) |
-| `register.blade.php` | Registration form with role selector (Applicant or Employer) |
-| `passwords/email.blade.php` | Forgot password — send reset email |
-| `passwords/reset.blade.php` | Reset password form |
+- Role-based account support for admins.
+- Moderation-oriented job workflow:
+  - approve jobs
+  - reject jobs with a reason
+  - close jobs
+  - soft-delete or hide jobs while preserving historical applications
+- Moderation audit fields: `approved_by`, `rejected_by`, `deleted_by`, and
+  related timestamps.
 
----
+### AI-Ready Features
 
-### 👤 Applicant Pages
-`resources/views/applicant/`
+- Resume text extraction storage through `resume_documents.extracted_text`.
+- AI job match cache through `ai_job_matches`.
+- Match score, score breakdown, matching skills, missing skills, explanation,
+  suggested action, provider/model metadata, and input hashes.
+- Postgres JSONB skill fields and GIN indexes for profile/job skill matching.
 
-| File | Purpose |
-|---|---|
-| `dashboard.blade.php` | Applicant home — application status summary, recent activity |
-| `profile/edit.blade.php` | Edit personal profile — name, contact info, bio |
-| `resume/upload.blade.php` | Upload or replace resume (PDF) |
-| `resume/view.blade.php` | Preview uploaded resume |
-| `applications/index.blade.php` | List all submitted applications with status badges |
-| `applications/show.blade.php` | Single application detail — job info, current status, timeline |
+## Current Implementation Status
 
----
+Implemented or scaffolded in the repository:
 
-### 🏢 Employer Pages
-`resources/views/employer/`
+- Public landing page: `GET /`
+- UI mockup page: `GET /mockup`
+- Auth, public, applicant, employer, and admin Blade views.
+- Domain models for users, profiles, companies, job categories, jobs,
+  applications, status logs, resume documents, saved jobs, app notifications,
+  and AI job matches.
+- Schema migrations split by concern.
+- Applicant dashboard controller that calculates application stats, recent
+  applications, recommended jobs, and profile completeness.
 
-| File | Purpose |
-|---|---|
-| `dashboard.blade.php` | Employer home — job post stats, recent applicants summary |
-| `profile/edit.blade.php` | Edit company profile — company name, logo, description |
-| `jobs/index.blade.php` | List all jobs posted by this employer |
-| `jobs/create.blade.php` | Form to create a new job posting |
-| `jobs/edit.blade.php` | Edit an existing job posting |
-| `jobs/show.blade.php` | View a specific job with list of applicants |
-| `applicants/index.blade.php` | View all applicants across all job postings |
-| `applicants/show.blade.php` | View a specific applicant's resume and profile |
+Still to wire at the application layer:
 
----
+- Real login/register/logout controllers and role redirects.
+- Role middleware for applicant, employer, and admin route groups.
+- Public job browsing and job detail controllers.
+- Applicant profile, resume upload, application submission, and application
+  detail controllers.
+- Employer job CRUD and applicant status update controllers.
+- Admin moderation screens/actions for approve, reject, and soft-delete.
+- AI job matching service and OpenAI integration.
 
-### 🛡️ Admin Pages
-`resources/views/admin/`
+## Tech Stack
 
-| File | Purpose |
-|---|---|
-| `dashboard.blade.php` | Admin home — system stats: users, jobs, applications |
-| `users/index.blade.php` | List all users (applicants + employers) |
-| `users/show.blade.php` | View a specific user's profile and activity |
-| `jobs/index.blade.php` | List all job postings — with approve/reject actions |
-| `jobs/show.blade.php` | Review a specific job post |
-| `applications/index.blade.php` | Monitor all applications system-wide |
+- PHP 8.3+
+- Laravel 13
+- Laravel UI
+- Vite 8
+- Bootstrap 5 and Bootstrap Icons
+- Tailwind CSS 4 via `@tailwindcss/vite`
+- Postgres/Neon-oriented schema
+- SQLite-compatible migrations for local/test smoke checks where possible
+- PHPUnit 12
 
----
+## Setup
 
-### 🧱 Shared / Layout Files
-`resources/views/common/`
+Install PHP, Composer, Node.js, and npm first.
 
-| File | Purpose |
-|---|---|
-| `main.blade.php` | Main layout — navbar, footer, Bootstrap CDN |
-| `guest.blade.php` | Minimal layout for auth pages (login/register) |
-| `admin.blade.php` | Admin-specific layout with sidebar |
-
-`resources/views/partials/`
-
-| File | Purpose |
-|---|---|
-| `navbar.blade.php` | Top navigation bar |
-| `footer.blade.php` | Site footer |
-| `alerts.blade.php` | Flash message alerts (success, error, warning) |
-| `job-card.blade.php` | Reusable job listing card component |
-| `status-badge.blade.php` | Reusable application status badge (pending, hired, etc.) |
-
----
-
-## 2. 🧭 Routes Structure
-
-All routes are defined in `routes/web.php`. No code yet — just the planned groupings and URL patterns.
-
----
-
-### Public Routes (No Middleware)
-
-```
-GET  /                     → Home page
-GET  /jobs                 → Browse all jobs
-GET  /jobs/{id}            → View single job
-GET  /about                → About page
-GET  /contact              → Contact page
-POST /contact              → Submit contact form
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
 ```
 
----
+For SQLite local development:
 
-### Auth Routes
-
-```
-GET  /login                → Show login form
-POST /login                → Handle login
-GET  /register             → Show register form
-POST /register             → Handle registration
-POST /logout               → Logout user
-GET  /password/reset       → Forgot password form
-POST /password/email       → Send reset link
-GET  /password/reset/{token} → Reset password form
-POST /password/update      → Update password
+```bash
+touch database/database.sqlite
+php artisan migrate --seed
 ```
 
----
+For Postgres or Neon, configure the `DB_*` values in `.env`, verify the target
+branch/endpoint, then run migrations without seeding:
 
-### Applicant Routes (Middleware: `auth` + `role:applicant`)
-
-```
-GET  /applicant/dashboard           → Applicant dashboard
-GET  /applicant/profile/edit        → Edit profile
-PUT  /applicant/profile             → Update profile
-GET  /applicant/resume              → View resume
-POST /applicant/resume              → Upload resume
-GET  /applicant/applications        → List all applications
-GET  /applicant/applications/{id}   → View single application
-POST /jobs/{id}/apply               → Submit application for a job
+```bash
+php artisan migrate
 ```
 
----
+Only run `php artisan db:seed` against local databases or disposable dev/test
+branches. The default seeder creates sample users, companies, jobs, and
+applications, and should not be run against production or shared branches.
 
-### Employer Routes (Middleware: `auth` + `role:employer`)
+Use a direct Neon connection string for schema migrations. Pooled Neon
+connections are better for application traffic, but migration tools may rely on
+session behavior that transaction pooling does not preserve.
 
-```
-GET    /employer/dashboard           → Employer dashboard
-GET    /employer/profile/edit        → Edit company profile
-PUT    /employer/profile             → Update profile
-GET    /employer/jobs                → List my job postings
-GET    /employer/jobs/create         → Create new job form
-POST   /employer/jobs                → Store new job
-GET    /employer/jobs/{id}/edit      → Edit job form
-PUT    /employer/jobs/{id}           → Update job
-DELETE /employer/jobs/{id}           → Delete job
-GET    /employer/jobs/{id}/applicants → View applicants for a job
-GET    /employer/applicants/{id}     → View a specific applicant
-PATCH  /employer/applications/{id}/status → Update application status
+Run the app and Vite in separate terminals:
+
+```bash
+php artisan serve
+npm run dev
 ```
 
----
+Or run the combined development script:
 
-### Admin Routes (Middleware: `auth` + `role:admin`)
-
-```
-GET    /admin/dashboard              → Admin dashboard
-GET    /admin/users                  → List all users
-GET    /admin/users/{id}             → View user detail
-DELETE /admin/users/{id}             → Delete/ban user
-GET    /admin/jobs                   → List all job posts
-PATCH  /admin/jobs/{id}/approve      → Approve a job post
-PATCH  /admin/jobs/{id}/reject       → Reject a job post
-DELETE /admin/jobs/{id}              → Remove a job post
-GET    /admin/applications           → Monitor all applications
+```bash
+composer run dev
 ```
 
----
+Build frontend assets:
 
-### Middleware Plan
-
-| Middleware Name | Purpose |
-|---|---|
-| `auth` | Ensures user is logged in |
-| `role:applicant` | Restricts to applicant role only |
-| `role:employer` | Restricts to employer role only |
-| `role:admin` | Restricts to admin role only |
-
-> These role-check middlewares will be created in `app/Http/Middleware/`.
-
----
-
-## 3. 🧠 Controllers Structure
-
-All controllers live in `app/Http/Controllers/`. Organized by role subfolder.
-
----
-
-### `AuthController`
-**Location:** `app/Http/Controllers/AuthController.php`
-
-Responsibilities:
-- Show login and registration forms
-- Handle login, registration, logout
-- Redirect users to the correct dashboard based on role after login
-
----
-
-### `JobController`
-**Location:** `app/Http/Controllers/JobController.php`
-
-Responsibilities:
-- Display public job listings (index, show)
-- Handle job search and filter logic (by title, location, category)
-- Used by both guests and authenticated users for browsing
-
----
-
-### `Applicant/DashboardController`
-**Location:** `app/Http/Controllers/Applicant/DashboardController.php`
-
-Responsibilities:
-- Show applicant dashboard with summary statistics
-- Show recent application activity
-
----
-
-### `Applicant/ProfileController`
-**Location:** `app/Http/Controllers/Applicant/ProfileController.php`
-
-Responsibilities:
-- Show and update applicant profile
-- Handle resume upload and storage
-
----
-
-### `Applicant/ApplicationController`
-**Location:** `app/Http/Controllers/Applicant/ApplicationController.php`
-
-Responsibilities:
-- Submit a job application
-- List all applications for the logged-in applicant
-- Show single application detail and status history
-
----
-
-### `Employer/DashboardController`
-**Location:** `app/Http/Controllers/Employer/DashboardController.php`
-
-Responsibilities:
-- Show employer dashboard with job post stats and applicant counts
-
----
-
-### `Employer/JobController`
-**Location:** `app/Http/Controllers/Employer/JobController.php`
-
-Responsibilities:
-- CRUD operations for employer's own job postings
-- View applicants per job posting
-
----
-
-### `Employer/ApplicantController`
-**Location:** `app/Http/Controllers/Employer/ApplicantController.php`
-
-Responsibilities:
-- View applicant profiles and resumes
-- Update application status (pending → interview → hired / rejected)
-
----
-
-### `Admin/DashboardController`
-**Location:** `app/Http/Controllers/Admin/DashboardController.php`
-
-Responsibilities:
-- Show admin dashboard with platform-wide stats
-
----
-
-### `Admin/UserController`
-**Location:** `app/Http/Controllers/Admin/UserController.php`
-
-Responsibilities:
-- List all users
-- View user details
-- Delete or suspend user accounts
-
----
-
-### `Admin/JobController`
-**Location:** `app/Http/Controllers/Admin/JobController.php`
-
-Responsibilities:
-- List all job posts system-wide
-- Approve or reject job posts pending moderation
-- Force-delete any job post
-
----
-
-### `Admin/ApplicationController`
-**Location:** `app/Http/Controllers/Admin/ApplicationController.php`
-
-Responsibilities:
-- View all applications system-wide for monitoring
-
----
-
-## 4. 🗂 Suggested Folder Architecture
-
+```bash
+npm run build
 ```
+
+Run tests:
+
+```bash
+composer test
+```
+
+## Seeded Accounts
+
+All seeded accounts use the password `password`.
+
+| Role | Email |
+| --- | --- |
+| Admin | `admin@githired.com` |
+| Employer | `marco@techph.com` |
+| Applicant | `juan@email.com` |
+
+The default route setup does not yet wire the login form to authentication, so
+these accounts are mainly useful after auth routes/controllers are connected or
+when signing in through a temporary local flow.
+
+## Active Routes
+
+The current application-facing routes are defined in `routes/web.php`. Laravel
+also exposes framework routes such as `up` and local storage routes.
+
+| Method | Path | Name | Current behavior |
+| --- | --- | --- | --- |
+| GET | `/` | none | Renders the landing page |
+| GET | `/mockup` | none | Renders the UI mockup page |
+| GET | `/jobs` | `jobs.index` | Placeholder string; duplicated route |
+| GET | `/jobs/{id}` | `jobs.show` | Placeholder job detail string |
+| GET | `/login` | `login` | Placeholder string |
+| GET | `/register` | `register` | Placeholder string |
+| GET | `/applicant/dashboard` | `applicant.dashboard` | Uses applicant dashboard controller behind `auth` |
+| GET | `/applicant/applications` | `applicant.applications.index` | Placeholder string |
+| GET | `/applicant/resume` | `applicant.resume` | Placeholder string |
+| GET | `/applicant/profile/edit` | `applicant.profile.edit` | Placeholder string |
+
+## Database Schema
+
+The base Laravel/domain migrations are extended by a split schema migration set:
+
+| Area | Concern |
+| --- | --- |
+| Auth and ownership | Future auth-provider fields and one-to-one owner constraints |
+| Resume documents | Resume metadata and extracted text |
+| Applications | Application to resume linkage |
+| Job moderation | Job approval, rejection, closing, and soft-delete metadata |
+| Notifications | Notification metadata and read timestamps |
+| AI job matches | Cached AI job match results |
+| Query support | Portable foreign-key and dashboard indexes |
+| Postgres optimization | Constraints, JSONB/citext/numeric conversions, partial indexes, GIN indexes, and full-text search |
+
+### Domain Tables
+
+| Table | Purpose |
+| --- | --- |
+| `users` | Account records, roles, Laravel auth, future external auth ids |
+| `profiles` | Applicant profile and skills |
+| `companies` | Employer company profile |
+| `job_categories` | Job category metadata |
+| `job_listings` | Employer job posts, moderation lifecycle, soft deletion, search data |
+| `applications` | Applicant submissions to jobs |
+| `application_status_logs` | Application status history |
+| `resume_documents` | Resume file metadata and extracted text |
+| `saved_jobs` | Applicant saved jobs |
+| `notifications` | In-app notifications |
+| `ai_job_matches` | Cached AI recommendations and explanations |
+
+### Status Values
+
+`users.role`:
+
+- `applicant`
+- `employer`
+- `admin`
+
+`job_listings.status`:
+
+- `draft`
+- `pending`
+- `active`
+- `closed`
+- `rejected`
+
+`applications.status` and application status log values:
+
+- `pending`
+- `interview`
+- `hired`
+- `rejected`
+
+`resume_documents.extraction_status`:
+
+- `pending`
+- `ready`
+- `failed`
+
+`ai_job_matches.generation_status`:
+
+- `pending`
+- `ready`
+- `failed`
+
+### Postgres Optimizations
+
+- `users.email` is converted to `citext` on Postgres for case-insensitive
+  email handling.
+- `profiles.skills`, `job_listings.skills_required`, notification data, and AI
+  match JSON fields are converted to JSONB on Postgres.
+- Job salary fields are converted to `numeric(12,2)` on Postgres.
+- `job_listings.search_vector` is generated for full-text job search.
+- Partial indexes support active job browsing, admin pending queues, unread
+  notifications, current resumes, and external auth uniqueness.
+- Replacing a user's current resume must unset the old current resume and insert
+  the new current resume in the same database transaction.
+- GIN indexes support full-text search and JSONB skill matching.
+- Foreign-key and composite indexes support dashboard and review queries.
+
+## ERD
+
+```mermaid
+erDiagram
+    USERS {
+        bigint id PK
+        text name
+        citext email
+        text role
+        text password
+        text auth_provider
+        text external_auth_id
+        timestamptz email_verified_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    PROFILES {
+        bigint id PK
+        bigint user_id FK
+        text headline
+        text bio
+        text location
+        text phone
+        text website
+        text linkedin
+        text github
+        text resume_path
+        text avatar_path
+        jsonb skills
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    COMPANIES {
+        bigint id PK
+        bigint user_id FK
+        text name
+        text slug
+        text logo_path
+        text website
+        text industry
+        text size
+        text location
+        text description
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    JOB_CATEGORIES {
+        bigint id PK
+        text name
+        text slug
+        text icon
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    JOB_LISTINGS {
+        bigint id PK
+        bigint user_id FK
+        bigint company_id FK
+        bigint category_id FK
+        text title
+        text slug
+        text location
+        text location_type
+        text type
+        text experience_level
+        text description
+        text requirements
+        jsonb skills_required
+        numeric salary_min
+        numeric salary_max
+        text salary_currency
+        text status
+        text rejection_reason
+        timestamptz submitted_at
+        timestamptz approved_at
+        bigint approved_by FK
+        timestamptz rejected_at
+        bigint rejected_by FK
+        timestamptz closed_at
+        timestamptz published_at
+        timestamptz expires_at
+        bigint views_count
+        timestamptz deleted_at
+        bigint deleted_by FK
+        text delete_reason
+        tsvector search_vector
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    APPLICATIONS {
+        bigint id PK
+        bigint user_id FK
+        bigint job_listing_id FK
+        bigint resume_document_id FK
+        text cover_letter
+        text resume_path
+        text status
+        text employer_notes
+        timestamptz status_updated_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    APPLICATION_STATUS_LOGS {
+        bigint id PK
+        bigint application_id FK
+        text old_status
+        text new_status
+        bigint changed_by FK
+        text note
+        timestamptz created_at
+    }
+
+    RESUME_DOCUMENTS {
+        bigint id PK
+        bigint user_id FK
+        text file_path
+        text original_name
+        text mime_type
+        bigint file_size
+        text extracted_text
+        text content_hash
+        text extraction_status
+        text extraction_error
+        boolean is_current
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    SAVED_JOBS {
+        bigint id PK
+        bigint user_id FK
+        bigint job_listing_id FK
+        timestamptz created_at
+    }
+
+    NOTIFICATIONS {
+        bigint id PK
+        bigint user_id FK
+        text type
+        text title
+        text message
+        text link
+        jsonb data
+        boolean is_read
+        timestamptz read_at
+        timestamptz created_at
+    }
+
+    AI_JOB_MATCHES {
+        bigint id PK
+        bigint user_id FK
+        bigint job_listing_id FK
+        bigint resume_document_id FK
+        numeric match_score "nullable until ready"
+        jsonb score_breakdown
+        jsonb matching_skills
+        jsonb missing_skills
+        text explanation
+        text suggested_action
+        text provider
+        text model
+        text prompt_version
+        text profile_hash
+        text resume_hash
+        text job_hash
+        text generation_status
+        text error_message
+        timestamptz generated_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    USERS ||--o| PROFILES : has
+    USERS ||--o| COMPANIES : owns
+    USERS ||--o{ JOB_LISTINGS : posts
+    USERS ||--o{ APPLICATIONS : submits
+    USERS ||--o{ RESUME_DOCUMENTS : uploads
+    USERS ||--o{ SAVED_JOBS : saves
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ AI_JOB_MATCHES : gets
+    USERS ||--o{ APPLICATION_STATUS_LOGS : changes
+
+    USERS ||--o{ JOB_LISTINGS : approves
+    USERS ||--o{ JOB_LISTINGS : rejects
+    USERS ||--o{ JOB_LISTINGS : deletes
+
+    COMPANIES ||--o{ JOB_LISTINGS : has
+    JOB_CATEGORIES ||--o{ JOB_LISTINGS : groups
+    JOB_LISTINGS ||--o{ APPLICATIONS : receives
+    JOB_LISTINGS ||--o{ SAVED_JOBS : saved_as
+    JOB_LISTINGS ||--o{ AI_JOB_MATCHES : matched_for
+
+    APPLICATIONS ||--o{ APPLICATION_STATUS_LOGS : logs
+    RESUME_DOCUMENTS ||--o{ APPLICATIONS : used_for
+    RESUME_DOCUMENTS ||--o{ AI_JOB_MATCHES : informs
+```
+
+## Project Structure
+
+```text
 app/
-├── Http/
-│   ├── Controllers/
-│   │   ├── AuthController.php
-│   │   ├── JobController.php          ← public job browsing
-│   │   ├── Applicant/
-│   │   │   ├── DashboardController.php
-│   │   │   ├── ProfileController.php
-│   │   │   └── ApplicationController.php
-│   │   ├── Employer/
-│   │   │   ├── DashboardController.php
-│   │   │   ├── JobController.php
-│   │   │   └── ApplicantController.php
-│   │   └── Admin/
-│   │       ├── DashboardController.php
-│   │       ├── UserController.php
-│   │       ├── JobController.php
-│   │       └── ApplicationController.php
-│   └── Middleware/
-│       ├── CheckRole.php              ← custom role-check middleware
-│       └── RedirectIfAuthenticated.php
-├── Models/
-│   ├── User.php
-│   ├── Job.php
-│   ├── Application.php
-│   ├── Resume.php
-│   └── EmployerProfile.php
+  Http/Controllers/
+    Applicant/DashboardController.php
+    Applicant/ApplicationController.php
+    Applicant/ProfileController.php
+    Employer/*.php
+    Admin/*.php
+    AuthController.php
+    JobController.php
+  Models/
+    AiJobMatch.php
+    AppNotification.php
+    Application.php
+    ApplicationStatusLog.php
+    Company.php
+    JobCategory.php
+    JobListing.php
+    Profile.php
+    ResumeDocument.php
+    SavedJob.php
+    User.php
+database/
+  migrations/
+  seeders/DatabaseSeeder.php
 resources/
-└── views/
-    ├── common/
-    │   ├── main.blade.php
-    │   ├── guest.blade.php
-    │   └── admin.blade.php
-    ├── partials/
-    │   ├── navbar.blade.php
-    │   ├── footer.blade.php
-    │   ├── alerts.blade.php
-    │   ├── job-card.blade.php
-    │   └── status-badge.blade.php
-    ├── auth/
-    ├── public/
-    ├── applicant/
-    ├── employer/
-    └── admin/
+  views/
 routes/
-└── web.php                            ← all routes in one file for now
+  web.php
 ```
 
----
-
-## 5. 📘 Simple Development Guide
-
-### Step 1 — Order of Implementation (What to Build First)
-
-Follow this order to avoid blocking each other:
-
-```
-Phase 1 — Foundation
-  1. Auth system (login, register, role-based redirect)
-  2. Layouts + partials (navbar, footer, alerts)
-  3. Public job listing page (index + show — no auth needed)
-
-Phase 2 — Core Features
-  4. Employer: post jobs (create, edit, delete)
-  5. Applicant: browse jobs + apply + upload resume
-  6. Application status system (pending → interview → hired/rejected)
-
-Phase 3 — Dashboards
-  7. Applicant dashboard (view own applications + statuses)
-  8. Employer dashboard (view applicants per job, update status)
-
-Phase 4 — Admin Panel
-  9. Admin: moderate job posts (approve/reject)
-  10. Admin: manage users and monitor applications
-
-Phase 5 — Polish
-  11. Job search and filtering
-  12. Flash messages, form validation, error pages
-  13. Final UI cleanup with Bootstrap
-```
-
----
-
-### Step 2 — How to Divide Work in a Team
-
-Suggested team split :
-
-| Member | Area |
-|---|---|
-| Member 1 | Auth system + layouts + partials |
-| Member 1 | Public pages + job browsing + search |
-| Member 2 | Applicant module (profile, resume, applications) |
-| Member 3 | Employer module (job CRUD, view applicants, update status) |
-| Member 4 | Admin panel (moderation, user management) |
-
-> 💡 Tip: If you have fewer than 5 members, combine Member 1+2 or Member 4+5.
-
----
-
-## Step 3 — How to Avoid Git Conflicts
-
-We will use a development workflow based on a shared `dev` branch.
-
-### Branch Structure
-
-```text
-main
-│
-└── dev
-    ├── feature/auth
-    ├── feature/applicant
-    ├── feature/employer
-    └── feature/admin
-```
-
-### Git Rules
-
-1. **Each member works on their own feature branch.**
-
-   Examples:
-
-   ```text
-   feature/auth
-   feature/applicant
-   feature/employer
-   feature/admin
-   ```
-
-2. **Never commit directly to `main`.**
-
-   Workflow:
-
-   ```text
-   feature branch
-         ↓
-         dev
-         ↓
-        main
-   ```
-
-3. **Pull from `dev` before starting work.**
-
-   ```bash
-   git checkout dev
-   git pull origin dev
-   ```
-
-4. **Keep your feature branch updated.**
-
-   ```bash
-   git checkout feature/applicant
-   git merge dev
-   ```
-
-5. **Respect file ownership.**
-
-   Members should primarily work only within their assigned folders and controllers.
-
-6. **Communicate before modifying shared files.**
-
-   Shared files include:
-
-   ```text
-   routes/web.php
-   resources/views/common/main.blade.php
-   resources/views/partials/navbar.blade.php
-   database/migrations/
-   ```
-
-7. **Commit small and often.**
-
-   Good example:
-
-   ```bash
-   git commit -m "Add applicant dashboard view"
-   git commit -m "Create employer job routes"
-   ```
-
-   Avoid saving several days of work into one massive commit.
-
-
-Use clear and consistent commit messages following the format:
-
-```text
-type: short description
-```
-
-Common commit types:
-
-| Type | Purpose |
-|--------|--------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `refactor` | Code improvement without changing functionality |
-| `style` | Formatting, spacing, UI adjustments |
-| `docs` | Documentation updates |
-| `chore` | Project maintenance, configuration changes |
-| `test` | Adding or updating tests |
-
-Avoid saving several days of work into one massive commit.
-
-
-9. **Merge feature branches into `dev` first.**
-
-   Do not merge feature branches directly into `main`.
-
-10. **Test before merging.**
-
-   Verify that:
-   - Pages load correctly
-   - Routes work
-   - Forms submit properly
-   - No existing features are broken
-
-11. **Use Pull Requests when possible.**
-
-    This allows teammates to review changes before they are merged into `dev`.
----
-
-### Step 4 — How Routing + Views Connect Logically
-
-Think of it as a pipeline:
-
-```
-User visits URL
-      ↓
-Route in web.php matches the URL
-      ↓
-Route calls the correct Controller method
-      ↓
-Controller prepares data (from Model)
-      ↓
-Controller returns a View (Blade file)
-      ↓
-Blade file renders HTML using the data
-```
-
-**Example (Applicant views their applications):**
-
-```
-URL:        /applicant/applications
-Route:      → ApplicationController@index  (in Applicant group)
-Controller: fetches all applications for logged-in user
-View:       resources/views/applicant/applications/index.blade.php
-```
-
-Always keep this pipeline in mind. If something doesn't show up on screen, trace back:
-Did the route exist? → Did it point to the right controller? → Did the controller pass data to the right view?
-
----
-
-### Step 5 — Best Practices for Laravel Teams
-
-1. **Use `@extends` and `@section` in every Blade file.**
-   Every page should extend a layout (`common.main`) and yield content into `@section('content')`.
-
-2. **Keep controllers thin.**
-   Controllers should only receive input, talk to models, and return views.
-   No complex logic inside controllers — that goes in the Model or a Service class later.
-
-3. **Name routes.**
-   Use named routes like `route('applicant.applications.index')` instead of hardcoded URLs.
-   This makes it easy to change URLs without breaking links everywhere.
-
-4. **Use `middleware groups` in routes.**
-   Group all applicant routes under one `->middleware(['auth', 'role:applicant'])` block.
-   This keeps web.php clean and easy to read.
-
-5. **Test each feature before merging.**
-   Before opening a Pull Request, manually test your feature in the browser.
-   Check that forms submit, redirects work, and the right pages load.
-
-6. **Use `.env` for environment config — never hardcode credentials.**
-   Database name, app URL, and mail settings all go in `.env`, not in PHP files.
-
-7. **Keep the `public/` folder tidy.**
-   Put Bootstrap CSS/JS links in your commom\main file. Put any custom CSS in `public/css/app.css`.
-
----
+## Tests
+
+The test suite currently contains Laravel's default example tests:
+
+- `tests/Feature/ExampleTest.php` checks that `/` returns HTTP 200.
+- `tests/Unit/ExampleTest.php` checks a basic truth assertion.
+
+Current verification performed for the schema work:
+
+- PHP syntax checks for split migrations and affected models.
+- `composer test`.
+- Fresh temp SQLite migration smoke test.
+- Rollback of the schema extension migrations.
+
+Broader feature tests still need to be added for auth, role authorization, job
+moderation, applications, notifications, and AI match generation.
+
+## Next Priorities
+
+1. Wire Laravel auth routes/controllers and role redirects.
+2. Add role middleware and register applicant, employer, and admin route groups.
+3. Implement public job browse/detail pages using `JobListing`.
+4. Implement applicant profile, PDF resume upload, application submission, and
+   application tracking.
+5. Implement employer company profile, job CRUD, applicant review, and status
+   updates.
+6. Implement admin moderation for pending, approved, rejected, closed, and
+   soft-deleted jobs.
+7. Implement in-app notifications.
+8. Add AI job matching service after the basic portal workflows are stable.

@@ -6,26 +6,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Profile extends Model
+class AppNotification extends Model
 {
     use HasFactory;
 
+    protected $table = 'notifications';
+
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'user_id',
-        'headline',
-        'bio',
-        'location',
-        'phone',
-        'website',
-        'linkedin',
-        'github',
-        'resume_path',
-        'avatar_path',
-        'skills',
+        'type',
+        'title',
+        'message',
+        'link',
+        'data',
+        'is_read',
+        'read_at',
+        'created_at',
     ];
 
     protected $casts = [
-        'skills' => 'array',
+        'data' => 'array',
+        'is_read' => 'boolean',
+        'read_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
