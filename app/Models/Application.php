@@ -15,6 +15,7 @@ class Application extends Model
         'job_listing_id',
         'cover_letter',
         'resume_path',
+        'resume_document_id',
         'status',
         'employer_notes',
         'status_updated_at',
@@ -32,6 +33,11 @@ class Application extends Model
     public function jobListing(): BelongsTo
     {
         return $this->belongsTo(JobListing::class);
+    }
+
+    public function resumeDocument(): BelongsTo
+    {
+        return $this->belongsTo(ResumeDocument::class);
     }
 
     public function statusLogs()

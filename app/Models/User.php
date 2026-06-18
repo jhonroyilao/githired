@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
-#[Fillable(['name', 'email', 'role', 'password'])]
+#[Fillable(['name', 'email', 'role', 'password', 'auth_provider', 'external_auth_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -58,5 +58,30 @@ class User extends Authenticatable
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    public function resumeDocuments(): HasMany
+    {
+        return $this->hasMany(ResumeDocument::class);
+    }
+
+    public function currentResumeDocument(): HasOne
+    {
+        return $this->hasOne(ResumeDocument::class)->where('is_current', true);
+    }
+
+    public function savedJobs(): HasMany
+    {
+        return $this->hasMany(SavedJob::class);
+    }
+
+    public function appNotifications(): HasMany
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+
+    public function aiJobMatches(): HasMany
+    {
+        return $this->hasMany(AiJobMatch::class);
     }
 }
