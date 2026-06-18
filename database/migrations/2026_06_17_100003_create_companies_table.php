@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // employer user
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique()->nullable();
             $table->string('logo_path')->nullable();
             $table->string('website')->nullable();
             $table->string('industry')->nullable();
-            $table->string('size')->nullable();             // "1-10", "11-50", "51-200", "200+"
+            $table->string('size')->nullable();
             $table->string('location')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
