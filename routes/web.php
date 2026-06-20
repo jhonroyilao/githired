@@ -14,6 +14,10 @@ Route::get('/mockup', function () {
     return view('mockup');
 });
 
+Route::get('/tailwind', function () {
+    return view('tailwind');
+})->name('tailwind');
+
 Route::get('/jobs', function () {
     return 'Jobs page coming soon';
 })->name('jobs.index');
