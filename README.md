@@ -11,8 +11,8 @@ Last reviewed: 2026-06-19
 ### Applicant
 
 - Role-based account support for applicants.
-- Applicant profile data: headline, bio, location, contact links, avatar, and
-  skills.
+- Applicant profile data: headline, bio, location, contact links, job search
+  preferences, avatar, and skills.
 - PDF resume document model with extracted text support for future AI matching.
 - Approved job browsing data model with category, location, type, experience,
   salary, and full-text search support.
@@ -287,6 +287,9 @@ erDiagram
         text website
         text linkedin
         text github
+        text desired_job_type
+        text work_preference
+        text experience_level
         text resume_path
         text avatar_path
         jsonb skills

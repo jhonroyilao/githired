@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Applicant;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\JobListing;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -18,11 +17,11 @@ class DashboardController extends Controller
         $applications = Application::where('user_id', $user->id)->get();
 
         $stats = [
-            'total'     => $applications->count(),
-            'pending'   => $applications->where('status', 'pending')->count(),
+            'total' => $applications->count(),
+            'pending' => $applications->where('status', 'pending')->count(),
             'interview' => $applications->where('status', 'interview')->count(),
-            'hired'     => $applications->where('status', 'hired')->count(),
-            'rejected'  => $applications->where('status', 'rejected')->count(),
+            'hired' => $applications->where('status', 'hired')->count(),
+            'rejected' => $applications->where('status', 'rejected')->count(),
         ];
 
         // ── Recent applications (latest 5, with job + company info) ──
@@ -48,6 +47,9 @@ class DashboardController extends Controller
             $profile?->headline,
             $profile?->bio,
             $profile?->location,
+            $profile?->desired_job_type,
+            $profile?->work_preference,
+            $profile?->experience_level,
             $profile?->resume_path,
             $profile?->skills,
         ];
