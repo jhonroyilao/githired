@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\ResumeDocument;
 use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +43,7 @@ class OnboardingFlowTest extends TestCase
     public function test_applicant_can_remove_uploaded_avatar_during_onboarding(): void
     {
         Storage::fake('public');
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        /** @var FilesystemAdapter $publicStorage */
         $publicStorage = Storage::disk('public');
 
         $user = $this->applicantWithBasicProfile();
@@ -66,7 +67,7 @@ class OnboardingFlowTest extends TestCase
     public function test_replacing_applicant_avatar_removes_previous_file(): void
     {
         Storage::fake('public');
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        /** @var FilesystemAdapter $publicStorage */
         $publicStorage = Storage::disk('public');
 
         $user = $this->applicantWithBasicProfile();
@@ -221,7 +222,7 @@ class OnboardingFlowTest extends TestCase
     public function test_employer_can_remove_uploaded_company_logo_during_onboarding(): void
     {
         Storage::fake('public');
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        /** @var FilesystemAdapter $publicStorage */
         $publicStorage = Storage::disk('public');
 
         $user = User::factory()->create([
@@ -256,7 +257,7 @@ class OnboardingFlowTest extends TestCase
     public function test_replacing_company_logo_removes_previous_file(): void
     {
         Storage::fake('public');
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        /** @var FilesystemAdapter $publicStorage */
         $publicStorage = Storage::disk('public');
 
         $user = User::factory()->create([
@@ -334,7 +335,7 @@ class OnboardingFlowTest extends TestCase
             'phone' => '+63 912 345 6789',
         ]);
 
-        $response->assertForbidden();
+        $response->assertRedirect(route('employer.onboarding.company', absolute: false));
     }
 
     public function test_applicant_visiting_employer_onboarding_is_redirected_to_applicant_onboarding(): void

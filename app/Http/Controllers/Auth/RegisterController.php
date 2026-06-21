@@ -26,6 +26,10 @@ final class RegisterController extends Controller
         RegisterUserAction $registerUser,
         ResolveUserDestinationRouteAction $resolveDestination,
     ): RedirectResponse {
+        if ($user = Auth::user()) {
+            return redirect()->route($resolveDestination->handle($user));
+        }
+
         $user = $registerUser->handle($request->userAttributes());
 
         Auth::login($user);

@@ -264,6 +264,111 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertRedirect(route('applicant.onboarding.profile', absolute: false));
     }
 
+    public function test_authenticated_user_posting_login_is_redirected_without_switching_accounts(): void
+    {
+        $currentUser = User::factory()->create([
+            'email' => 'current-user@example.com',
+            'role' => UserRole::Admin->value,
+        ]);
+
+        $otherUser = User::factory()->create([
+            'email' => 'other-user@example.com',
+            'role' => UserRole::Applicant->value,
+        ]);
+
+        $response = $this->actingAs($currentUser)->post(route('login.store'), [
+            'email' => 'other-user@example.com',
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard', absolute: false));
+        $this->assertAuthenticatedAs($currentUser);
+        $this->assertNotEquals($otherUser->id, auth()->id());
+    }
+
+    public function test_authenticated_user_posting_register_is_redirected_without_creating_account(): void
+    {
+        $currentUser = User::factory()->create([
+            'email' => 'current-admin@example.com',
+            'role' => UserRole::Admin->value,
+        ]);
+
+        $response = $this->actingAs($currentUser)->post(route('register.store'), [
+            'name' => 'New Applicant',
+            'email' => 'new-applicant@example.com',
+            'role' => UserRole::Applicant->value,
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard', absolute: false));
+        $this->assertAuthenticatedAs($currentUser);
+        $this->assertDatabaseMissing('users', [
+            'email' => 'new-applicant@example.com',
+        ]);
+    }
+
+    public function test_applicant_routes_redirect_non_applicant_users_to_their_own_destination(): void
+    {
+        $employer = User::factory()->create([
+            'role' => UserRole::Employer->value,
+        ]);
+        $employer->company()->create($this->completeCompanyAttributes());
+
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin->value,
+        ]);
+
+        $this->actingAs($employer)
+            ->get(route('applicant.dashboard'))
+            ->assertRedirect(route('employer.dashboard', absolute: false));
+
+        $this->actingAs($admin)
+            ->get(route('applicant.dashboard'))
+            ->assertRedirect(route('admin.dashboard', absolute: false));
+    }
+
+    public function test_employer_routes_redirect_non_employer_users_to_their_own_destination(): void
+    {
+        $applicant = User::factory()->create([
+            'role' => UserRole::Applicant->value,
+        ]);
+        $applicant->profile()->create($this->completeApplicantProfileAttributes());
+
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin->value,
+        ]);
+
+        $this->actingAs($applicant)
+            ->get(route('employer.dashboard'))
+            ->assertRedirect(route('applicant.dashboard', absolute: false));
+
+        $this->actingAs($admin)
+            ->get(route('employer.dashboard'))
+            ->assertRedirect(route('admin.dashboard', absolute: false));
+    }
+
+    public function test_admin_routes_redirect_non_admin_users_to_their_own_destination(): void
+    {
+        $applicant = User::factory()->create([
+            'role' => UserRole::Applicant->value,
+        ]);
+        $applicant->profile()->create($this->completeApplicantProfileAttributes());
+
+        $employer = User::factory()->create([
+            'role' => UserRole::Employer->value,
+        ]);
+        $employer->company()->create($this->completeCompanyAttributes());
+
+        $this->actingAs($applicant)
+            ->get(route('admin.dashboard'))
+            ->assertRedirect(route('applicant.dashboard', absolute: false));
+
+        $this->actingAs($employer)
+            ->get(route('admin.dashboard'))
+            ->assertRedirect(route('employer.dashboard', absolute: false));
+    }
+
     /**
      * @return array<string, mixed>
      */
