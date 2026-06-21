@@ -42,9 +42,11 @@ class OnboardingFlowTest extends TestCase
     public function test_applicant_can_remove_uploaded_avatar_during_onboarding(): void
     {
         Storage::fake('public');
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        $publicStorage = Storage::disk('public');
 
         $user = $this->applicantWithBasicProfile();
-        Storage::disk('public')->put('avatars/current-avatar.jpg', 'avatar');
+        $publicStorage->put('avatars/current-avatar.jpg', 'avatar');
         $user->profile()->update([
             'avatar_path' => 'avatars/current-avatar.jpg',
         ]);
@@ -57,16 +59,18 @@ class OnboardingFlowTest extends TestCase
         ]);
 
         $response->assertRedirect(route('applicant.onboarding.summary', absolute: false));
-        Storage::disk('public')->assertMissing('avatars/current-avatar.jpg');
+        $publicStorage->assertMissing('avatars/current-avatar.jpg');
         $this->assertNull($user->profile()->first()->avatar_path);
     }
 
     public function test_replacing_applicant_avatar_removes_previous_file(): void
     {
         Storage::fake('public');
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        $publicStorage = Storage::disk('public');
 
         $user = $this->applicantWithBasicProfile();
-        Storage::disk('public')->put('avatars/current-avatar.jpg', 'avatar');
+        $publicStorage->put('avatars/current-avatar.jpg', 'avatar');
         $user->profile()->update([
             'avatar_path' => 'avatars/current-avatar.jpg',
         ]);
@@ -79,11 +83,11 @@ class OnboardingFlowTest extends TestCase
         ]);
 
         $response->assertRedirect(route('applicant.onboarding.summary', absolute: false));
-        Storage::disk('public')->assertMissing('avatars/current-avatar.jpg');
+        $publicStorage->assertMissing('avatars/current-avatar.jpg');
 
         $avatarPath = $user->profile()->first()->avatar_path;
         $this->assertNotNull($avatarPath);
-        Storage::disk('public')->assertExists($avatarPath);
+        $publicStorage->assertExists($avatarPath);
     }
 
     public function test_applicant_summary_step_persists_structured_skills_and_advances(): void
@@ -98,6 +102,22 @@ class OnboardingFlowTest extends TestCase
 
         $response->assertRedirect(route('applicant.onboarding.preferences', absolute: false));
         $this->assertSame(['Laravel', 'Tailwind CSS'], $user->profile()->first()->skills);
+    }
+
+    public function test_whitespace_only_applicant_summary_is_rejected(): void
+    {
+        $user = $this->applicantWithBasicProfile();
+
+        $response = $this->actingAs($user)
+            ->from(route('applicant.onboarding.summary'))
+            ->post(route('applicant.onboarding.summary.store'), [
+                'headline' => '   ',
+                'bio' => '   ',
+                'skills' => '   ',
+            ]);
+
+        $response->assertRedirect(route('applicant.onboarding.summary', absolute: false));
+        $response->assertSessionHasErrors(['headline', 'bio', 'skills']);
     }
 
     public function test_invalid_applicant_preferences_are_rejected(): void
@@ -149,6 +169,20 @@ class OnboardingFlowTest extends TestCase
         $this->assertSame(0, ResumeDocument::query()->count());
     }
 
+    public function test_applicant_can_move_back_and_forward_after_finishing_onboarding(): void
+    {
+        $user = $this->applicantWithPreferences();
+
+        $this->actingAs($user)->post(route('applicant.onboarding.links.store'), [
+            'github' => 'https://github.com/ada',
+            'linkedin' => null,
+            'website' => null,
+        ])->assertRedirect(route('applicant.dashboard', absolute: false));
+
+        $this->actingAs($user)->get(route('applicant.onboarding.summary'))->assertOk();
+        $this->actingAs($user)->get(route('applicant.onboarding.links'))->assertOk();
+    }
+
     public function test_resume_placeholder_renders_without_requiring_resume_upload(): void
     {
         $user = $this->applicantWithPreferences();
@@ -187,11 +221,13 @@ class OnboardingFlowTest extends TestCase
     public function test_employer_can_remove_uploaded_company_logo_during_onboarding(): void
     {
         Storage::fake('public');
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        $publicStorage = Storage::disk('public');
 
         $user = User::factory()->create([
             'role' => UserRole::Employer->value,
         ]);
-        Storage::disk('public')->put('company-logos/current-logo.jpg', 'logo');
+        $publicStorage->put('company-logos/current-logo.jpg', 'logo');
         $user->company()->create([
             'name' => 'Acme Careers',
             'slug' => 'acme-careers',
@@ -213,18 +249,20 @@ class OnboardingFlowTest extends TestCase
         ]);
 
         $response->assertRedirect(route('employer.dashboard', absolute: false));
-        Storage::disk('public')->assertMissing('company-logos/current-logo.jpg');
+        $publicStorage->assertMissing('company-logos/current-logo.jpg');
         $this->assertNull($user->company()->first()->logo_path);
     }
 
     public function test_replacing_company_logo_removes_previous_file(): void
     {
         Storage::fake('public');
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $publicStorage */
+        $publicStorage = Storage::disk('public');
 
         $user = User::factory()->create([
             'role' => UserRole::Employer->value,
         ]);
-        Storage::disk('public')->put('company-logos/current-logo.jpg', 'logo');
+        $publicStorage->put('company-logos/current-logo.jpg', 'logo');
         $user->company()->create([
             'name' => 'Acme Careers',
             'slug' => 'acme-careers',
@@ -246,11 +284,11 @@ class OnboardingFlowTest extends TestCase
         ]);
 
         $response->assertRedirect(route('employer.dashboard', absolute: false));
-        Storage::disk('public')->assertMissing('company-logos/current-logo.jpg');
+        $publicStorage->assertMissing('company-logos/current-logo.jpg');
 
         $logoPath = $user->company()->first()->logo_path;
         $this->assertNotNull($logoPath);
-        Storage::disk('public')->assertExists($logoPath);
+        $publicStorage->assertExists($logoPath);
     }
 
     public function test_duplicate_company_slug_is_rejected(): void
