@@ -19,13 +19,20 @@ document.addEventListener('change', (event) => {
         return;
     }
 
-    target.textContent = input.files?.length ? input.files[0].name : 'No file selected';
+    const hasFile = input.files?.length > 0;
+    target.textContent = hasFile ? input.files[0].name : 'No file selected';
 
     const removeTargetId = input.dataset.removeTarget;
     const removeTarget = removeTargetId ? document.getElementById(removeTargetId) : null;
 
     if (removeTarget instanceof HTMLInputElement) {
         removeTarget.value = '0';
+    }
+
+    const uploadId = input.id;
+    const removeButton = uploadId ? document.querySelector(`[data-remove-button="${uploadId}"]`) : null;
+    if (removeButton instanceof HTMLElement) {
+        removeButton.hidden = !hasFile;
     }
 
     const previewTargetId = input.dataset.previewTarget;
@@ -58,7 +65,7 @@ document.addEventListener('click', (event) => {
     const fileNameTarget = input.dataset.fileNameTarget ? document.getElementById(input.dataset.fileNameTarget) : null;
 
     if (fileNameTarget) {
-        fileNameTarget.textContent = 'Marked for removal';
+        fileNameTarget.textContent = 'File will be cleared on save';
     }
 
     const removeTarget = input.dataset.removeTarget ? document.getElementById(input.dataset.removeTarget) : null;
@@ -72,6 +79,8 @@ document.addEventListener('click', (event) => {
     if (previewTarget instanceof HTMLImageElement) {
         previewTarget.src = previewTarget.dataset.placeholderSrc ?? '';
     }
+
+    button.hidden = true;
 });
 
 document.addEventListener('click', (event) => {

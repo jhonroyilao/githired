@@ -5,6 +5,9 @@
     $errorClass = 'mt-2 text-sm font-bold text-signal-red';
     $secondaryButtonClass = 'inline-flex min-h-[3.35rem] min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-neutral-900 bg-neutral-50/75 px-6 py-3 font-black text-neutral-900 no-underline transition hover:-translate-y-0.5 max-sm:w-full';
     $primaryButtonClass = 'inline-flex min-h-[3.35rem] min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-6 py-3 font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5 max-sm:w-full';
+    $logoMarkedForRemoval = old('remove_logo') === '1';
+    $hasLogo = filled($company?->logo_path) && ! $logoMarkedForRemoval;
+    $logoPlaceholder = asset('assets/avatar.svg');
 @endphp
 
 <x-onboarding-shell title="Set up your company" :step="2" :total="2">
@@ -68,10 +71,10 @@
                 <div class="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-neutral-950/45 bg-primarygreen-100/60">
                     <img
                         id="logo-preview"
-                        src="{{ $company?->logo_path ? asset('storage/'.$company->logo_path) : asset('assets/avatar.svg') }}"
+                        src="{{ $hasLogo ? asset('storage/'.$company->logo_path) : $logoPlaceholder }}"
                         alt=""
                         class="h-full w-full object-cover"
-                        data-placeholder-src="{{ asset('assets/avatar.svg') }}"
+                        data-placeholder-src="{{ $logoPlaceholder }}"
                     >
                 </div>
 
@@ -82,18 +85,23 @@
                         </label>
                         <button
                             type="button"
-                            class="inline-flex min-h-10 items-center justify-center rounded-xl border-2 border-neutral-900 bg-neutral-50/75 px-4 text-sm font-black text-neutral-900 transition hover:-translate-y-0.5"
+                            class="inline-flex size-10 items-center justify-center rounded-xl border-2 border-neutral-900 bg-neutral-50/75 text-neutral-900 transition hover:-translate-y-0.5 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primarygreen/25"
                             data-remove-upload="logo"
+                            data-remove-button="logo"
+                            aria-label="Clear uploaded logo"
+                            title="Clear uploaded logo"
+                            @unless($hasLogo) hidden @endunless
                         >
-                            Remove
+                            <i class="bi bi-x-lg text-base" aria-hidden="true"></i>
+                            <span class="sr-only">Clear uploaded logo</span>
                         </button>
                     </div>
                     <span id="logo-file-name" class="mt-2 block text-sm font-extrabold text-neutral-600" aria-live="polite">
-                        {{ $company?->logo_path ? 'Current logo saved' : 'No logo selected' }}
+                        {{ $logoMarkedForRemoval ? 'File will be cleared on save' : ($hasLogo ? 'Current logo saved' : 'No logo selected') }}
                     </span>
                 </div>
             </div>
-            <input id="logo-remove" name="remove_logo" type="hidden" value="0">
+            <input id="logo-remove" name="remove_logo" type="hidden" value="{{ $logoMarkedForRemoval ? '1' : '0' }}">
             <input
                 id="logo"
                 name="logo"
