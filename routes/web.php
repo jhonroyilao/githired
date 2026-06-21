@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
+use App\Enums\UserRole;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
 use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
@@ -35,13 +36,15 @@ Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination)
 |--------------------------------------------------------------------------
 */
 
-Route::get('/login', [LoginController::class, 'create'])->name('login');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
 
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
-Route::get('/register', [RegisterController::class, 'create'])->name('register');
+    Route::get('/register', [RegisterController::class, 'create'])->name('register');
 
-Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+    Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+});
 
 Route::post('/logout', LogoutController::class)->name('logout');
 
@@ -51,7 +54,7 @@ Route::post('/logout', LogoutController::class)->name('logout');
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('applicant')->name('applicant.')->group(function () {
+Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applicant')->name('applicant.')->group(function () {
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/profile', [BasicProfileController::class, 'create'])->name('profile');
         Route::post('/profile', [BasicProfileController::class, 'store'])->name('profile.store');
@@ -75,7 +78,7 @@ Route::middleware(['auth'])->prefix('applicant')->name('applicant.')->group(func
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(function () {
+Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer')->name('employer.')->group(function () {
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
         Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
@@ -90,6 +93,6 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
 });

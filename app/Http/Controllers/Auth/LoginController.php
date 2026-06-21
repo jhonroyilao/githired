@@ -27,6 +27,10 @@ final class LoginController extends Controller
         AuthenticateUserAction $authenticateUser,
         ResolveUserDestinationRouteAction $resolveDestination,
     ): RedirectResponse {
+        if ($user = Auth::user()) {
+            return redirect()->route($resolveDestination->handle($user));
+        }
+
         if (! $authenticateUser->handle($request->credentials(), $request->boolean('remember'))) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
