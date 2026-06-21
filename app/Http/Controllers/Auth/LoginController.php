@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\Auth\AuthenticateUserAction;
-use App\Actions\Auth\ResolveUserDashboardRouteAction;
+use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -13,10 +13,10 @@ use Illuminate\View\View;
 
 final class LoginController extends Controller
 {
-    public function create(ResolveUserDashboardRouteAction $resolveDashboardRoute): View|RedirectResponse
+    public function create(ResolveUserDestinationRouteAction $resolveDestination): View|RedirectResponse
     {
         if ($user = Auth::user()) {
-            return redirect()->route($resolveDashboardRoute->handle($user));
+            return redirect()->route($resolveDestination->handle($user));
         }
 
         return view('auth.login');
@@ -25,7 +25,7 @@ final class LoginController extends Controller
     public function store(
         LoginRequest $request,
         AuthenticateUserAction $authenticateUser,
-        ResolveUserDashboardRouteAction $resolveDashboardRoute,
+        ResolveUserDestinationRouteAction $resolveDestination,
     ): RedirectResponse {
         if (! $authenticateUser->handle($request->credentials(), $request->boolean('remember'))) {
             throw ValidationException::withMessages([
@@ -35,6 +35,6 @@ final class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route($resolveDashboardRoute->handle(Auth::user()), absolute: false));
+        return redirect()->intended(route($resolveDestination->handle(Auth::user()), absolute: false));
     }
 }
