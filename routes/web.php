@@ -1,9 +1,17 @@
 <?php
 
-use App\Actions\Auth\ResolveUserDashboardRouteAction;
+use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
+use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
+use App\Http\Controllers\Applicant\Onboarding\LinksController;
+use App\Http\Controllers\Applicant\Onboarding\PreferencesController;
+use App\Http\Controllers\Applicant\Onboarding\SummaryController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
+use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -13,9 +21,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function (ResolveUserDashboardRouteAction $resolveDashboardRoute) {
+Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination) {
     if ($user = Auth::user()) {
-        return redirect()->route($resolveDashboardRoute->handle($user));
+        return redirect()->route($resolveDestination->handle($user));
     }
 
     return redirect()->route('login');
@@ -44,9 +52,21 @@ Route::post('/logout', LogoutController::class)->name('logout');
 */
 
 Route::middleware(['auth'])->prefix('applicant')->name('applicant.')->group(function () {
-    Route::get('/dashboard', function () {
-        return response('Applicant dashboard');
-    })->name('dashboard');
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/profile', [BasicProfileController::class, 'create'])->name('profile');
+        Route::post('/profile', [BasicProfileController::class, 'store'])->name('profile.store');
+
+        Route::get('/summary', [SummaryController::class, 'create'])->name('summary');
+        Route::post('/summary', [SummaryController::class, 'store'])->name('summary.store');
+
+        Route::get('/preferences', [PreferencesController::class, 'create'])->name('preferences');
+        Route::post('/preferences', [PreferencesController::class, 'store'])->name('preferences.store');
+
+        Route::get('/links', [LinksController::class, 'create'])->name('links');
+        Route::post('/links', [LinksController::class, 'store'])->name('links.store');
+    });
+
+    Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
 });
 
 /*
@@ -56,9 +76,12 @@ Route::middleware(['auth'])->prefix('applicant')->name('applicant.')->group(func
 */
 
 Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(function () {
-    Route::get('/dashboard', function () {
-        return response('Employer dashboard');
-    })->name('dashboard');
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
+        Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
+    });
+
+    Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
 });
 
 /*
@@ -68,7 +91,5 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 */
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return response('Admin dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
 });
