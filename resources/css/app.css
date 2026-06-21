@@ -5,6 +5,75 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+    --color-neutral-950: #171b18;
+    --color-neutral-900: #27302b;
+    --color-neutral-800: #394139;
+    --color-neutral-700: #454b45;
+    --color-neutral-600: #525252;
+    --color-neutral-300: #c9cec5;
+    --color-neutral-200: #e5e7e2;
+    --color-neutral-100: #f2f4ef;
+    --color-neutral-50: #fafafa;
+
+    --color-primarygreen: #91c93c;
+    --color-primarygreen-700: #5f8f22;
+    --color-primarygreen-100: #eef8df;
+    --color-primarygreen-50: #f7fce9;
+
+    --color-signal-blue: #3e8f84;
+    --color-signal-blue-100: #e1f2ef;
+    --color-signal-amber: #d99222;
+    --color-signal-amber-100: #fbefd7;
+    --color-signal-red: #c4513d;
+    --color-signal-red-100: #f7e1dc;
+
+    --shadow-panel: 0 22px 60px rgb(23 27 24 / 10%);
+    --shadow-pressed: inset 0 1px 0 rgb(255 255 255 / 38%);
+
+    --radius-card: 0.875rem;
+    --radius-control: 0.625rem;
+}
+
+:root {
+    color-scheme: light;
+
+    --gh-ink: #27302b;
+    --gh-ink-strong: #171b18;
+    --gh-ink-muted: #525252;
+    --gh-surface: #fafafa;
+    --gh-surface-raised: #ffffff;
+    --gh-surface-tinted: #f2f4ef;
+    --gh-line: #e5e7e2;
+    --gh-line-strong: #c9cec5;
+    --gh-action: #91c93c;
+    --gh-action-strong: #5f8f22;
+    --gh-action-soft: #eef8df;
+    --gh-info: #3e8f84;
+    --gh-warning: #d99222;
+    --gh-danger: #c4513d;
+}
+
+@layer base {
+    body {
+        background: var(--gh-surface);
+        color: var(--gh-ink);
+        font-family: var(--font-sans);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+        background: var(--gh-action);
+        color: var(--gh-ink-strong);
+    }
+
+    :focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--gh-action) 72%, white);
+        outline-offset: 3px;
+    }
 }
