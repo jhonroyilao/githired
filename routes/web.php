@@ -1,6 +1,18 @@
 <?php
 
+use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
+use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
+use App\Http\Controllers\Applicant\Onboarding\LinksController;
+use App\Http\Controllers\Applicant\Onboarding\PreferencesController;
+use App\Http\Controllers\Applicant\Onboarding\SummaryController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
+use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -9,25 +21,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination) {
+    if ($user = Auth::user()) {
+        return redirect()->route($resolveDestination->handle($user));
+    }
+
+    return redirect()->route('login');
 });
-
-Route::get('/mockup', function () {
-    return view('mockup');
-});
-
-Route::get('/tailwind', function () {
-    return view('tailwind');
-})->name('tailwind');
-
-Route::get('/jobs', function () {
-    return 'Job listing page — to be built';
-})->name('jobs.index');
-
-Route::get('/jobs/{id}', function ($id) {
-    return 'Job detail page — to be built for job #' . $id;
-})->name('jobs.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -35,17 +35,15 @@ Route::get('/jobs/{id}', function ($id) {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/login', function () {
-    return 'Login page coming soon';
-})->name('login');
+Route::get('/login', [LoginController::class, 'create'])->name('login');
 
-Route::get('/register', function () {
-    return 'Register page coming soon';
-})->name('register');
+Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
-Route::post('/logout', function () {
-    return 'Logout route coming soon';
-})->name('logout');
+Route::get('/register', [RegisterController::class, 'create'])->name('register');
+
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+Route::post('/logout', LogoutController::class)->name('logout');
 
 /*
 |--------------------------------------------------------------------------
@@ -54,23 +52,21 @@ Route::post('/logout', function () {
 */
 
 Route::middleware(['auth'])->prefix('applicant')->name('applicant.')->group(function () {
-    Route::get('/dashboard', [ApplicantDashboardController::class, 'index'])->name('dashboard');
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/profile', [BasicProfileController::class, 'create'])->name('profile');
+        Route::post('/profile', [BasicProfileController::class, 'store'])->name('profile.store');
 
-    // These are referenced by the dashboard view's links.
-    // Build their controllers next; for now you can stub them
-    // with a closure so the dashboard doesn't break:
+        Route::get('/summary', [SummaryController::class, 'create'])->name('summary');
+        Route::post('/summary', [SummaryController::class, 'store'])->name('summary.store');
 
-    Route::get('/applications', function () {
-        return 'Applications list — to be built';
-    })->name('applications.index');
+        Route::get('/preferences', [PreferencesController::class, 'create'])->name('preferences');
+        Route::post('/preferences', [PreferencesController::class, 'store'])->name('preferences.store');
 
-    Route::get('/resume', function () {
-        return 'Resume upload page — to be built';
-    })->name('resume');
+        Route::get('/links', [LinksController::class, 'create'])->name('links');
+        Route::post('/links', [LinksController::class, 'store'])->name('links.store');
+    });
 
-    Route::get('/profile/edit', function () {
-        return 'Profile edit page — to be built';
-    })->name('profile.edit');
+    Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
 });
 
 /*
@@ -80,21 +76,12 @@ Route::middleware(['auth'])->prefix('applicant')->name('applicant.')->group(func
 */
 
 Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(function () {
-    Route::get('/dashboard', function () {
-        return 'Employer dashboard — to be built';
-    })->name('dashboard');
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
+        Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
+    });
 
-    Route::get('/jobs', function () {
-        return 'Employer jobs — to be built';
-    })->name('jobs.index');
-
-    Route::get('/applicants', function () {
-        return 'Employer applicants — to be built';
-    })->name('applicants.index');
-
-    Route::get('/profile/edit', function () {
-        return 'Employer profile edit — to be built';
-    })->name('profile.edit');
+    Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
 });
 
 /*
@@ -104,7 +91,5 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 */
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return 'Admin dashboard — to be built';
-    })->name('dashboard');
+    Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
 });
