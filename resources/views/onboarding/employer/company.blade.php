@@ -120,7 +120,7 @@
 
         <div class="mt-5">
             <label for="description" class="{{ $labelClass }}">Company description</label>
-            <textarea id="description" name="description" rows="5" class="{{ $inputClass }} min-h-[8.5rem] resize-y" placeholder="Tell job seekers what your team builds and how you work." required>{{ old('description', $company?->description) }}</textarea>
+            <textarea id="description" name="description" rows="5" class="{{ $inputClass }} min-h-34 resize-y" placeholder="Tell job seekers what your team builds and how you work." required>{{ old('description', $company?->description) }}</textarea>
             @error('description')
                 <div class="{{ $errorClass }}">{{ $message }}</div>
             @enderror
