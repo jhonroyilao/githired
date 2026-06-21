@@ -6,22 +6,30 @@ use App\Actions\Onboarding\DetermineApplicantOnboardingStepAction;
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Actions\Onboarding\UpdateApplicantBasicProfileAction;
 use App\Enums\UserRole;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Onboarding\AbstractOnboardingController;
 use App\Http\Requests\Applicant\Onboarding\StoreBasicProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-final class BasicProfileController extends Controller
+final class BasicProfileController extends AbstractOnboardingController
 {
     public function create(
         Request $request,
         DetermineApplicantOnboardingStepAction $determineStep,
         ResolveUserDestinationRouteAction $resolveDestination,
     ): View|RedirectResponse {
-        if ($redirect = $this->redirectIfUnavailable($request, $determineStep, $resolveDestination, 'applicant.onboarding.profile')) {
+        if ($redirect = $this->redirectIfUnavailable(
+            $request,
+            $resolveDestination,
+            'applicant.onboarding.profile',
+            $determineStep->handle($request->user()),
+            UserRole::Applicant->value,
+        )) {
             return $redirect;
         }
+
+        $this->rememberStep($request, 'applicant.onboarding.profile');
 
         return view('onboarding.applicant.profile', [
             'user' => $request->user(),
@@ -36,41 +44,24 @@ final class BasicProfileController extends Controller
     ): RedirectResponse {
         $updateProfile->handle($request->user(), $request->profileAttributes());
 
-        return redirect()->route($resolveDestination->handle($request->user()->refresh()));
+        $destination = $resolveDestination->handle($request->user()->refresh());
+        $this->rememberStep($request, $destination);
+
+        return redirect()->route($destination);
     }
 
-    private function redirectIfUnavailable(
-        Request $request,
-        DetermineApplicantOnboardingStepAction $determineStep,
-        ResolveUserDestinationRouteAction $resolveDestination,
-        string $currentRoute,
-    ): ?RedirectResponse {
-        $user = $request->user();
-
-        if ($user->role !== UserRole::Applicant->value) {
-            return redirect()->route($resolveDestination->handle($user));
-        }
-
-        $nextRoute = $determineStep->handle($user);
-
-        if ($nextRoute === null) {
-            return redirect()->route('applicant.dashboard');
-        }
-
-        if ($this->stepOrder($currentRoute) > $this->stepOrder($nextRoute)) {
-            return redirect()->route($nextRoute);
-        }
-
-        return null;
-    }
-
-    private function stepOrder(string $route): int
+    protected function stepOrder(): array
     {
         return [
             'applicant.onboarding.profile' => 1,
             'applicant.onboarding.summary' => 2,
             'applicant.onboarding.preferences' => 3,
             'applicant.onboarding.links' => 4,
-        ][$route] ?? 999;
+        ];
+    }
+
+    protected function flowKey(): string
+    {
+        return 'applicant';
     }
 }

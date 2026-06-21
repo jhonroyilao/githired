@@ -91,7 +91,7 @@
 
         <div class="mt-6 flex flex-wrap gap-3">
             <a href="{{ route('register') }}" class="{{ $secondaryButtonClass }}">Back</a>
-            <button type="submit" class="{{ $primaryButtonClass }}">Save changes</button>
+            <button type="submit" class="{{ $primaryButtonClass }}">Next</button>
         </div>
     </form>
 </x-onboarding-shell>

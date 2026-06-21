@@ -56,7 +56,7 @@
 
         <div class="mt-8 flex flex-wrap gap-3">
             <a href="{{ route('applicant.onboarding.summary') }}" class="{{ $secondaryButtonClass }}">Back</a>
-            <button type="submit" class="{{ $primaryButtonClass }}">Continue</button>
+            <button type="submit" class="{{ $primaryButtonClass }}">Next</button>
         </div>
     </form>
 </x-onboarding-shell>

@@ -6,13 +6,13 @@ use App\Actions\Onboarding\DetermineEmployerOnboardingStepAction;
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Actions\Onboarding\UpdateEmployerCompanyAction;
 use App\Enums\UserRole;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Onboarding\AbstractOnboardingController;
 use App\Http\Requests\Employer\Onboarding\StoreCompanyProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-final class CompanyProfileController extends Controller
+final class CompanyProfileController extends AbstractOnboardingController
 {
     public function create(
         Request $request,
@@ -25,9 +25,17 @@ final class CompanyProfileController extends Controller
             return redirect()->route($resolveDestination->handle($user));
         }
 
-        if ($determineStep->handle($user) === null) {
-            return redirect()->route('employer.dashboard');
+        if ($redirect = $this->redirectIfUnavailable(
+            $request,
+            $resolveDestination,
+            'employer.onboarding.company',
+            $determineStep->handle($user),
+            UserRole::Employer->value,
+        )) {
+            return $redirect;
         }
+
+        $this->rememberStep($request, 'employer.onboarding.company');
 
         return view('onboarding.employer.company', [
             'company' => $user->company,
@@ -41,6 +49,21 @@ final class CompanyProfileController extends Controller
     ): RedirectResponse {
         $updateCompany->handle($request->user(), $request->companyAttributes());
 
-        return redirect()->route($resolveDestination->handle($request->user()->refresh()));
+        $destination = $resolveDestination->handle($request->user()->refresh());
+        $this->rememberStep($request, $destination);
+
+        return redirect()->route($destination);
+    }
+
+    protected function stepOrder(): array
+    {
+        return [
+            'employer.onboarding.company' => 1,
+        ];
+    }
+
+    protected function flowKey(): string
+    {
+        return 'employer';
     }
 }
