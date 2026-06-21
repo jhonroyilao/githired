@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('public.home');
 });
 
 Route::get('/mockup', function () {
-    return view('mockup');
+    return view('dev.mockup');
 });
 
 Route::get('/tailwind', function () {
-    return view('tailwind');
+    return view('dev.frontend-decision');
 })->name('tailwind');
 
 Route::get('/jobs', function () {

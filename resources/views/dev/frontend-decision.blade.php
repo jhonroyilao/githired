@@ -53,7 +53,7 @@
                     Back to GitHired
                 </a>
                 <span class="text-sm text-slate-400">
-                    Proof route: /frontend-decision
+                    Proof route: /tailwind
                 </span>
             </div>
         </section>
