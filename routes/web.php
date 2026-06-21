@@ -8,6 +8,7 @@ use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
 use App\Http\Controllers\Applicant\Onboarding\LinksController;
 use App\Http\Controllers\Applicant\Onboarding\PreferencesController;
 use App\Http\Controllers\Applicant\Onboarding\SummaryController;
+use App\Http\Controllers\Applicant\ProfileController as ApplicantProfileController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -70,6 +71,8 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
     });
 
     Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
+    Route::get('/profile', [ApplicantProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ApplicantProfileController::class, 'update'])->name('profile.update');
 });
 
 /*

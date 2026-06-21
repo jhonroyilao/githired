@@ -14,8 +14,8 @@
         </div>
         <div class="rounded-2xl border border-neutral-200 bg-white p-5">
             <p class="text-sm font-black text-neutral-600">Links</p>
-            <a href="{{ route('applicant.onboarding.links') }}" class="mt-2 inline-flex font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">
-                Edit profile links
+            <a href="{{ route('applicant.profile.edit') }}" class="mt-2 inline-flex font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">
+                Edit profile
             </a>
         </div>
     </div>
