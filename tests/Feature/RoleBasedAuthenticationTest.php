@@ -81,7 +81,7 @@ class RoleBasedAuthenticationTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function test_applicant_dashboard_renders_after_login_redirect(): void
+    public function test_applicant_dashboard_redirect_target_remains_available(): void
     {
         User::factory()->create([
             'email' => 'applicant-render@example.com',
@@ -94,7 +94,7 @@ class RoleBasedAuthenticationTest extends TestCase
         ]);
 
         $response->assertOk();
-        $response->assertSee('Welcome back');
+        $response->assertSee('Applicant dashboard');
     }
 
     public function test_employer_login_redirects_to_employer_dashboard(): void
