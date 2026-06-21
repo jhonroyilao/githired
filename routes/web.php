@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,7 +29,7 @@ Route::get('/jobs', function () {
 })->name('jobs.index');
 
 Route::get('/jobs/{id}', function ($id) {
-    return 'Job detail page — to be built for job #' . $id;
+    return 'Job detail page — to be built for job #'.$id;
 })->name('jobs.show');
 
 /*
@@ -35,17 +38,15 @@ Route::get('/jobs/{id}', function ($id) {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/login', function () {
-    return 'Login page coming soon';
-})->name('login');
+Route::get('/login', [LoginController::class, 'create'])->name('login');
 
-Route::get('/register', function () {
-    return 'Register page coming soon';
-})->name('register');
+Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
-Route::post('/logout', function () {
-    return 'Logout route coming soon';
-})->name('logout');
+Route::get('/register', [RegisterController::class, 'create'])->name('register');
+
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+Route::post('/logout', LogoutController::class)->name('logout');
 
 /*
 |--------------------------------------------------------------------------
