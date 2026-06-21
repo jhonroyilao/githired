@@ -8,7 +8,7 @@
 
 <x-auth-shell title="Sign in" subtitle="Please enter your details" card-width="narrow">
     @if ($errors->any())
-        <div class="mt-5 rounded-[0.875rem] border border-signal-red bg-signal-red-100 px-4 py-3.5 text-sm text-[#7f2c20]" role="alert">
+        <div class="mt-5 rounded-card border border-signal-red bg-signal-red-100 px-4 py-3.5 text-sm text-[#7f2c20]" role="alert">
             <ul class="m-0 list-disc pl-5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -40,15 +40,27 @@
 
         <div class="mt-6">
             <label for="password" class="{{ $labelClass }}">Password</label>
-            <input
-                id="password"
-                name="password"
-                type="password"
-                class="{{ $inputClass }}"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-                required
-            >
+            <div class="relative">
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    class="{{ $inputClass }} pr-12"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+                <button
+                    type="button"
+                    class="absolute inset-y-0 right-2 my-auto inline-flex size-9 items-center justify-center rounded-full text-neutral-600 transition hover:bg-neutral-200/70 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primarygreen/25"
+                    data-password-toggle="password"
+                    aria-label="Show password"
+                    title="Show password"
+                >
+                    <i class="bi bi-eye-fill text-lg" aria-hidden="true" data-password-icon></i>
+                    <span class="sr-only" data-password-label>Show password</span>
+                </button>
+            </div>
             @error('password')
                 <div class="{{ $errorClass }}">{{ $message }}</div>
             @enderror

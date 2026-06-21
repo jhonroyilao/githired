@@ -1,3 +1,5 @@
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 document.addEventListener('change', (event) => {
     const input = event.target;
 
@@ -69,5 +71,36 @@ document.addEventListener('click', (event) => {
 
     if (previewTarget instanceof HTMLImageElement) {
         previewTarget.src = previewTarget.dataset.placeholderSrc ?? '';
+    }
+});
+
+document.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-password-toggle]') : null;
+
+    if (!(button instanceof HTMLButtonElement)) {
+        return;
+    }
+
+    const targetId = button.dataset.passwordToggle;
+    const input = targetId ? document.getElementById(targetId) : null;
+
+    if (!(input instanceof HTMLInputElement)) {
+        return;
+    }
+
+    const shouldShow = input.type === 'password';
+    input.type = shouldShow ? 'text' : 'password';
+
+    const icon = button.querySelector('[data-password-icon]');
+    if (icon instanceof HTMLElement) {
+        icon.className = shouldShow ? 'bi bi-eye-slash-fill text-lg' : 'bi bi-eye-fill text-lg';
+    }
+
+    const label = shouldShow ? 'Hide password' : 'Show password';
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+    const text = button.querySelector('[data-password-label]');
+    if (text) {
+        text.textContent = label;
     }
 });

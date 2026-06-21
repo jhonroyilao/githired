@@ -8,7 +8,7 @@
 
 <x-auth-shell title="Sign up" subtitle="Create your GitHired account">
     @if ($errors->any())
-        <div class="mt-5 rounded-[0.875rem] border border-signal-red bg-signal-red-100 px-4 py-3.5 text-sm text-[#7f2c20]" role="alert">
+        <div class="mt-5 rounded-card border border-signal-red bg-signal-red-100 px-4 py-3.5 text-sm text-[#7f2c20]" role="alert">
             <ul class="m-0 list-disc pl-5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -59,7 +59,7 @@
             <legend class="{{ $labelClass }}">What best describes you?</legend>
 
             <div class="grid grid-cols-2 gap-4 max-[920px]:grid-cols-1">
-                <label class="relative grid min-h-[6.25rem] cursor-pointer place-items-center rounded-[1.125rem] border-2 border-neutral-950/60 bg-white p-3 text-center transition hover:-translate-y-0.5 has-[:checked]:border-neutral-900 has-[:checked]:bg-neutral-900 has-[:checked]:text-white">
+                <label class="relative grid min-h-25 cursor-pointer place-items-center rounded-[1.125rem] border-2 border-neutral-950/60 bg-white p-3 text-center transition hover:-translate-y-0.5 has-checked:border-neutral-900 has-checked:bg-neutral-900 has-checked:text-white">
                     <input
                         name="role"
                         type="radio"
@@ -74,7 +74,7 @@
                     <span class="mt-2 text-base font-black">Job seeker</span>
                 </label>
 
-                <label class="relative grid min-h-[6.25rem] cursor-pointer place-items-center rounded-[1.125rem] border-2 border-neutral-950/60 bg-white p-3 text-center transition hover:-translate-y-0.5 has-[:checked]:border-neutral-900 has-[:checked]:bg-neutral-900 has-[:checked]:text-white">
+                <label class="relative grid min-h-25 cursor-pointer place-items-center rounded-[1.125rem] border-2 border-neutral-950/60 bg-white p-3 text-center transition hover:-translate-y-0.5 has-checked:border-neutral-900 has-checked:bg-neutral-900 has-checked:text-white">
                     <input
                         name="role"
                         type="radio"
@@ -98,15 +98,27 @@
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
                 <label for="password" class="{{ $labelClass }}">Password</label>
-                <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="{{ $inputClass }}"
-                    placeholder="Enter your password"
-                    autocomplete="new-password"
-                    required
-                >
+                <div class="relative">
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        class="{{ $inputClass }} pr-12"
+                        placeholder="Enter your password"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button
+                        type="button"
+                        class="absolute inset-y-0 right-2 my-auto inline-flex size-9 items-center justify-center rounded-full text-neutral-600 transition hover:bg-neutral-200/70 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primarygreen/25"
+                        data-password-toggle="password"
+                        aria-label="Show password"
+                        title="Show password"
+                    >
+                        <i class="bi bi-eye-fill text-lg" aria-hidden="true" data-password-icon></i>
+                        <span class="sr-only" data-password-label>Show password</span>
+                    </button>
+                </div>
                 @error('password')
                     <div class="{{ $errorClass }}">{{ $message }}</div>
                 @enderror
@@ -114,15 +126,27 @@
 
             <div>
                 <label for="password_confirmation" class="{{ $labelClass }}">Confirm password</label>
-                <input
-                    id="password_confirmation"
-                    name="password_confirmation"
-                    type="password"
-                    class="{{ $inputClass }}"
-                    placeholder="Repeat your password"
-                    autocomplete="new-password"
-                    required
-                >
+                <div class="relative">
+                    <input
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        class="{{ $inputClass }} pr-12"
+                        placeholder="Repeat your password"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button
+                        type="button"
+                        class="absolute inset-y-0 right-2 my-auto inline-flex size-9 items-center justify-center rounded-full text-neutral-600 transition hover:bg-neutral-200/70 hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primarygreen/25"
+                        data-password-toggle="password_confirmation"
+                        aria-label="Show password"
+                        title="Show password"
+                    >
+                        <i class="bi bi-eye-fill text-lg" aria-hidden="true" data-password-icon></i>
+                        <span class="sr-only" data-password-label>Show password</span>
+                    </button>
+                </div>
             </div>
         </div>
 
