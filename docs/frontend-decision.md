@@ -77,9 +77,9 @@ as semantic CSS variables under `:root`.
 
 ### Typography
 
-- Display: `Space Grotesk` for restrained headings, dashboard section labels,
+- Display: `Cabinet Grotesk` for restrained headings, dashboard section labels,
   and empty-state headlines.
-- Body: `Inter` for form fields, tables, cards, and long interface copy.
+- Body: `Manrope` for form fields, tables, cards, and long interface copy.
 - Utility: `IBM Plex Mono` for compact metadata, IDs, timestamps, scores, and
   moderation labels.
 
@@ -111,6 +111,22 @@ For auth screens, use a narrower split layout:
 | role-specific copy           | validation + focused action   |
 +-----------------------------+-------------------------------+
 ```
+
+Registration displays role choices as `Job seeker` and `Recruiter`, but form
+values must stay mapped to the backend roles `applicant` and `employer`.
+
+Applicant onboarding should follow `docs/PRD/user-stories.md` rather than early
+mockup step counts:
+
+1. Role selection: display `Job seeker`, store `applicant`.
+2. Basic profile: name, avatar, location, phone, email display/edit path.
+3. Applicant summary: professional headline, short bio, skills.
+4. Job preferences: desired job type, work preference, experience level.
+5. Links and resume: GitHub, LinkedIn, website/portfolio, PDF resume upload.
+
+Employer onboarding should use the recruiter label in UI and store `employer`,
+then move into company profile setup: company name, logo, website, industry,
+size, location, and description.
 
 ### Signature Element
 
