@@ -7,6 +7,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class StoreSummaryRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'headline' => is_string($this->input('headline')) ? trim($this->input('headline')) : $this->input('headline'),
+            'bio' => is_string($this->input('bio')) ? trim($this->input('bio')) : $this->input('bio'),
+            'skills' => is_string($this->input('skills')) ? trim($this->input('skills')) : $this->input('skills'),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return $this->user()?->role === UserRole::Applicant->value;

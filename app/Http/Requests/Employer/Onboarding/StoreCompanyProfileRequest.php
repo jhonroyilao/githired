@@ -12,6 +12,16 @@ final class StoreCompanyProfileRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
+        $this->merge([
+            'name' => is_string($this->input('name')) ? trim($this->input('name')) : $this->input('name'),
+            'slug' => is_string($this->input('slug')) ? trim($this->input('slug')) : $this->input('slug'),
+            'website' => is_string($this->input('website')) ? trim($this->input('website')) : $this->input('website'),
+            'industry' => is_string($this->input('industry')) ? trim($this->input('industry')) : $this->input('industry'),
+            'size' => is_string($this->input('size')) ? trim($this->input('size')) : $this->input('size'),
+            'location' => is_string($this->input('location')) ? trim($this->input('location')) : $this->input('location'),
+            'description' => is_string($this->input('description')) ? trim($this->input('description')) : $this->input('description'),
+        ]);
+
         if (! $this->filled('slug') && $this->filled('name')) {
             $this->merge([
                 'slug' => Str::slug((string) $this->input('name')),

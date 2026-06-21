@@ -7,6 +7,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class StoreLinksRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'github' => is_string($this->input('github')) ? trim($this->input('github')) : $this->input('github'),
+            'linkedin' => is_string($this->input('linkedin')) ? trim($this->input('linkedin')) : $this->input('linkedin'),
+            'website' => is_string($this->input('website')) ? trim($this->input('website')) : $this->input('website'),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return $this->user()?->role === UserRole::Applicant->value;
