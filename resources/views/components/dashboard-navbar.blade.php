@@ -32,7 +32,7 @@
                     @elseif(isset($user->profile->avatar_path) && $user->profile->avatar_path)
                         <img src="{{ asset('storage/' . $user->profile->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                     @else
-                        <img src="{{ asset('images/icon.svg') }}" alt="Default Avatar Placeholder" class="w-5 h-5 object-contain opacity-80">
+                        <img src="{{ asset('assets/avatar.svg') }}" alt="Default Avatar Placeholder" class="w-full h-full object-cover">
                     @endif
                 </div>
                 
