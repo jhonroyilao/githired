@@ -3,6 +3,7 @@
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Enums\UserRole;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
 use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
 use App\Http\Controllers\Applicant\Onboarding\LinksController;
@@ -31,6 +32,10 @@ Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination)
     return redirect()->route('login');
 });
 
+Route::view('/mockup', 'mockup');
+Route::get('/jobs', fn () => 'jobs index')->name('jobs.index');
+Route::get('/jobs/{id}', fn () => 'job detail')->name('jobs.show');
+
 /*
 |--------------------------------------------------------------------------
 | Auth Routes
@@ -39,11 +44,8 @@ Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination)
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
-
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 });
 
@@ -56,10 +58,13 @@ Route::post('/logout', LogoutController::class)->name('logout');
 */
 
 Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applicant')->name('applicant.')->group(function () {
+    
+    // Onboarding Sub-Group
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/profile', [BasicProfileController::class, 'create'])->name('profile');
         Route::post('/profile', [BasicProfileController::class, 'store'])->name('profile.store');
 
+        // Dynamic Text blocks logic references
         Route::get('/summary', [SummaryController::class, 'create'])->name('summary');
         Route::post('/summary', [SummaryController::class, 'store'])->name('summary.store');
 
@@ -70,9 +75,18 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
         Route::post('/links', [LinksController::class, 'store'])->name('links.store');
     });
 
+    // Core Applicant Workspace Layout
     Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
     Route::get('/profile', [ApplicantProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ApplicantProfileController::class, 'update'])->name('profile.update');
+
+    // Local workspace additions for application monitoring tracking system
+    Route::get('/applications', fn () => 'applications index')->name('applications.index');
+    Route::get('/resume', fn () => 'resume')->name('resume');
+
+    // Job Applications Workflow Engine Management Layer
+    Route::get('/job-listings/{jobListing}/apply', [ApplicationController::class, 'create'])->name('job-listings.apply');
+    Route::post('/job-listings/{jobListing}/apply', [ApplicationController::class, 'store'])->name('job-listings.apply.store');
 });
 
 /*
