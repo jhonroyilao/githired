@@ -70,7 +70,7 @@ class JobListing extends Model
     $query->where('status', JobStatus::Active);
     
     /* ------------------ NOTE: cinomment out ko muna kasi walang lalabas na job card if nilagay ko lahat ng restrictions
-    since naka NULL yung approved sa database.
+    since naka NULL yung approved sa 
 
     $query->where('status', JobStatus::Active)
           ->whereNotNull('approved_at')
