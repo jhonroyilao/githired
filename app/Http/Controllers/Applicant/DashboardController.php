@@ -7,12 +7,21 @@ use App\Models\Application;
 use App\Models\JobListing;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 
 final class DashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request, ResolveUserDestinationRouteAction $resolveDestination): View|RedirectResponse
     {
         $user = $request->user();
+
+        // redirect users na hindi pa tapos sa onboarding
+        $destination = $resolveDestination->handle($user);
+        if ($destination !== 'applicant.dashboard') {
+            return redirect()->route($destination);
+        }
+
         $profile = $user->profile;
 
         $applicationCount = Application::where('user_id', $user->id)->count();
