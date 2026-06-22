@@ -67,7 +67,7 @@ final class ApplicationController extends Controller
             // Store uploaded file on the private disk under resumes/{user_id}/
             $resumePath = $request->file('resume')->store(
                 "resumes/{$user->id}",
-                'private'
+                'local'
             );
         } elseif ($user->profile?->resume_path) {
             // Fall back to the resume saved on their profile
