@@ -22,6 +22,7 @@ class ResumeController extends Controller
             ->where('is_current', false)
             ->latest()
             ->get();
+            
         return view('applicant.resume.view', [
             'currentResume' => $user->currentResumeDocument,
             'resumeHistory' => $resumeHistory
@@ -39,21 +40,28 @@ class ResumeController extends Controller
         $savedPath = null;
 
         try {
-            $savedPath = $uploadedFile->store("resumes/{$user->id}", 'local'); //Save file to local storage folder
-            DB::transaction(function () use ($user, $uploadedFile, $savedPath, $fileHash) { //Update database
-               
-                $user->resumeDocuments()->current()->update(['is_current' => false]); //Remove current status on old resume
+            //Save file to local storage folder
+            $savedPath = $uploadedFile->store("resumes/{$user->id}", 'local');
 
-                //Save new resume and make it current one
-                $user->resumeDocuments()->create([
-                    'file_path'         => $savedPath,
-                    'original_name'     => $uploadedFile->getClientOriginalName(),
-                    'mime_type'         => $uploadedFile->getClientMimeType() ?: 'application/pdf',
-                    'file_size'         => $uploadedFile->getSize(),
-                    'content_hash'      => $fileHash,
-                    'extraction_status' => 'pending',
-                    'is_current'        => true,
-                ]);
+            DB::transaction(function () use ($user, $uploadedFile, $savedPath, $fileHash) { 
+                
+                // Fetch model first
+                $currentResume = $user->currentResumeDocument;
+                if ($currentResume) {
+                    $currentResume->update(['is_current' => false]);
+                }
+
+                $newResume = new ResumeDocument();
+                $newResume->user_id = $user->id;
+                $newResume->file_path = $savedPath;
+                $newResume->original_name = $uploadedFile->getClientOriginalName();
+                $newResume->mime_type = $uploadedFile->getClientMimeType() ?: 'application/pdf';
+                $newResume->file_size = $uploadedFile->getSize();
+                $newResume->content_hash = $fileHash;
+                $newResume->extraction_status = 'pending';
+                $newResume->is_current = true; 
+                
+                $newResume->save();
             });
 
         } catch (\Exception $e) {
@@ -73,7 +81,8 @@ class ResumeController extends Controller
     //For download of resume file
     public function show(ResumeDocument $resumeDocument)
     {
-        Gate::authorize('view', $resumeDocument); //Verify the person trying to download is the owner
+        Gate::authorize('view', $resumeDocument); 
+        
         return Storage::disk('local')->download(
             $resumeDocument->file_path,
             $resumeDocument->original_name ?? 'resume.pdf'
@@ -83,12 +92,19 @@ class ResumeController extends Controller
     //Swap old resume to become current one option
     public function setCurrent(ResumeDocument $resumeDocument)
     {
-        Gate::authorize('view', $resumeDocument); //Verify the person trying to swap is the owner
+        Gate::authorize('update', $resumeDocument);
 
-        DB::transaction(function () use ($resumeDocument) { //Demote current resume and promote the old version
-            $resumeDocument->user->resumeDocuments()->current()->update(['is_current' => false]);
+        DB::transaction(function () use ($resumeDocument) { 
+            // Demote the current resume
+            $currentResume = $resumeDocument->user->currentResumeDocument;
+            if ($currentResume) {
+                $currentResume->update(['is_current' => false]);
+            }
+            
+            // Promote the old version
             $resumeDocument->update(['is_current' => true]);
         });
+
         return redirect()
             ->route('applicant.resume')
             ->with('status', 'Resume set as current.');
@@ -97,14 +113,15 @@ class ResumeController extends Controller
     //Delete completely resume from system
     public function destroy(ResumeDocument $resumeDocument)
     {
-        Gate::authorize('delete', $resumeDocument); //Verify the person trying to delete is the owner
+        Gate::authorize('delete', $resumeDocument);
 
         $path = $resumeDocument->file_path;
-        
-        if ($resumeDocument->delete()) { //Remove database record completely
-            Storage::disk('local')->delete($path);
-        }
 
+        //Delete file 
+        if (Storage::disk('local')->delete($path)) { 
+            $resumeDocument->delete(); //Delete database record
+        }
+        
         return redirect()
             ->route('applicant.resume')
             ->with('status', 'Resume deleted.');

@@ -13,14 +13,13 @@ class ResumeUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp()
+    protected function setUp(): void 
     {
         parent::setUp();
-        
         Storage::fake('local'); //Mock storage for no saving of real files during tests
     }
 
-    public function test_applicant_can_upload_a_pdf_resume()
+    public function test_applicant_can_upload_a_pdf_resume(): void
     {
         $user = User::factory()->create();
         $file = UploadedFile::fake()->create('resume.pdf', 200, 'application/pdf');
@@ -42,7 +41,7 @@ class ResumeUploadTest extends TestCase
         Storage::disk('local')->assertExists($resume->file_path);
     }
 
-    public function test_guests_cannot_upload_a_resume()
+    public function test_guests_cannot_upload_a_resume(): void
     {
         $file = UploadedFile::fake()->create('resume.pdf', 100, 'application/pdf');
 
@@ -54,7 +53,7 @@ class ResumeUploadTest extends TestCase
         $this->assertDatabaseCount('resume_documents', 0);
     }
 
-    public function test_non_pdf_uploads_are_rejected()
+    public function test_non_pdf_uploads_are_rejected(): void
     {
         $user = User::factory()->create();
         $file = UploadedFile::fake()->create('resume.docx', 200, 'application/msword'); //Try uploading a word doc
@@ -67,7 +66,7 @@ class ResumeUploadTest extends TestCase
         $this->assertDatabaseCount('resume_documents', 0);
     }
 
-    public function test_oversized_uploads_are_rejected()
+    public function test_oversized_uploads_are_rejected(): void
     {
         $user = User::factory()->create();
         $file = UploadedFile::fake()->create('resume.pdf', 6000, 'application/pdf'); //Upload file over 5MB limit
@@ -80,7 +79,7 @@ class ResumeUploadTest extends TestCase
         $this->assertDatabaseCount('resume_documents', 0);
     }
 
-    public function test_missing_resume_file_is_rejected()
+    public function test_missing_resume_file_is_rejected(): void
     {
         $user = User::factory()->create();
 
@@ -89,7 +88,7 @@ class ResumeUploadTest extends TestCase
         $response->assertSessionHasErrors('resume');
     }
 
-    public function test_uploading_a_new_resume_supersedes_the_previous_current_resume()
+    public function test_uploading_a_new_resume_supersedes_the_previous_current_resume(): void
     {
         $user = User::factory()->create();
         $oldResume = ResumeDocument::factory()->for($user)->create(['is_current' => true]);
@@ -105,19 +104,21 @@ class ResumeUploadTest extends TestCase
             'is_current' => false,
         ]);
 
+        // New upload must be promoted
         $this->assertDatabaseHas('resume_documents', [ //Promote new upload
             'user_id' => $user->id,
             'original_name' => 'new-resume.pdf',
             'is_current' => true,
         ]);
 
+        // Exactly one current resume per user
         $this->assertSame(
             1,
             ResumeDocument::where('user_id', $user->id)->where('is_current', true)->count()
         );
     }
 
-    public function test_uploading_a_resume_does_not_affect_other_users_current_resume()
+    public function test_uploading_a_resume_does_not_affect_other_users_current_resume(): void
     {
         $userA = User::factory()->create();
         $userB = User::factory()->create();
@@ -135,7 +136,7 @@ class ResumeUploadTest extends TestCase
         ]);
     }
 
-    public function test_applicant_can_view_their_own_resume()
+    public function test_applicant_can_view_their_own_resume(): void
     {
         $user = User::factory()->create();
         $resume = ResumeDocument::factory()->for($user)->create();
@@ -146,7 +147,7 @@ class ResumeUploadTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_applicant_cannot_view_another_users_resume()
+    public function test_applicant_cannot_view_another_users_resume(): void
     {
         $owner = User::factory()->create();
         $intruder = User::factory()->create();
@@ -158,19 +159,19 @@ class ResumeUploadTest extends TestCase
         $response->assertForbidden(); //Block intruder from viewing
     }
 
-    public function test_applicant_cannot_delete_another_users_resume()
+    public function test_applicant_cannot_delete_another_users_resume(): void
     {
         $owner = User::factory()->create();
         $intruder = User::factory()->create();
-        $resume = ResumeDocument::factory()->for($owner)->create();
 
+        $resume = ResumeDocument::factory()->for($owner)->create();
         $response = $this->actingAs($intruder)->delete(route('applicant.resume.destroy', $resume));
 
         $response->assertForbidden(); //Block intruder from deleting
         $this->assertDatabaseHas('resume_documents', ['id' => $resume->id]); // Make sure file is still there
     }
 
-    public function test_applicant_can_delete_their_own_resume()
+    public function test_applicant_can_delete_their_own_resume(): void
     {
         $user = User::factory()->create();
         $resume = ResumeDocument::factory()->for($user)->create();
@@ -183,10 +184,10 @@ class ResumeUploadTest extends TestCase
         Storage::disk('local')->assertMissing($resume->file_path);
     }
 
-    public function test_resume_index_shows_current_resume_and_history()
+    public function test_resume_index_shows_current_resume_and_history(): void
     {
         $user = User::factory()->create();
-        
+
         $current = ResumeDocument::factory()->for($user)->create(['is_current' => true]);
         $old = ResumeDocument::factory()->for($user)->notCurrent()->create();
 
@@ -195,5 +196,37 @@ class ResumeUploadTest extends TestCase
         $response->assertOk();
         $response->assertViewHas('currentResume', fn ($resume) => $resume->id === $current->id);
         $response->assertViewHas('resumeHistory', fn ($history) => $history->contains('id', $old->id));
+    }
+
+    public function test_applicant_can_set_an_old_resume_as_current(): void
+    {
+        $user = User::factory()->create();
+        $currentResume = ResumeDocument::factory()->for($user)->create(['is_current' => true]);
+        $oldResume = ResumeDocument::factory()->for($user)->notCurrent()->create();
+
+        $response = $this->actingAs($user)->patch(route('applicant.resume.set-current', $oldResume));
+
+        $response->assertRedirect(route('applicant.resume'));
+        
+        $this->assertDatabaseHas('resume_documents', [
+            'id' => $oldResume->id,
+            'is_current' => true,
+        ]);
+        
+        $this->assertDatabaseHas('resume_documents', [
+            'id' => $currentResume->id,
+            'is_current' => false,
+        ]);
+    }
+
+    public function test_applicant_cannot_set_another_users_resume_as_current(): void
+    {
+        $owner = User::factory()->create();
+        $intruder = User::factory()->create();
+        $resume = ResumeDocument::factory()->for($owner)->notCurrent()->create();
+
+        $response = $this->actingAs($intruder)->patch(route('applicant.resume.set-current', $resume));
+
+        $response->assertForbidden();
     }
 }

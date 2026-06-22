@@ -16,4 +16,9 @@ class ResumeDocumentPolicy
     {
         return $user->id === $resumeDocument->user_id; //Verify the person trying to delete is the owner
     }
+
+    public function update(User $user, ResumeDocument $resumeDocument) 
+    {
+        return $user->id === $resumeDocument->user_id; //Verify the person trying to update/set current is the owner
+    }
 }

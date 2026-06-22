@@ -29,13 +29,14 @@
                         </div>
 
                         {{-- Navigation Links --}}
-                        <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                            <a href="{{ route('applicant.resume') }}" 
-                               class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-900 hover:border-blue-500 focus:outline-none transition duration-150 ease-in-out">
-                                My Resume
-                            </a>
-                        </div>
-                    </div>
+                        @if(Auth::check() && Auth::user()->role === App\Enums\UserRole::Applicant->value)
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <a href="{{ route('applicant.resume') }}" 
+                                   class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-900 hover:border-blue-500 focus:outline-none transition duration-150 ease-in-out">
+                                    My Resume
+                                </a>
+                            </div>
+                        @endif
                     
                     {{-- Show logged in user's name on the right side --}}
                     <div class="hidden sm:flex sm:items-center sm:ml-6 text-sm text-gray-500">
