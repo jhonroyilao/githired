@@ -21,71 +21,72 @@
                                 <option value="{{ $loc }}" {{ request('location') == $loc ? 'selected' : '' }}>{{ $loc }}</option>
                             @endforeach
                         </select>
-                        <span class="absolute right-3 top-3.5 pointer-events-none text-xs text-neutral-500">▼</span>
                     </div>
                 </div>
 
                 <hr class="border-neutral-300" />
 
+                <div class="space-y-2">
+                    <h4 class="text-xs font-black text-neutral-900 uppercase tracking-wider mb-1">Categories</h4>
+                    <div class="space-y-1.5">
+                        @foreach($categories as $category)
+                            <label class="flex items-center justify-between text-sm font-semibold text-neutral-700 cursor-pointer group">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" name="category[]" value="{{ $category->slug }}" onchange="this.form.submit()" 
+                                           class="rounded border-neutral-300 text-[#91c93c] focus:ring-[#91c93c]" 
+                                           {{ is_array(request('category')) && in_array($category->slug, request('category')) ? 'checked' : '' }}>
+                                    <span class="group-hover:text-neutral-900 transition">{{ $category->name }}</span>
+                                </div>
+                                <span class="text-xs font-bold text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded-md">
+                                    {{ $categoryCounts[$category->name] ?? 0 }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+
                 @php
-                    $filterGroups = [
-                        'Category' => [
-                            'param' => 'category',
-                            'items' => ['Data Science', 'UI/UX', 'Cybersecurity', 'Web Development', 'Project Management'],
-                            'counts' => $categoryCounts
-                        ],
-                        'Job Type' => [
-                            'param' => 'job_type',
-                            'items' => ['Full-Time', 'Part-Time', 'Freelance', 'Seasonal', 'Fixed-Price'],
-                            'counts' => $typeCounts
-                        ],
-                        'Experience Level' => [
-                            'param' => 'experience_level',
-                            'items' => ['No-experience', 'Fresher', 'Intermediate', 'Expert'],
-                            'counts' => $experienceCounts
-                        ],
-                        'Date Posted' => [
-                            'param' => 'date_posted',
-                            'items' => ['All', 'Last Hour', 'Last 24 Hours', 'Last 7 Days', 'Last 30 Days'],
-                            'counts' => $dateCounts
-                        ]
+                    $otherFilters = [
+                        'Job Type' => ['param' => 'job_type', 'items' => ['Full-Time', 'Part-Time', 'Freelance', 'Seasonal', 'Fixed-Price'], 'counts' => $typeCounts],
+                        'Experience Level' => ['param' => 'experience_level', 'items' => ['No-experience', 'Fresher', 'Intermediate', 'Expert'], 'counts' => $experienceCounts],
+                        'Date Posted' => ['param' => 'date_posted', 'items' => ['All', 'Last Hour', 'Last 24 Hours', 'Last 7 Days', 'Last 30 Days'], 'counts' => $dateCounts]
                     ];
                 @endphp
 
-                @foreach($filterGroups as $groupLabel => $group)
+                @foreach($otherFilters as $groupLabel => $group)
+                    <hr class="border-neutral-300" />
                     <div class="space-y-2">
                         <h4 class="text-xs font-black text-neutral-900 uppercase tracking-wider mb-1">{{ $groupLabel }}</h4>
                         <div class="space-y-1.5">
                             @foreach($group['items'] as $option)
-                                @php 
-                                    $currentCount = $group['counts'][$option] ?? 0;
-                                @endphp
                                 <label class="flex items-center justify-between text-sm font-semibold text-neutral-700 cursor-pointer group">
                                     <div class="flex items-center gap-2.5">
                                         <input type="checkbox" name="{{ $group['param'] }}[]" value="{{ $option }}" onchange="this.form.submit()" class="rounded border-neutral-300 text-[#91c93c] focus:ring-[#91c93c]" {{ is_array(request($group['param'])) && in_array($option, request($group['param'])) ? 'checked' : '' }}>
                                         <span class="group-hover:text-neutral-900 transition">{{ $option }}</span>
                                     </div>
                                     <span class="text-xs font-bold text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded-md">
-                                        {{ $currentCount }}
+                                        {{ $group['counts'][$option] ?? 0 }}
                                     </span>
                                 </label>
                             @endforeach
                         </div>
                     </div>
                 @endforeach
+                            <hr class="border-neutral-300" />
 
-                <hr class="border-neutral-300" />
-
-                <div>
+            <div>
                     <h4 class="text-xs font-black text-neutral-900 uppercase tracking-wider mb-3">Tags</h4>
                     <div class="flex flex-wrap gap-1.5">
-                        @forelse($tags as $tag)
-                            <button type="submit" name="tag" value="{{ $tag->name }}" class="text-xs font-bold {{ request('tag') == $tag->name ? 'bg-[#91c93c] text-neutral-950' : 'bg-neutral-900 text-white hover:bg-neutral-800' }} transition px-3 py-1 rounded-full">
-                                {{ $tag->name }}
+                        @foreach($categories as $category)
+                            <button type="submit" name="category[]" value="{{ $category->slug }}" 
+                                    class="text-xs font-bold transition px-3 py-1 rounded-full 
+                                    {{ (is_array(request('category')) && in_array($category->slug, request('category'))) 
+                                        ? 'bg-[#91c93c] text-neutral-950' 
+                                        : 'bg-neutral-900 text-white hover:bg-neutral-800' }}">
+                                {{ $category->name }}
                             </button>
-                        @empty
-                            <span class="text-xs text-neutral-400 italic">No tags loaded</span>
-                        @endforelse
+                        @endforeach
                     </div>
                 </div>
             </form>

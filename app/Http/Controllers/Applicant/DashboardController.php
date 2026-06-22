@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Applicant;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\JobListing;
+use App\Models\JobCategory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -27,8 +28,11 @@ final class DashboardController extends Controller
         $applicationCount = Application::where('user_id', $user->id)->count();
         $interviewCount = Application::where('user_id', $user->id)->where('status', 'interview')->count();
 
+        // kunin ang lahat ng categories para sa dynamic filtering
+        $allCategories = JobCategory::all();
         $query = JobListing::publiclyVisible()->with(['company', 'category']);
 
+        // search Filter
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -43,9 +47,10 @@ final class DashboardController extends Controller
             $query->where('location', $request->input('location'));
         }
 
+        // category Filter (Dynamic gamit ang slugs)
         if ($request->filled('category')) {
             $query->whereHas('category', function ($q) use ($request) {
-                $q->whereIn('name', $request->input('category'));
+                $q->whereIn('slug', (array)$request->input('category'));
             });
         }
 
@@ -69,17 +74,11 @@ final class DashboardController extends Controller
             });
         }
 
-        if ($request->filled('tag')) {
-            $query->whereHas('tags', function ($q) use ($request) {
-                $q->where('name', $request->input('tag'));
-            });
-        }
-
-        $allListings = JobListing::publiclyVisible()->get();
+        $allListings = JobListing::publiclyVisible()->with('category')->get();
 
         $categoryCounts = [];
-        foreach (['Data Science', 'UI/UX', 'Cybersecurity', 'Web Development', 'Project Management'] as $cat) {
-            $categoryCounts[$cat] = $allListings->where('category.name', $cat)->count();
+        foreach ($allCategories as $cat) {
+            $categoryCounts[$cat->name] = $allListings->where('category_id', $cat->id)->count();
         }
 
         $typeCounts = [];
@@ -102,8 +101,6 @@ final class DashboardController extends Controller
 
         $locations = JobListing::publiclyVisible()->whereNotNull('location')->pluck('location')->unique()->all();
         
-        $tags = collect(); 
-
         $aiMatches = (clone $query)->latest()->limit(3)->get();
         $browseListings = $query->latest()->paginate(6)->withQueryString();
 
@@ -114,13 +111,13 @@ final class DashboardController extends Controller
         return view('dashboards.applicant', [
             'user' => $user,
             'profile' => $profile,
+            'categories' => $allCategories, 
             'applicationCount' => $applicationCount,
             'interviewCount' => $interviewCount,
             'aiMatches' => $aiMatches,
             'browseListings' => $browseListings,
             'appliedListingIds' => $appliedListingIds,
             'locations' => $locations,
-            'tags' => $tags,
             'categoryCounts' => $categoryCounts,
             'typeCounts' => $typeCounts,
             'experienceCounts' => $experienceCounts,
