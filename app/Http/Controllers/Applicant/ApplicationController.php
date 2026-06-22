@@ -20,12 +20,12 @@ final class ApplicationController extends Controller
     {
         // FIX: stricter validation. 
         abort_unless(
-            $jobListing->status === 'active' && 
-            $jobListing->approved_at !== null && 
-            $jobListing->published_at !== null && 
-            $jobListing->closed_at === null && 
-            $jobListing->deleted_at === null, 
-            Response::HTTP_NOT_FOUND
+            $jobListing->status->value === 'active'
+            , Response::HTTP_NOT_FOUND
+            // && $jobListing->approved_at !== null 
+            // && $jobListing->published_at !== null 
+            // && $jobListing->closed_at === null 
+            // && $jobListing->deleted_at === null
         );
 
         $user = $request->user();
@@ -54,12 +54,12 @@ final class ApplicationController extends Controller
     {
         // 1. FIX guard against direct POST to an unapproved or inactive listing
         abort_unless(
-            $jobListing->status === 'active' && 
-            $jobListing->approved_at !== null && 
-            $jobListing->published_at !== null && 
-            $jobListing->closed_at === null && 
-            $jobListing->deleted_at === null, 
-            Response::HTTP_NOT_FOUND
+            $jobListing->status->value === 'active'
+            , Response::HTTP_NOT_FOUND //
+            // && $jobListing->approved_at !== null 
+            // && $jobListing->published_at !== null 
+            // && $jobListing->closed_at === null 
+            // && $jobListing->deleted_at === null
         );
 
         $user = $request->user();

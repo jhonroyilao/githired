@@ -3,7 +3,6 @@
         
         <div class="mx-auto max-w-5xl space-y-6">
             
-            <!-- Navigation & Upper Analytics Toolbar (Inspired by image_63d67b.jpg) -->
             <div class="flex flex-wrap items-center justify-between gap-4 bg-white border-2 border-neutral-200 rounded-xl p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.05)]">
                 <a href="{{ route('applicant.dashboard') }}" class="text-xs font-black text-neutral-500 hover:text-[#5f8f22] transition inline-flex items-center gap-1.5 uppercase tracking-wider">
                     ← Back to Jobs
@@ -16,13 +15,10 @@
                 </div>
             </div>
 
-            <!-- MAIN DUAL-COLUMN LAYOUT -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
-                <!-- LEFT COLUMN: Detailed Job Specification (Reference: image_63d67b.jpg structural content) -->
                 <div class="lg:col-span-2 bg-white border-2 border-neutral-200 rounded-2xl p-6 space-y-6 shadow-[4px_4px_0px_0px_rgba(26,35,21,0.06)]">
                     
-                    <!-- Header Segment -->
                     <div class="flex items-start gap-4">
                         <div class="w-14 h-14 rounded-2xl bg-neutral-950 border-2 border-neutral-800 flex items-center justify-center text-lg text-[#91c93c] font-black shrink-0">
                             {{ substr($jobListing->company->name ?? 'C', 0, 1) }}
@@ -42,7 +38,6 @@
 
                     <hr class="border-neutral-200/60">
 
-                    <!-- Core Body Description -->
                     <div class="space-y-2">
                         <h3 class="text-xs font-black text-neutral-400 uppercase tracking-wider">Job Context & Description</h3>
                         <p class="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">
@@ -50,7 +45,6 @@
                         </p>
                     </div>
 
-                    <!-- Core Requirements Field -->
                     <div class="space-y-3 bg-neutral-50 p-4 border border-neutral-200 rounded-xl">
                         <h3 class="text-xs font-black text-neutral-950 uppercase tracking-wider flex items-center gap-1.5">
                             <span>📌</span> Key Requirements & Expectations
@@ -60,7 +54,6 @@
                         </p>
                     </div>
 
-                    <!-- Required Skills Badges Array -->
                     @if($jobListing->skills_required && count($jobListing->skills_required) > 0)
                         <div class="space-y-2">
                             <h3 class="text-xs font-black text-neutral-400 uppercase tracking-wider">Target Tech Stack & Competencies</h3>
@@ -75,10 +68,8 @@
                     @endif
                 </div>
 
-                <!-- RIGHT COLUMN: Metadata & Application Dynamic Form Panel (Reference: image_63d602.png Layout Modules) -->
                 <div class="lg:col-span-1 space-y-6">
                     
-                    <!-- Quick Specs Card -->
                     <div class="bg-neutral-950 border-2 border-neutral-950 rounded-2xl p-5 text-white shadow-[4px_4px_0px_0px_#91c93c]">
                         <span class="text-[9px] uppercase tracking-widest font-black text-[#91c93c] block mb-2">Compensation Bracket</span>
                         <div class="text-xl font-black tracking-tight text-white mb-4">
@@ -97,7 +88,7 @@
                         </div>
                     </div>
 
-                    <!-- Concrete Form Component Container -->
+                    
                     <form action="{{ route('applicant.job-listings.apply.store', $jobListing->id) }}" method="POST" enctype="multipart/form-data" class="bg-white border-2 border-neutral-200 rounded-2xl p-5 space-y-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]">
                         @csrf
                         
@@ -106,7 +97,6 @@
                             <p class="text-[11px] text-neutral-400">Verify details below to initiate submission.</p>
                         </div>
 
-                        <!-- User Profile Checkbox Verification -->
                         <div class="p-3 bg-[#f3f5f0]/50 border border-neutral-200 rounded-xl space-y-1.5 text-xs">
                             <span class="block text-[10px] uppercase font-black text-neutral-400 tracking-wider">Applicant Account</span>
                             <div class="leading-tight">
@@ -115,7 +105,6 @@
                             </div>
                         </div>
 
-                        <!-- Document Upload Field Wrapper -->
                         <div class="space-y-1.5">
                             <label class="block text-xs font-black text-neutral-950 uppercase tracking-wide">Attach System CV / Resume</label>
                             
@@ -138,7 +127,6 @@
                             @enderror
                         </div>
 
-                        <!-- Cover Letter Block -->
                         <div class="space-y-1">
                             <div class="flex justify-between items-baseline">
                                 <label for="cover_letter" class="block text-xs font-black text-neutral-950 uppercase tracking-wide">Cover Letter</label>
@@ -151,7 +139,6 @@
                             @enderror
                         </div>
 
-                        <!-- Portfolio Link Injector Option -->
                         <label class="flex items-start gap-2.5 p-2.5 border border-neutral-200 rounded-xl cursor-pointer bg-neutral-50/50 hover:bg-neutral-50 transition">
                             <input type="checkbox" name="sync_portfolio" value="1" checked class="mt-0.5 accent-[#5f8f22] h-3.5 w-3.5 rounded border-neutral-300 text-[#5f8f22] focus:ring-0">
                             <span class="text-[11px] font-medium text-neutral-600 leading-tight">
@@ -159,7 +146,6 @@
                             </span>
                         </label>
 
-                        <!-- Action Submit Triggers -->
                         <div class="pt-2 grid grid-cols-3 gap-2">
                             <a href="{{ route('applicant.dashboard') }}" class="col-span-1 py-2 rounded-xl border-2 border-neutral-200 text-center text-xs font-black text-neutral-600 hover:text-neutral-950 transition bg-white">
                                 Back
