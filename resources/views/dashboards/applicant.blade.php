@@ -101,7 +101,7 @@
                     @elseif(isset($profile->avatar_url) && $profile->avatar_url)
                         <img src="{{ asset($profile->avatar_url) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                     @else
-                        <img src="{{ asset('assets/icon.png') }}" alt="Default Avatar" class="w-full h-full object-cover">
+                        <img src="{{ asset('assets/avatar.svg') }}" alt="Default Avatar" class="w-full h-full object-cover">
                     @endif
                 </div>
                 <div class="flex-1 text-center md:text-left">

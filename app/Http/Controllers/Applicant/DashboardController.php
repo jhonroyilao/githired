@@ -1,15 +1,18 @@
 <?php
-
 namespace App\Http\Controllers\Applicant;
 
+use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
 use App\Models\Application;
 use App\Models\JobListing;
 use App\Models\JobCategory;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
+
+
 
 final class DashboardController extends Controller
 {
@@ -18,8 +21,8 @@ final class DashboardController extends Controller
         $user = $request->user();
 
         // redirect users na hindi pa tapos sa onboarding
-        $destination = $resolveDestination->handle($user);
-        if ($destination !== 'applicant.dashboard') {
+        $destination = $resolveDestination->handle($request->user());
+            if ($destination !== 'applicant.dashboard') {
             return redirect()->route($destination);
         }
 
