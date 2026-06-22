@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\JobStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class JobListing extends Model
 {
@@ -38,27 +40,27 @@ class JobListing extends Model
         'closed_at',
         'published_at',
         'expires_at',
-        'views_count',
-        'deleted_by',
-        'delete_reason',
     ];
 
     protected $casts = [
+        'status'         => JobStatus::class,
         'skills_required' => 'array',
-        'salary_min'       => 'decimal:2',
-        'salary_max'       => 'decimal:2',
-        'submitted_at'     => 'datetime',
-        'approved_at'      => 'datetime',
-        'rejected_at'      => 'datetime',
-        'closed_at'        => 'datetime',
-        'published_at'     => 'datetime',
-        'expires_at'       => 'datetime',
-        'deleted_at'       => 'datetime',
+        'submitted_at'   => 'datetime',
+        'approved_at'    => 'datetime',
+        'rejected_at'    => 'datetime',
+        'closed_at'      => 'datetime',
+        'published_at'   => 'datetime',
+        'expires_at'     => 'datetime',
+        'salary_min'     => 'decimal:2',
+        'salary_max'     => 'decimal:2',
     ];
 
-    public function user(): BelongsTo
+    // ── Relationships ────────────────────────────────────────────────────
+
+    /** The employer who posted this listing. */
+    public function employer(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function company(): BelongsTo
@@ -68,7 +70,7 @@ class JobListing extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(JobCategory::class, 'category_id');
+        return $this->belongsTo(JobCategory::class);
     }
 
     public function applications(): HasMany
@@ -76,50 +78,44 @@ class JobListing extends Model
         return $this->hasMany(Application::class);
     }
 
-    public function approvedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function rejectedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'rejected_by');
-    }
-
-    public function deletedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
-
-    public function savedJobs(): HasMany
+    public function savedBy(): HasMany
     {
         return $this->hasMany(SavedJob::class);
     }
 
-    public function aiJobMatches(): HasMany
+    // ── Scopes ───────────────────────────────────────────────────────────
+
+    /**
+     * Jobs that applicants may browse and apply to.
+     * Requires status = active and not soft-deleted.
+     */
+    public function scopePubliclyVisible(Builder $query): void
     {
-        return $this->hasMany(AiJobMatch::class);
+        $query->where('status', JobStatus::Active);
     }
 
-    // ── Scopes ──────────────────────────────────────────────
-    public function scopeActive($query)
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    public function isPubliclyVisible(): bool
     {
-        return $query->where('status', 'active')->whereNull('deleted_at');
+        return $this->status === JobStatus::Active && ! $this->trashed();
     }
 
-    // ── Helpers ─────────────────────────────────────────────
-    public function salaryRange(): string
+    /**
+     * Formatted salary range, e.g. "PHP 40,000 – 80,000".
+     */
+    public function salaryRange(): ?string
     {
-        if (!$this->salary_min && !$this->salary_max) {
-            return 'Negotiable';
+        if (! $this->salary_min && ! $this->salary_max) {
+            return null;
         }
 
         $currency = $this->salary_currency ?? 'PHP';
 
         if ($this->salary_min && $this->salary_max) {
-            return $currency . ' ' . number_format($this->salary_min) . ' - ' . number_format($this->salary_max);
+            return $currency.' '.number_format($this->salary_min).' – '.number_format($this->salary_max);
         }
 
-        return $currency . ' ' . number_format($this->salary_min ?? $this->salary_max);
+        return $currency.' '.number_format($this->salary_min ?? $this->salary_max);
     }
 }
