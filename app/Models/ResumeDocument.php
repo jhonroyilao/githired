@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ResumeDocument extends Model
 {
@@ -28,7 +30,7 @@ class ResumeDocument extends Model
     ];
 
     //Link to resume owner
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -39,13 +41,13 @@ class ResumeDocument extends Model
     }
 
     //Link to the applicant's job submissions
-    public function applications()
+    public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
     }
 
     //Link to the AI matching results
-    public function aiJobMatches()
+    public function aiJobMatches(): HasMany
     {
         return $this->hasMany(AiJobMatch::class);
     }
