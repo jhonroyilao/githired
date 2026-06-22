@@ -54,10 +54,7 @@ Route::post('/logout', LogoutController::class)->name('logout');
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:' . UserRole::Applicant->value])
-    ->prefix('applicant')
-    ->name('applicant.')
-    ->group(function () {
+Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applicant')->name('applicant.')->group(function () {
 
         // Onboarding
         Route::prefix('onboarding')->name('onboarding.')->group(function () {
@@ -93,18 +90,11 @@ Route::middleware(['auth', 'role:' . UserRole::Applicant->value])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:' . UserRole::Employer->value])
-    ->prefix('employer')
-    ->name('employer.')
-    ->group(function () {
+Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer')->name('employer.')->group(function () {
 
-        Route::prefix('onboarding')->name('onboarding.')->group(function () {
-            Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
-            Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
-        });
+    Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
 
-        Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
-    });
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -112,9 +102,6 @@ Route::middleware(['auth', 'role:' . UserRole::Employer->value])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:' . UserRole::Admin->value])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
-    });
+Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+});
