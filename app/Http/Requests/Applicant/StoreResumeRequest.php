@@ -2,41 +2,44 @@
 
 namespace App\Http\Requests\Applicant;
 
+use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreResumeRequest extends FormRequest
+final class StoreResumeRequest extends FormRequest
 {
-    public const MAX_FILE_SIZE_KB = 5120; //5MB max file size
+    private const MAX_FILE_SIZE_KB = 5120;
 
-    //Allow anyone logged in to use request
-    public function authorize()
+    public function authorize(): bool
     {
-        return true; 
+        return $this->user()?->role === UserRole::Applicant->value;
     }
 
-    //Validation for the file upload
-    public function rules()
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             'resume' => [
                 'required',
                 'file',
-                'mimes:pdf', 
-                'mimetypes:application/pdf', //Make sure it is really a PDF
+                'mimes:pdf',
+                'mimetypes:application/pdf',
                 'max:'.self::MAX_FILE_SIZE_KB,
             ],
         ];
     }
 
-    
-    //Error messages if they upload the wrong thing
-    public function messages()
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
     {
         return [
-            'resume.required' => 'Please choose a resume file to upload.',
-            'resume.mimes' => 'Your resume must be a PDF file.',
-            'resume.mimetypes' => 'Your resume must be a PDF file.',
-            'resume.max' => 'Your resume must be smaller than '.(self::MAX_FILE_SIZE_KB / 1024).' MB.',
+            'resume.required' => 'Choose a resume PDF to upload.',
+            'resume.mimes' => 'The resume must be a PDF file.',
+            'resume.mimetypes' => 'The resume must be a PDF file.',
+            'resume.max' => 'The resume must be 5 MB or smaller.',
         ];
     }
 }

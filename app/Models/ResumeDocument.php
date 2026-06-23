@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ class ResumeDocument extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ //Fields we can save on
+    protected $fillable = [
         'user_id',
         'file_path',
         'original_name',
@@ -24,29 +25,26 @@ class ResumeDocument extends Model
         'is_current',
     ];
 
-    protected $casts = [ //Ensure data types are correct when pulling from the database
+    protected $casts = [
         'is_current' => 'boolean',
         'file_size' => 'integer',
     ];
 
-    //Link to resume owner
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function scopeCurrent($query)
+    public function scopeCurrent(Builder $query): Builder
     {
-        return $query->where('is_current', true); //Filter for the active resume
+        return $query->where('is_current', true);
     }
 
-    //Link to the applicant's job submissions
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
     }
 
-    //Link to the AI matching results
     public function aiJobMatches(): HasMany
     {
         return $this->hasMany(AiJobMatch::class);

@@ -5,20 +5,20 @@ namespace App\Policies;
 use App\Models\ResumeDocument;
 use App\Models\User;
 
-class ResumeDocumentPolicy
+final class ResumeDocumentPolicy
 {
-    public function view(User $user, ResumeDocument $resumeDocument)
+    public function view(User $user, ResumeDocument $resumeDocument): bool
     {
-        return $user->id === $resumeDocument->user_id; //Verify the person trying to view/download is the owner
+        return $user->id === $resumeDocument->user_id;
     }
 
-    public function delete(User $user, ResumeDocument $resumeDocument) 
+    public function update(User $user, ResumeDocument $resumeDocument): bool
     {
-        return $user->id === $resumeDocument->user_id; //Verify the person trying to delete is the owner
+        return $user->id === $resumeDocument->user_id;
     }
 
-    public function update(User $user, ResumeDocument $resumeDocument) 
+    public function delete(User $user, ResumeDocument $resumeDocument): bool
     {
-        return $user->id === $resumeDocument->user_id; //Verify the person trying to update/set current is the owner
+        return $user->id === $resumeDocument->user_id;
     }
 }

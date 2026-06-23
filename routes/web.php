@@ -40,9 +40,11 @@ Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination)
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
+
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
+
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 });
 
@@ -55,34 +57,29 @@ Route::post('/logout', LogoutController::class)->name('logout');
 */
 
 Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applicant')->name('applicant.')->group(function () {
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/profile', [BasicProfileController::class, 'create'])->name('profile');
+        Route::post('/profile', [BasicProfileController::class, 'store'])->name('profile.store');
 
-        // Onboarding
-        Route::prefix('onboarding')->name('onboarding.')->group(function () {
-            Route::get('/profile', [BasicProfileController::class, 'create'])->name('profile');
-            Route::post('/profile', [BasicProfileController::class, 'store'])->name('profile.store');
+        Route::get('/summary', [SummaryController::class, 'create'])->name('summary');
+        Route::post('/summary', [SummaryController::class, 'store'])->name('summary.store');
 
-            Route::get('/summary', [SummaryController::class, 'create'])->name('summary');
-            Route::post('/summary', [SummaryController::class, 'store'])->name('summary.store');
+        Route::get('/preferences', [PreferencesController::class, 'create'])->name('preferences');
+        Route::post('/preferences', [PreferencesController::class, 'store'])->name('preferences.store');
 
-            Route::get('/preferences', [PreferencesController::class, 'create'])->name('preferences');
-            Route::post('/preferences', [PreferencesController::class, 'store'])->name('preferences.store');
-
-            Route::get('/links', [LinksController::class, 'create'])->name('links');
-            Route::post('/links', [LinksController::class, 'store'])->name('links.store');
-        });
-
-        // Dashboard & Profile
-        Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
-        Route::get('/profile', [ApplicantProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [ApplicantProfileController::class, 'update'])->name('profile.update');
-
-        // Resume
-        Route::get('/resume', [ResumeController::class, 'index'])->name('resume');
-        Route::post('/resume', [ResumeController::class, 'store'])->name('resume.store');
-        Route::get('/resume/{resumeDocument}', [ResumeController::class, 'show'])->name('resume.show');
-        Route::patch('/resume/{resumeDocument}/set-current', [ResumeController::class, 'setCurrent'])->name('resume.set-current');
-        Route::delete('/resume/{resumeDocument}', [ResumeController::class, 'destroy'])->name('resume.destroy');
+        Route::get('/links', [LinksController::class, 'create'])->name('links');
+        Route::post('/links', [LinksController::class, 'store'])->name('links.store');
     });
+
+    Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
+    Route::get('/profile', [ApplicantProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ApplicantProfileController::class, 'update'])->name('profile.update');
+    Route::get('/resume', [ResumeController::class, 'index'])->name('resume');
+    Route::post('/resume', [ResumeController::class, 'store'])->name('resume.store');
+    Route::get('/resume/{resumeDocument}', [ResumeController::class, 'show'])->name('resume.show');
+    Route::patch('/resume/{resumeDocument}/set-current', [ResumeController::class, 'setCurrent'])->name('resume.set-current');
+    Route::delete('/resume/{resumeDocument}', [ResumeController::class, 'destroy'])->name('resume.destroy');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -91,9 +88,12 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
 */
 
 Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer')->name('employer.')->group(function () {
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
+        Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
+    });
 
     Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
-
 });
 
 /*
