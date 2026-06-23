@@ -190,6 +190,40 @@ final class ResumeManagementTest extends TestCase
         $this->assertNull($user->profile()->first()->resume_path);
     }
 
+    public function test_applicant_can_delete_current_resume_and_return_to_resume_dashboard(): void
+    {
+        $user = $this->applicant();
+        $resume = $this->resumeFor($user, ['original_name' => 'current.pdf']);
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $resume->file_path]);
+        Storage::disk('local')->put($resume->file_path, 'pdf-contents');
+
+        $response = $this->actingAs($user)
+            ->followingRedirects()
+            ->delete(route('applicant.resume.destroy', $resume));
+
+        $response->assertOk();
+        $response->assertSee('No current resume uploaded.');
+        $response->assertDontSee('current.pdf');
+        $this->assertDatabaseMissing('resume_documents', ['id' => $resume->id]);
+        $this->assertNull($user->profile()->first()->resume_path);
+        Storage::disk('local')->assertMissing($resume->file_path);
+    }
+
+    public function test_stale_resume_delete_request_returns_to_resume_dashboard(): void
+    {
+        $user = $this->applicant();
+        $resume = $this->resumeFor($user);
+        $url = route('applicant.resume.destroy', $resume);
+        $resume->delete();
+
+        $response = $this->actingAs($user)
+            ->followingRedirects()
+            ->delete($url);
+
+        $response->assertOk();
+        $response->assertSee('Resume already removed.');
+    }
+
     public function test_resume_index_shows_current_resume_and_history(): void
     {
         $user = $this->applicant();
@@ -211,6 +245,7 @@ final class ResumeManagementTest extends TestCase
         $response->assertViewHas('resumeHistory', fn ($history): bool => $history->contains('id', $old->id));
         $response->assertSee('current.pdf');
         $response->assertSee('old.pdf');
+        $response->assertSee('Remove selected file');
     }
 
     private function applicant(): User

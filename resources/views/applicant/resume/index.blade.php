@@ -18,13 +18,18 @@
     <section class="mt-7 rounded-2xl border border-neutral-200 bg-white p-5">
         <h2 class="text-xl font-black text-neutral-900">Upload PDF</h2>
 
-        <form method="POST" action="{{ route('applicant.resume.store') }}" enctype="multipart/form-data" class="mt-4 space-y-4">
+        <form method="POST" action="{{ route('applicant.resume.store') }}" enctype="multipart/form-data" class="mt-4 space-y-4" data-resume-upload-form>
             @csrf
 
             <div>
                 <label for="resume" class="mb-1.5 block text-base font-extrabold text-neutral-950">Resume file</label>
                 <input id="resume" name="resume" type="file" accept="application/pdf" required class="w-full rounded-[0.875rem] border-2 border-neutral-950/70 bg-neutral-50/80 px-4 py-3 text-base text-neutral-900 transition file:mr-4 file:rounded-lg file:border-0 file:bg-primarygreen file:px-4 file:py-2 file:text-sm file:font-black file:text-neutral-900 focus:border-neutral-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primarygreen/25">
-                <p class="mt-1.5 text-xs font-bold text-neutral-600/70">PDF only, 5 MB maximum.</p>
+                <div class="mt-1.5 flex flex-wrap items-center gap-3">
+                    <p class="text-xs font-bold text-neutral-600/70">PDF only, 5 MB maximum.</p>
+                    <button type="button" class="hidden text-xs font-black text-signal-red underline decoration-2 underline-offset-4" data-clear-resume-file>
+                        Remove selected file
+                    </button>
+                </div>
                 @error('resume')
                     <div class="mt-1.5 text-sm font-bold text-signal-red">{{ $message }}</div>
                 @enderror
@@ -86,4 +91,25 @@
             </div>
         </section>
     @endif
+
+    <script>
+        document.querySelectorAll('[data-resume-upload-form]').forEach((form) => {
+            const input = form.querySelector('input[type="file"]');
+            const clearButton = form.querySelector('[data-clear-resume-file]');
+
+            if (! input || ! clearButton) {
+                return;
+            }
+
+            input.addEventListener('change', () => {
+                clearButton.classList.toggle('hidden', input.files.length === 0);
+            });
+
+            clearButton.addEventListener('click', () => {
+                input.value = '';
+                clearButton.classList.add('hidden');
+                input.focus();
+            });
+        });
+    </script>
 </x-dashboard-shell>

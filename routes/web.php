@@ -78,7 +78,11 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
     Route::post('/resume', [ResumeController::class, 'store'])->name('resume.store');
     Route::get('/resume/{resumeDocument}', [ResumeController::class, 'show'])->name('resume.show');
     Route::patch('/resume/{resumeDocument}/set-current', [ResumeController::class, 'setCurrent'])->name('resume.set-current');
-    Route::delete('/resume/{resumeDocument}', [ResumeController::class, 'destroy'])->name('resume.destroy');
+    Route::delete('/resume/{resumeDocument}', [ResumeController::class, 'destroy'])
+        ->name('resume.destroy')
+        ->missing(fn () => redirect()
+            ->route('applicant.resume')
+            ->with('status', 'Resume already removed.'));
 });
 
 /*
