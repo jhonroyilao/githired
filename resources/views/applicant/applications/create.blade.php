@@ -113,7 +113,7 @@
                                 <div class="text-xs font-bold text-neutral-600">
                                     📁 <span class="text-[#5f8f22] group-hover:text-[#91c93c] underline">Upload modern file</span>
                                 </div>
-                                <p class="text-[9px] text-neutral-400 mt-0.5">PDF or DOCX up to 5MB</p>
+                                <p class="text-[9px] text-neutral-400 mt-0.5">PDF up to 5MB</p>
                             </div>
 
                             @if($profile?->resume_path)

@@ -15,15 +15,16 @@ final class StoreApplicationRequest extends FormRequest
     {
         return [
             'cover_letter' => ['nullable', 'string', 'max:5000'],
-            'resume'       => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'], // 5 MB
+            'resume' => ['nullable', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:5120'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'resume.mimes' => 'Your résumé must be a PDF, DOC, or DOCX file.',
-            'resume.max'   => 'Your résumé may not be larger than 5 MB.',
+            'resume.mimes' => 'Your resume must be a PDF file.',
+            'resume.mimetypes' => 'Your resume must be a PDF file.',
+            'resume.max' => 'Your resume may not be larger than 5 MB.',
         ];
     }
 }

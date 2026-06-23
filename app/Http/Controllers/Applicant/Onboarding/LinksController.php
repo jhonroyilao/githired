@@ -33,6 +33,7 @@ final class LinksController extends AbstractOnboardingController
 
         return view('onboarding.applicant.links', [
             'profile' => $request->user()->profile,
+            'currentResume' => $request->user()->currentResumeDocument,
         ]);
     }
 

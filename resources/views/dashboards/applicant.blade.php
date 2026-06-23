@@ -48,9 +48,9 @@
 
                 @php
                     $otherFilters = [
-                        'Job Type' => ['param' => 'job_type', 'items' => ['Full-Time', 'Part-Time', 'Freelance', 'Seasonal', 'Fixed-Price'], 'counts' => $typeCounts],
-                        'Experience Level' => ['param' => 'experience_level', 'items' => ['No-experience', 'Fresher', 'Intermediate', 'Expert'], 'counts' => $experienceCounts],
-                        'Date Posted' => ['param' => 'date_posted', 'items' => ['All', 'Last Hour', 'Last 24 Hours', 'Last 7 Days', 'Last 30 Days'], 'counts' => $dateCounts]
+                        'Job Type' => ['param' => 'job_type', 'items' => $jobTypeOptions, 'counts' => $typeCounts],
+                        'Experience Level' => ['param' => 'experience_level', 'items' => $experienceOptions, 'counts' => $experienceCounts],
+                        'Date Posted' => ['param' => 'date_posted', 'items' => array_combine(['All', 'Last Hour', 'Last 24 Hours', 'Last 7 Days', 'Last 30 Days'], ['All', 'Last hour', 'Last 24 hours', 'Last 7 days', 'Last 30 days']), 'counts' => $dateCounts]
                     ];
                 @endphp
 
@@ -59,11 +59,11 @@
                     <div class="space-y-2">
                         <h4 class="text-xs font-black text-neutral-900 uppercase tracking-wider mb-1">{{ $groupLabel }}</h4>
                         <div class="space-y-1.5">
-                            @foreach($group['items'] as $option)
+                            @foreach($group['items'] as $option => $label)
                                 <label class="flex items-center justify-between text-sm font-semibold text-neutral-700 cursor-pointer group">
                                     <div class="flex items-center gap-2.5">
                                         <input type="checkbox" name="{{ $group['param'] }}[]" value="{{ $option }}" onchange="this.form.submit()" class="rounded border-neutral-300 text-[#91c93c] focus:ring-[#91c93c]" {{ is_array(request($group['param'])) && in_array($option, request($group['param'])) ? 'checked' : '' }}>
-                                        <span class="group-hover:text-neutral-900 transition">{{ $option }}</span>
+                                        <span class="group-hover:text-neutral-900 transition">{{ $label }}</span>
                                     </div>
                                     <span class="text-xs font-bold text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded-md">
                                         {{ $group['counts'][$option] ?? 0 }}
@@ -118,6 +118,9 @@
                             <span class="text-xs font-bold text-neutral-500 uppercase tracking-wider mt-1 block">Upcoming Interviews</span>
                         </div>
                     </div>
+                    <a href="{{ route('applicant.resume') }}" class="mt-5 inline-flex rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black text-neutral-900 no-underline transition hover:-translate-y-0.5">
+                        Manage resume
+                    </a>
                 </div>
             </div>
 

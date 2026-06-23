@@ -38,10 +38,11 @@
                 
                 <div class="hidden sm:block text-left leading-tight">
                     <p class="text-xs font-black tracking-tight">{{ $user->name }}</p>
+                    <p class="text-[10px] font-semibold text-neutral-400">{{ $user->email }}</p>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="text-[10px] font-bold text-neutral-400 hover:text-red-400 transition">
-                            Log Out
+                            Log out
                         </button>
                     </form>
                 </div>
