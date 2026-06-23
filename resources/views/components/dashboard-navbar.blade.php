@@ -1,29 +1,42 @@
 @props([
-    'user' => auth()->user()
+    'user' => auth()->user(),
+    'homeUrl' => route('login'),
+    'navItems' => [],
+    'notificationUrl' => null,
+    'settingsUrl' => null,
 ])
 
 <nav class="bg-[#1a2315] text-white px-6 py-4 sticky top-0 z-50 transition-shadow duration-200 hover:shadow-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         
         <div class="flex items-center gap-10">
-            <a href="{{ route('applicant.dashboard') }}" class="inline-flex items-center">
+            <a href="{{ $homeUrl }}" class="inline-flex items-center">
                 <img src="{{ asset('brand/logo-full.svg') }}" alt="GitHired" class="h-8 w-auto">
             </a>
-            <div class="hidden md:flex items-center gap-6 font-semibold text-sm tracking-wide">
-                <a href="{{ route('applicant.dashboard') }}" class="{{ request()->routeIs('applicant.dashboard') ? 'text-[#91c93c]' : 'text-neutral-300 hover:text-white' }} transition">Find Jobs</a>
-                <a href="#" class="text-neutral-300 hover:text-white transition">My Applications</a>
-            </div>
+            @if(count($navItems) > 0)
+                <div class="hidden md:flex items-center gap-6 font-semibold text-sm tracking-wide">
+                    @foreach($navItems as $item)
+                        @php
+                            $url = $item['url'] ?? (isset($item['route']) && \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route'], $item['parameters'] ?? []) : '#');
+                            $active = $item['active'] ?? (isset($item['route']) ? request()->routeIs($item['route']) : request()->fullUrlIs($url));
+                        @endphp
+                        <a href="{{ $url }}" class="{{ $active ? 'text-[#91c93c]' : 'text-neutral-300 hover:text-white' }} transition">
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         <div class="flex items-center gap-5">
-            <button class="text-neutral-300 hover:text-white relative p-1.5 transition flex items-center justify-center">
+            <a href="{{ $notificationUrl ?? '#' }}" class="text-neutral-300 hover:text-white relative p-1.5 transition flex items-center justify-center" aria-label="Notifications">
                 <img src="{{ asset('assets/notif.svg') }}" alt="Notifications" class="h-5 w-5 object-contain">
                 <span class="absolute top-1 right-1 w-2 h-2 bg-[#91c93c] rounded-full"></span>
-            </button>
+            </a>
             
-            <button class="text-neutral-300 hover:text-white p-1.5 transition flex items-center justify-center">
+            <a href="{{ $settingsUrl ?? '#' }}" class="text-neutral-300 hover:text-white p-1.5 transition flex items-center justify-center" aria-label="Settings">
                 <img src="{{ asset('assets/settings.svg') }}" alt="Settings" class="h-5 w-5 object-contain">
-            </button>
+            </a>
             
             <div class="flex items-center gap-3 border-l border-neutral-700 pl-4">
                 <div class="w-9 h-9 rounded-full overflow-hidden bg-neutral-700 border border-neutral-600 flex items-center justify-center">

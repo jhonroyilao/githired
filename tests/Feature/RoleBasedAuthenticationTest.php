@@ -197,6 +197,10 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertOk();
         $response->assertSee('Applicant dashboard');
         $response->assertSee('dashboard-applicant@example.com');
+        $response->assertSee(route('applicant.dashboard'), false);
+        $response->assertSee(route('applicant.resume'), false);
+        $response->assertSee('Find jobs');
+        $response->assertSee('Resume');
         $response->assertSee('Log out');
     }
 
@@ -215,7 +219,29 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertOk();
         $response->assertSee('Employer dashboard');
         $response->assertSee('Acme Careers');
+        $response->assertSee(route('employer.dashboard'), false);
+        $response->assertSee(route('employer.onboarding.company'), false);
+        $response->assertDontSee(route('applicant.dashboard'), false);
+        $response->assertSee('Company profile');
         $response->assertSee('Log out');
+    }
+
+    public function test_admin_dashboard_uses_admin_navigation(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Ari Admin',
+            'email' => 'dashboard-admin@example.com',
+            'role' => UserRole::Admin->value,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Admin dashboard');
+        $response->assertSee(route('admin.dashboard'), false);
+        $response->assertDontSee(route('applicant.dashboard'), false);
+        $response->assertDontSee(route('employer.dashboard'), false);
+        $response->assertSee('dashboard-admin@example.com');
     }
 
     public function test_incomplete_authenticated_user_visiting_login_is_redirected_to_onboarding(): void
