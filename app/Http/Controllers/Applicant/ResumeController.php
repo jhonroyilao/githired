@@ -58,9 +58,11 @@ final class ResumeController extends Controller
     {
         Gate::authorize('view', $resumeDocument);
 
-        abort_unless(Storage::disk('local')->exists($resumeDocument->file_path), 404);
+        $disk = Storage::disk(config('filesystems.resume_disk', 'local'));
 
-        return Storage::disk('local')->download(
+        abort_unless($disk->exists($resumeDocument->file_path), 404);
+
+        return $disk->download(
             $resumeDocument->file_path,
             $resumeDocument->original_name ?? 'resume.pdf',
         );

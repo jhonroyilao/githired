@@ -115,11 +115,6 @@ class JobListing extends Model
             });
     }
 
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active')->whereNull('deleted_at');
-    }
-
     public function isPubliclyVisible(): bool
     {
         return $this->status === JobStatus::Active->value

@@ -23,7 +23,6 @@ final class ApplicationController extends Controller
 
         $user = $request->user();
 
-        // redirect if this applicant already applied
         if (Application::where('job_listing_id', $jobListing->id)
             ->where('user_id', $user->id)
             ->exists()
@@ -52,7 +51,6 @@ final class ApplicationController extends Controller
 
         $user = $request->user();
 
-        // duplicate check at the application layer
         if (Application::where('job_listing_id', $jobListing->id)
             ->where('user_id', $user->id)
             ->exists()

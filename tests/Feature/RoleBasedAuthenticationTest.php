@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
 class RoleBasedAuthenticationTest extends TestCase
@@ -202,6 +203,7 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertSee('Find jobs');
         $response->assertSee('Resume');
         $response->assertDontSee(route('applicant.applications.index'), false);
+        $response->assertDontSee('href="#"', false);
         $response->assertSee('Log out');
     }
 
@@ -237,6 +239,7 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertSee(route('employer.onboarding.company'), false);
         $response->assertDontSee(route('applicant.dashboard'), false);
         $response->assertSee('Company profile');
+        $response->assertDontSee('href="#"', false);
         $response->assertSee('Log out');
     }
 
@@ -256,6 +259,29 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertDontSee(route('applicant.dashboard'), false);
         $response->assertDontSee(route('employer.dashboard'), false);
         $response->assertSee('dashboard-admin@example.com');
+        $response->assertDontSee('href="#"', false);
+    }
+
+    public function test_dashboard_navbar_skips_items_without_valid_destinations(): void
+    {
+        $user = User::factory()->create([
+            'role' => UserRole::Applicant->value,
+        ]);
+
+        $html = Blade::render(
+            '<x-dashboard-navbar :user="$user" :nav-items="$navItems" />',
+            [
+                'user' => $user,
+                'navItems' => [
+                    ['label' => 'Missing route', 'route' => 'missing.dashboard.route'],
+                    ['label' => 'Find jobs', 'route' => 'applicant.dashboard'],
+                ],
+            ],
+        );
+
+        $this->assertStringNotContainsString('href="#"', $html);
+        $this->assertStringNotContainsString('Missing route', $html);
+        $this->assertStringContainsString(route('applicant.dashboard'), $html);
     }
 
     public function test_incomplete_authenticated_user_visiting_login_is_redirected_to_onboarding(): void

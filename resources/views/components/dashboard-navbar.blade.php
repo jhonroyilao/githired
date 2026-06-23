@@ -17,7 +17,16 @@
                 <div class="hidden md:flex items-center gap-6 font-semibold text-sm tracking-wide">
                     @foreach($navItems as $item)
                         @php
-                            $url = $item['url'] ?? (isset($item['route']) && \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route'], $item['parameters'] ?? []) : '#');
+                            $url = $item['url'] ?? null;
+
+                            if (! $url && isset($item['route']) && \Illuminate\Support\Facades\Route::has($item['route'])) {
+                                $url = route($item['route'], $item['parameters'] ?? []);
+                            }
+
+                            if (! $url) {
+                                continue;
+                            }
+
                             $active = $item['active'] ?? (isset($item['route']) ? request()->routeIs($item['route']) : request()->fullUrlIs($url));
                         @endphp
                         <a href="{{ $url }}" class="{{ $active ? 'text-[#91c93c]' : 'text-neutral-300 hover:text-white' }} transition">
@@ -29,14 +38,18 @@
         </div>
 
         <div class="flex items-center gap-5">
-            <a href="{{ $notificationUrl ?? '#' }}" class="text-neutral-300 hover:text-white relative p-1.5 transition flex items-center justify-center" aria-label="Notifications">
-                <img src="{{ asset('assets/notif.svg') }}" alt="Notifications" class="h-5 w-5 object-contain">
-                <span class="absolute top-1 right-1 w-2 h-2 bg-[#91c93c] rounded-full"></span>
-            </a>
+            @if($notificationUrl)
+                <a href="{{ $notificationUrl }}" class="text-neutral-300 hover:text-white relative p-1.5 transition flex items-center justify-center" aria-label="Notifications">
+                    <img src="{{ asset('assets/notif.svg') }}" alt="Notifications" class="h-5 w-5 object-contain">
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-[#91c93c] rounded-full"></span>
+                </a>
+            @endif
             
-            <a href="{{ $settingsUrl ?? '#' }}" class="text-neutral-300 hover:text-white p-1.5 transition flex items-center justify-center" aria-label="Settings">
-                <img src="{{ asset('assets/settings.svg') }}" alt="Settings" class="h-5 w-5 object-contain">
-            </a>
+            @if($settingsUrl)
+                <a href="{{ $settingsUrl }}" class="text-neutral-300 hover:text-white p-1.5 transition flex items-center justify-center" aria-label="Settings">
+                    <img src="{{ asset('assets/settings.svg') }}" alt="Settings" class="h-5 w-5 object-contain">
+                </a>
+            @endif
             
             <div class="flex items-center gap-3 border-l border-neutral-700 pl-4">
                 <div class="w-9 h-9 rounded-full overflow-hidden bg-neutral-700 border border-neutral-600 flex items-center justify-center">

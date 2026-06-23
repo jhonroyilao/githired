@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'resume_disk' => env('RESUME_DISK', 'local'),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks

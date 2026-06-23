@@ -21,7 +21,6 @@ final class DashboardController extends Controller
     ): View|RedirectResponse {
         $user = $request->user();
 
-        // redirect users na hindi pa tapos sa onboarding
         $destination = $resolveDestination->handle($request->user());
         if ($destination !== 'applicant.dashboard') {
             return redirect()->route($destination);
@@ -32,7 +31,6 @@ final class DashboardController extends Controller
         $applicationCount = Application::where('user_id', $user->id)->count();
         $interviewCount = Application::where('user_id', $user->id)->where('status', 'interview')->count();
 
-        // kunin ang lahat ng categories para sa dynamic filtering
         $allCategories = JobCategory::all();
         $query = JobListing::publiclyVisible()->with(['company', 'category']);
 

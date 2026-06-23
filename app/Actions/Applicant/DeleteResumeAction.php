@@ -22,7 +22,7 @@ final class DeleteResumeAction
             $resumeDocument->delete();
         });
 
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.resume_disk', 'local'));
 
         if ($disk->exists($path) && ! $disk->delete($path)) {
             Log::warning("Resume database row was deleted but file [{$path}] could not be removed.");
