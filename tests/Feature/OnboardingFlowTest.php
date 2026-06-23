@@ -184,7 +184,7 @@ class OnboardingFlowTest extends TestCase
         $this->actingAs($user)->get(route('applicant.onboarding.links'))->assertOk();
     }
 
-    public function test_resume_placeholder_renders_without_requiring_resume_upload(): void
+    public function test_resume_upload_renders_without_requiring_resume_upload(): void
     {
         $user = $this->applicantWithPreferences();
 
@@ -192,8 +192,50 @@ class OnboardingFlowTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Resume upload');
-        $response->assertSee('Coming soon');
-        $response->assertDontSee('type="file"', false);
+        $response->assertSee('Upload your PDF resume');
+        $response->assertSee('type="file"', false);
+        $response->assertSee('Remove selected file');
+    }
+
+    public function test_applicant_can_upload_resume_from_onboarding_links(): void
+    {
+        Storage::fake('local');
+
+        $user = $this->applicantWithPreferences();
+        $file = UploadedFile::fake()->create('ada-resume.pdf', 200, 'application/pdf');
+
+        $response = $this->actingAs($user)->post(route('applicant.resume.store'), [
+            'resume' => $file,
+            'redirect_to' => 'applicant.onboarding.links',
+        ]);
+
+        $response->assertRedirect(route('applicant.onboarding.links', absolute: false));
+
+        $resume = ResumeDocument::sole();
+        $this->assertSame($user->id, $resume->user_id);
+        $this->assertTrue($resume->is_current);
+        Storage::disk('local')->assertExists($resume->file_path);
+        $this->assertSame($resume->file_path, $user->profile()->first()->resume_path);
+    }
+
+    public function test_resume_upload_from_onboarding_preserves_unsaved_link_inputs(): void
+    {
+        Storage::fake('local');
+
+        $user = $this->applicantWithPreferences();
+
+        $response = $this->actingAs($user)->post(route('applicant.resume.store'), [
+            'resume' => UploadedFile::fake()->create('ada-resume.pdf', 200, 'application/pdf'),
+            'redirect_to' => 'applicant.onboarding.links',
+            'github' => 'https://github.com/unsaved',
+            'linkedin' => 'https://www.linkedin.com/in/unsaved',
+            'website' => 'https://example.com/unsaved',
+        ]);
+
+        $response->assertRedirect(route('applicant.onboarding.links', absolute: false));
+        $response->assertSessionHasInput('github', 'https://github.com/unsaved');
+        $response->assertSessionHasInput('linkedin', 'https://www.linkedin.com/in/unsaved');
+        $response->assertSessionHasInput('website', 'https://example.com/unsaved');
     }
 
     public function test_employer_company_setup_persists_and_advances_to_dashboard(): void

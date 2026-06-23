@@ -9,11 +9,13 @@ use App\Http\Controllers\Applicant\Onboarding\LinksController;
 use App\Http\Controllers\Applicant\Onboarding\PreferencesController;
 use App\Http\Controllers\Applicant\Onboarding\SummaryController;
 use App\Http\Controllers\Applicant\ProfileController as ApplicantProfileController;
+use App\Http\Controllers\Applicant\ResumeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +75,17 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
     Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
     Route::get('/profile', [ApplicantProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ApplicantProfileController::class, 'update'])->name('profile.update');
+    Route::get('/resume', [ResumeController::class, 'index'])->name('resume');
+    Route::post('/resume', [ResumeController::class, 'store'])->name('resume.store');
+    Route::get('/resume/{resumeDocument}', [ResumeController::class, 'show'])->name('resume.show');
+    Route::patch('/resume/{resumeDocument}/set-current', [ResumeController::class, 'setCurrent'])->name('resume.set-current');
+    Route::delete('/resume/{resumeDocument}', [ResumeController::class, 'destroy'])
+        ->name('resume.destroy')
+        ->missing(fn (Request $request) => redirect()
+            ->route($request->input('redirect_to') === 'applicant.onboarding.links'
+                ? 'applicant.onboarding.links'
+                : 'applicant.resume')
+            ->with('status', 'Resume already removed.'));
 });
 
 /*

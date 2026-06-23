@@ -17,10 +17,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-screen overflow-hidden">
-    <main class="h-screen overflow-hidden bg-[#f0f2f8]">
-        <section class="h-full overflow-hidden bg-[#f0f2f8]">
-            <div class="grid h-full min-h-0 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.5fr)] lg:gap-12 lg:py-8 lg:pl-20 lg:pr-8 xl:gap-16 xl:py-10 xl:pl-24 xl:pr-10">
+<body class="min-h-screen">
+    <main class="min-h-screen bg-[#f0f2f8]">
+        <section class="min-h-screen bg-[#f0f2f8]">
+            <div class="grid min-h-screen gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.5fr)] lg:gap-12 lg:py-8 lg:pl-20 lg:pr-8 xl:gap-16 xl:py-10 xl:pl-24 xl:pr-10">
                 <div class="min-h-0 w-full max-w-[44rem] self-center">
                     <img src="{{ asset('brand/logo-full-dark.svg') }}" alt="GitHired" class="mb-6 h-11 w-auto">
 
