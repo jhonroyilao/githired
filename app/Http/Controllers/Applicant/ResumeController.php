@@ -17,6 +17,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ResumeController extends Controller
 {
+    /**
+     * @var array<int, string>
+     */
+    private const REDIRECT_ROUTES = [
+        'applicant.resume',
+        'applicant.onboarding.links',
+    ];
+
     public function index(Request $request): View
     {
         $user = $request->user();
@@ -35,9 +43,15 @@ final class ResumeController extends Controller
     {
         $storeResume->handle($request->user(), $request->file('resume'));
 
-        return redirect()
-            ->route('applicant.resume')
+        $redirect = redirect()
+            ->route($this->redirectRoute($request))
             ->with('status', 'Resume uploaded.');
+
+        if ($this->redirectRoute($request) === 'applicant.onboarding.links') {
+            return $redirect->withInput($request->only('github', 'linkedin', 'website'));
+        }
+
+        return $redirect;
     }
 
     public function show(ResumeDocument $resumeDocument): StreamedResponse
@@ -52,25 +66,34 @@ final class ResumeController extends Controller
         );
     }
 
-    public function setCurrent(ResumeDocument $resumeDocument, SetCurrentResumeAction $setCurrentResume): RedirectResponse
+    public function setCurrent(Request $request, ResumeDocument $resumeDocument, SetCurrentResumeAction $setCurrentResume): RedirectResponse
     {
         Gate::authorize('update', $resumeDocument);
 
         $setCurrentResume->handle($resumeDocument);
 
         return redirect()
-            ->route('applicant.resume')
+            ->route($this->redirectRoute($request))
             ->with('status', 'Current resume updated.');
     }
 
-    public function destroy(ResumeDocument $resumeDocument, DeleteResumeAction $deleteResume): RedirectResponse
+    public function destroy(Request $request, ResumeDocument $resumeDocument, DeleteResumeAction $deleteResume): RedirectResponse
     {
         Gate::authorize('delete', $resumeDocument);
 
         $deleteResume->handle($resumeDocument);
 
         return redirect()
-            ->route('applicant.resume')
+            ->route($this->redirectRoute($request))
             ->with('status', 'Resume deleted.');
+    }
+
+    private function redirectRoute(Request $request): string
+    {
+        $route = $request->string('redirect_to')->toString();
+
+        return in_array($route, self::REDIRECT_ROUTES, true)
+            ? $route
+            : 'applicant.resume';
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -80,8 +81,10 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
     Route::patch('/resume/{resumeDocument}/set-current', [ResumeController::class, 'setCurrent'])->name('resume.set-current');
     Route::delete('/resume/{resumeDocument}', [ResumeController::class, 'destroy'])
         ->name('resume.destroy')
-        ->missing(fn () => redirect()
-            ->route('applicant.resume')
+        ->missing(fn (Request $request) => redirect()
+            ->route($request->input('redirect_to') === 'applicant.onboarding.links'
+                ? 'applicant.onboarding.links'
+                : 'applicant.resume')
             ->with('status', 'Resume already removed.'));
 });
 
