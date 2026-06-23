@@ -23,6 +23,8 @@ class PublicJobBrowsingTest extends TestCase
         $visible = $this->job(['title' => 'Visible Laravel Role']);
         $this->job(['title' => 'Unapproved Active Role', 'approved_at' => null]);
         $this->job(['title' => 'Draft Role', 'status' => JobStatus::Draft->value]);
+        $this->job(['title' => 'Pending Role', 'status' => JobStatus::Pending->value]);
+        $this->job(['title' => 'Rejected Role', 'status' => JobStatus::Rejected->value]);
         $this->job(['title' => 'Closed Role', 'status' => JobStatus::Closed->value, 'closed_at' => now()]);
         $this->job(['title' => 'Expired Role', 'expires_at' => now()->subDay()]);
         $deleted = $this->job(['title' => 'Soft Deleted Role']);
@@ -34,6 +36,8 @@ class PublicJobBrowsingTest extends TestCase
         $response->assertSee($visible->title);
         $response->assertDontSee('Unapproved Active Role');
         $response->assertDontSee('Draft Role');
+        $response->assertDontSee('Pending Role');
+        $response->assertDontSee('Rejected Role');
         $response->assertDontSee('Closed Role');
         $response->assertDontSee('Expired Role');
         $response->assertDontSee('Soft Deleted Role');
@@ -82,7 +86,7 @@ class PublicJobBrowsingTest extends TestCase
         $response->assertDontSee('Senior Laravel Designer');
     }
 
-    public function test_public_job_detail_shows_required_fields_and_applicant_apply_cta(): void
+    public function test_public_job_detail_shows_required_fields_to_guest_users(): void
     {
         $job = $this->job([
             'title' => 'Backend Engineer',
@@ -94,7 +98,7 @@ class PublicJobBrowsingTest extends TestCase
             'skills_required' => ['Laravel', 'Postgres'],
         ]);
 
-        $response = $this->actingAs($this->applicant())->get(route('jobs.show', $job));
+        $response = $this->get(route('jobs.show', $job));
 
         $response->assertOk();
         $response->assertSee('Backend Engineer');
@@ -105,14 +109,34 @@ class PublicJobBrowsingTest extends TestCase
         $response->assertSee('Build durable Laravel services.');
         $response->assertSee('Ship tested production code.');
         $response->assertSee('Laravel');
+    }
+
+    public function test_applicant_job_detail_shows_apply_cta(): void
+    {
+        $job = $this->job(['title' => 'Frontend Engineer']);
+
+        $response = $this->actingAs($this->applicant())->get(route('jobs.show', $job));
+
+        $response->assertOk();
         $response->assertSee(route('applicant.job-listings.apply', $job), false);
     }
 
     public function test_hidden_job_detail_urls_return_not_found(): void
     {
-        $hidden = $this->job(['title' => 'Hidden Job', 'approved_at' => null]);
+        $hiddenJobs = [
+            $this->job(['title' => 'Unapproved Hidden Job', 'approved_at' => null]),
+            $this->job(['title' => 'Pending Hidden Job', 'status' => JobStatus::Pending->value]),
+            $this->job(['title' => 'Rejected Hidden Job', 'status' => JobStatus::Rejected->value]),
+            $this->job(['title' => 'Closed Hidden Job', 'status' => JobStatus::Closed->value, 'closed_at' => now()]),
+            $this->job(['title' => 'Expired Hidden Job', 'expires_at' => now()->subDay()]),
+        ];
+        $deleted = $this->job(['title' => 'Deleted Hidden Job']);
+        $deleted->delete();
+        $hiddenJobs[] = $deleted;
 
-        $this->get(route('jobs.show', $hidden))->assertNotFound();
+        foreach ($hiddenJobs as $hiddenJob) {
+            $this->get(route('jobs.show', $hiddenJob))->assertNotFound();
+        }
     }
 
     private function applicant(): User

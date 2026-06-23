@@ -90,16 +90,28 @@ class ApplicationFlowTest extends TestCase
     public function test_applicant_cannot_apply_to_hidden_job(): void
     {
         $applicant = $this->applicant();
-        $hidden = $this->job(['approved_at' => null]);
+        $hiddenJobs = [
+            $this->job(['approved_at' => null]),
+            $this->job(['status' => JobStatus::Draft->value]),
+            $this->job(['status' => JobStatus::Pending->value]),
+            $this->job(['status' => JobStatus::Rejected->value]),
+            $this->job(['status' => JobStatus::Closed->value, 'closed_at' => now()]),
+            $this->job(['expires_at' => now()->subDay()]),
+        ];
+        $deleted = $this->job();
+        $deleted->delete();
+        $hiddenJobs[] = $deleted;
 
-        $this->actingAs($applicant)
-            ->post(route('applicant.job-listings.apply.store', $hidden))
-            ->assertNotFound();
+        foreach ($hiddenJobs as $hiddenJob) {
+            $this->actingAs($applicant)
+                ->post(route('applicant.job-listings.apply.store', $hiddenJob))
+                ->assertNotFound();
 
-        $this->assertDatabaseMissing('applications', [
-            'user_id' => $applicant->id,
-            'job_listing_id' => $hidden->id,
-        ]);
+            $this->assertDatabaseMissing('applications', [
+                'user_id' => $applicant->id,
+                'job_listing_id' => $hiddenJob->id,
+            ]);
+        }
     }
 
     public function test_guest_and_non_applicant_users_cannot_access_apply_routes(): void

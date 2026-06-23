@@ -11,7 +11,7 @@
                 <div class="flex items-center gap-4 text-xs font-bold text-neutral-500">
                     <span class="flex items-center gap-1">👁️ <strong class="text-neutral-900">{{ number_format($jobListing->views_count ?? 0) }}</strong> views</span>
                     <span class="text-neutral-300">|</span>
-                    <span class="flex items-center gap-1">📅 Expires: <strong class="text-neutral-900">{{ \Carbon\Carbon::parse($jobListing->expires_at)->format('M d, Y') }}</strong></span>
+                    <span class="flex items-center gap-1">📅 Expires: <strong class="text-neutral-900">{{ $jobListing->expires_at?->format('M d, Y') ?? 'No expiration date' }}</strong></span>
                 </div>
             </div>
 

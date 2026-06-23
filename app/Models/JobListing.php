@@ -6,41 +6,61 @@ use App\Enums\JobStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class JobListing extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'company_id', 'category_id', 'title', 'slug', 'location',
-        'location_type', 'type', 'experience_level', 'description', 'requirements',
-        'skills_required', 'salary_min', 'salary_max', 'salary_currency', 'status',
-        'rejection_reason', 'submitted_at', 'approved_at', 'approved_by',
-        'rejected_at', 'rejected_by', 'closed_at', 'published_at', 'expires_at',
+        'user_id',
+        'company_id',
+        'category_id',
+        'title',
+        'slug',
+        'location',
+        'location_type',
+        'type',
+        'experience_level',
+        'description',
+        'requirements',
+        'skills_required',
+        'salary_min',
+        'salary_max',
+        'salary_currency',
+        'status',
+        'rejection_reason',
+        'submitted_at',
+        'approved_at',
+        'approved_by',
+        'rejected_at',
+        'rejected_by',
+        'closed_at',
+        'published_at',
+        'expires_at',
+        'views_count',
+        'deleted_by',
+        'delete_reason',
     ];
 
     protected $casts = [
-        'status' => JobStatus::class,
         'skills_required' => 'array',
-        'submitted_at' => 'datetime',
-        'approved_at' => 'datetime',
-        'rejected_at' => 'datetime',
-        'closed_at' => 'datetime',
-        'published_at' => 'datetime',
-        'expires_at' => 'datetime',
-        'deleted_at' => 'datetime', // binalik q na yung sa softdeletes
-        'salary_min' => 'decimal:2',
-        'salary_max' => 'decimal:2',
+        'salary_min'       => 'decimal:2',
+        'salary_max'       => 'decimal:2',
+        'submitted_at'     => 'datetime',
+        'approved_at'      => 'datetime',
+        'rejected_at'      => 'datetime',
+        'closed_at'        => 'datetime',
+        'published_at'     => 'datetime',
+        'expires_at'       => 'datetime',
+        'deleted_at'       => 'datetime',
     ];
 
-    // ── relationships ────────────────────────────────────────────────────
-
-    public function employer(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function company(): BelongsTo
@@ -50,7 +70,7 @@ class JobListing extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(JobCategory::class);
+        return $this->belongsTo(JobCategory::class, 'category_id');
     }
 
     public function applications(): HasMany
@@ -58,16 +78,34 @@ class JobListing extends Model
         return $this->hasMany(Application::class);
     }
 
-    public function savedBy(): HasMany
+    public function approvedBy(): BelongsTo
     {
-        return $this->hasMany(SavedJob::class); // FIX
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    // ── scopes ───────────────────────────────────────────────────────────
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    public function savedJobs(): HasMany
+    {
+        return $this->hasMany(SavedJob::class);
+    }
+
+    public function aiJobMatches(): HasMany
+    {
+        return $this->hasMany(AiJobMatch::class);
+    }
 
     public function scopePubliclyVisible(Builder $query): Builder
     {
-        return $query->where('status', JobStatus::Active)
+        return $query->where('status', JobStatus::Active->value)
             ->whereNotNull('approved_at')
             ->whereNotNull('published_at')
             ->whereNull('closed_at')
@@ -77,11 +115,14 @@ class JobListing extends Model
             });
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')->whereNull('deleted_at');
+    }
 
     public function isPubliclyVisible(): bool
     {
-        return $this->status === JobStatus::Active
+        return $this->status === JobStatus::Active->value
             && ! is_null($this->approved_at)
             && ! is_null($this->published_at)
             && is_null($this->closed_at)
@@ -89,16 +130,18 @@ class JobListing extends Model
             && ! $this->trashed();
     }
 
-    public function salaryRange(): ?string
+    public function salaryRange(): string
     {
-        if (! $this->salary_min && ! $this->salary_max) {
-            return null;
-        }
-        $currency = $this->salary_currency ?? 'PHP';
-        if ($this->salary_min && $this->salary_max) {
-            return $currency.' '.number_format($this->salary_min).' – '.number_format($this->salary_max);
+        if (!$this->salary_min && !$this->salary_max) {
+            return 'Negotiable';
         }
 
-        return $currency.' '.number_format($this->salary_min ?? $this->salary_max);
+        $currency = $this->salary_currency ?? 'PHP';
+
+        if ($this->salary_min && $this->salary_max) {
+            return $currency . ' ' . number_format($this->salary_min) . ' - ' . number_format($this->salary_max);
+        }
+
+        return $currency . ' ' . number_format($this->salary_min ?? $this->salary_max);
     }
 }
