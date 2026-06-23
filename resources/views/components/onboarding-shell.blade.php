@@ -4,20 +4,7 @@
     'total',
 ])
 
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} | GitHired</title>
-    <link rel="preconnect" href="https://api.fontshare.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen">
+<x-app-shell :title="$title" body-class="min-h-screen">
     <main class="min-h-screen bg-[#f0f2f8]">
         <section class="min-h-screen bg-[#f0f2f8]">
             <div class="grid min-h-screen gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.5fr)] lg:gap-12 lg:py-8 lg:pl-20 lg:pr-8 xl:gap-16 xl:py-10 xl:pl-24 xl:pr-10">
@@ -57,5 +44,4 @@
             </div>
         </section>
     </main>
-</body>
-</html>
+</x-app-shell>

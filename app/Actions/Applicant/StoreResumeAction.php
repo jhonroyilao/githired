@@ -12,8 +12,9 @@ final class StoreResumeAction
 {
     public function handle(User $user, UploadedFile $resume): ResumeDocument
     {
-        $disk = Storage::disk('local');
-        $path = $resume->store("resumes/{$user->id}", 'local');
+        $diskName = config('filesystems.resume_disk', 'local');
+        $disk = Storage::disk($diskName);
+        $path = $resume->store("resumes/{$user->id}", $diskName);
 
         try {
             return DB::transaction(function () use ($user, $resume, $path): ResumeDocument {
