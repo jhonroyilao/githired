@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $jobListing->title }} | Githired</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-[#f3f5f0] text-neutral-950 antialiased">
+<x-app-shell :title="$jobListing->title" body-class="bg-[#f3f5f0] text-neutral-950 antialiased">
     <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <a href="{{ route('jobs.index') }}" class="text-sm font-black text-[#5f8f22]">Back to jobs</a>
 
@@ -79,5 +71,4 @@
             </aside>
         </div>
     </main>
-</body>
-</html>
+</x-app-shell>

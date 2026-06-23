@@ -4,20 +4,7 @@
     'cardWidth' => 'default',
 ])
 
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} | GitHired</title>
-    <link rel="preconnect" href="https://api.fontshare.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body>
+<x-app-shell :title="$title">
     <main class="min-h-screen bg-[#e8eaee]">
         <section class="min-h-screen overflow-hidden bg-[#e8eaee]">
             <div class="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.98fr)]">
@@ -43,5 +30,4 @@
             </div>
         </section>
     </main>
-</body>
-</html>
+</x-app-shell>
