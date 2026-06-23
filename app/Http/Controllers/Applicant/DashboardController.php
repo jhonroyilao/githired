@@ -3,20 +3,22 @@
 namespace App\Http\Controllers\Applicant;
 
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
-use App\Enums\ExperienceLevel;
-use App\Enums\JobType;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\JobCategory;
 use App\Models\JobListing;
+use App\Queries\JobListingBrowseQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 final class DashboardController extends Controller
 {
-    public function __invoke(Request $request, ResolveUserDestinationRouteAction $resolveDestination): View|RedirectResponse
-    {
+    public function __invoke(
+        Request $request,
+        ResolveUserDestinationRouteAction $resolveDestination,
+        JobListingBrowseQuery $browseQuery,
+    ): View|RedirectResponse {
         $user = $request->user();
 
         // redirect users na hindi pa tapos sa onboarding
@@ -34,55 +36,7 @@ final class DashboardController extends Controller
         $allCategories = JobCategory::all();
         $query = JobListing::publiclyVisible()->with(['company', 'category']);
 
-        // search Filter
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhereHas('company', function ($compQ) use ($search) {
-                        $compQ->where('name', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        if ($request->filled('location')) {
-            $query->where('location', $request->input('location'));
-        }
-
-        // category Filter (Dynamic gamit ang slugs)
-        if ($request->filled('category')) {
-            $query->whereHas('category', function ($q) use ($request) {
-                $q->whereIn('slug', (array) $request->input('category'));
-            });
-        }
-
-        if ($request->filled('job_type')) {
-            $query->whereIn('type', $request->input('job_type'));
-        }
-
-        if ($request->filled('experience_level')) {
-            $query->whereIn('experience_level', $request->input('experience_level'));
-        }
-
-        if ($request->filled('date_posted') && ! in_array('All', $request->input('date_posted'))) {
-            $dates = $request->input('date_posted');
-            $query->where(function ($q) use ($dates) {
-                foreach ($dates as $date) {
-                    if ($date === 'Last Hour') {
-                        $q->orWhere('created_at', '>=', now()->subHour());
-                    }
-                    if ($date === 'Last 24 Hours') {
-                        $q->orWhere('created_at', '>=', now()->subDay());
-                    }
-                    if ($date === 'Last 7 Days') {
-                        $q->orWhere('created_at', '>=', now()->subDays(7));
-                    }
-                    if ($date === 'Last 30 Days') {
-                        $q->orWhere('created_at', '>=', now()->subDays(30));
-                    }
-                }
-            });
-        }
+        $browseQuery->apply($query, $request, includeDatePosted: true);
 
         $allListings = JobListing::publiclyVisible()->with('category')->get();
 
@@ -91,18 +45,8 @@ final class DashboardController extends Controller
             $categoryCounts[$cat->name] = $allListings->where('category_id', $cat->id)->count();
         }
 
-        $jobTypeOptions = [
-            JobType::FullTime->value => 'Full-time',
-            JobType::PartTime->value => 'Part-time',
-            JobType::Contract->value => 'Contract',
-            JobType::Internship->value => 'Internship',
-        ];
-
-        $experienceOptions = [
-            ExperienceLevel::Entry->value => 'Entry level',
-            ExperienceLevel::Mid->value => 'Mid level',
-            ExperienceLevel::Senior->value => 'Senior level',
-        ];
+        $jobTypeOptions = $browseQuery->jobTypeOptions();
+        $experienceOptions = $browseQuery->experienceOptions();
 
         $typeCounts = [];
         foreach (array_keys($jobTypeOptions) as $type) {
@@ -143,6 +87,7 @@ final class DashboardController extends Controller
             'locations' => $locations,
             'jobTypeOptions' => $jobTypeOptions,
             'experienceOptions' => $experienceOptions,
+            'datePostedOptions' => $browseQuery->datePostedOptions(),
             'categoryCounts' => $categoryCounts,
             'typeCounts' => $typeCounts,
             'experienceCounts' => $experienceCounts,

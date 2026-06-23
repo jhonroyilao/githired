@@ -7,7 +7,7 @@
                 <p class="mt-2 max-w-2xl text-sm font-medium text-neutral-600">Find active, approved roles from hiring teams.</p>
             </div>
             @auth
-                <a href="{{ route('applicant.dashboard') }}" class="rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black">Dashboard</a>
+                <a href="{{ route($dashboardRoute) }}" class="rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black">Dashboard</a>
             @else
                 <a href="{{ route('login') }}" class="rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black">Sign in</a>
             @endauth

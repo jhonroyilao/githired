@@ -201,7 +201,21 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertSee(route('applicant.resume'), false);
         $response->assertSee('Find jobs');
         $response->assertSee('Resume');
+        $response->assertDontSee(route('applicant.applications.index'), false);
         $response->assertSee('Log out');
+    }
+
+    public function test_applicant_dashboard_accepts_scalar_date_filter(): void
+    {
+        $user = User::factory()->create([
+            'role' => UserRole::Applicant->value,
+        ]);
+
+        $user->profile()->create($this->completeApplicantProfileAttributes());
+
+        $this->actingAs($user)
+            ->get(route('applicant.dashboard', ['date_posted' => 'Last 7 Days']))
+            ->assertOk();
     }
 
     public function test_complete_employer_dashboard_shows_company_context_and_logout(): void

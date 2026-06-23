@@ -86,6 +86,38 @@ class PublicJobBrowsingTest extends TestCase
         $response->assertDontSee('Senior Laravel Designer');
     }
 
+    public function test_public_browse_keyword_search_is_case_insensitive(): void
+    {
+        $match = $this->job(['title' => 'React Frontend Developer']);
+        $this->job(['title' => 'QA Engineer']);
+
+        $response = $this->get(route('jobs.index', [
+            'search' => 'developer',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee($match->title);
+        $response->assertDontSee('QA Engineer');
+    }
+
+    public function test_public_browse_dashboard_link_uses_authenticated_user_role(): void
+    {
+        $employer = User::factory()->create(['role' => UserRole::Employer->value]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+
+        $this->actingAs($employer)
+            ->get(route('jobs.index'))
+            ->assertOk()
+            ->assertSee(route('employer.dashboard'), false)
+            ->assertDontSee(route('applicant.dashboard'), false);
+
+        $this->actingAs($admin)
+            ->get(route('jobs.index'))
+            ->assertOk()
+            ->assertSee(route('admin.dashboard'), false)
+            ->assertDontSee(route('applicant.dashboard'), false);
+    }
+
     public function test_public_job_detail_shows_required_fields_to_guest_users(): void
     {
         $job = $this->job([

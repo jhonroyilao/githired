@@ -50,7 +50,7 @@
                     $otherFilters = [
                         'Job Type' => ['param' => 'job_type', 'items' => $jobTypeOptions, 'counts' => $typeCounts],
                         'Experience Level' => ['param' => 'experience_level', 'items' => $experienceOptions, 'counts' => $experienceCounts],
-                        'Date Posted' => ['param' => 'date_posted', 'items' => array_combine(['All', 'Last Hour', 'Last 24 Hours', 'Last 7 Days', 'Last 30 Days'], ['All', 'Last hour', 'Last 24 hours', 'Last 7 days', 'Last 30 days']), 'counts' => $dateCounts]
+                        'Date Posted' => ['param' => 'date_posted', 'items' => $datePostedOptions, 'counts' => $dateCounts]
                     ];
                 @endphp
 
@@ -202,7 +202,7 @@
                                 @if(in_array($job->id, $appliedListingIds))
                                     <span class="bg-neutral-200 text-neutral-500 font-black text-xs px-3 py-1.5 rounded-lg select-none">Applied</span>
                                 @else
-                                    <a href="{{ route('applicant.job-listings.apply', $job->id) }}" class="bg-[#91c93c] hover:bg-[#7fae34] text-neutral-950 font-black text-xs px-4 py-1.5 rounded-lg transition">Details</a>
+                                    <a href="{{ route('jobs.show', $job) }}" class="bg-[#91c93c] hover:bg-[#7fae34] text-neutral-950 font-black text-xs px-4 py-1.5 rounded-lg transition">Details</a>
                                 @endif
                             </div>
                         </div>
