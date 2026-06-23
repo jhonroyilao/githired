@@ -76,7 +76,7 @@
                             <hr class="border-neutral-300" />
 
             <div>
-                    <h4 class="text-xs font-black text-neutral-900 uppercase tracking-wider mb-3">Tags</h4>
+                    <!-- <h4 class="text-xs font-black text-neutral-900 uppercase tracking-wider mb-3">Tags</h4>
                     <div class="flex flex-wrap gap-1.5">
                         @foreach($categories as $category)
                             <button type="submit" name="category[]" value="{{ $category->slug }}" 
@@ -87,7 +87,7 @@
                                 {{ $category->name }}
                             </button>
                         @endforeach
-                    </div>
+                    </div> -->
                 </div>
             </form>
         </aside>
