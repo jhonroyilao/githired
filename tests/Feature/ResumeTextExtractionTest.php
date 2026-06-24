@@ -45,7 +45,7 @@ class ResumeTextExtractionTest extends TestCase
     {
         $extractor = Mockery::mock(ResumeTextExtractor::class);
         $extractor->expects('extract')
-            ->andThrow(new \RuntimeException($message));
+            ->andThrow(new \DomainException($message));
         return $extractor;
     }
 
@@ -143,8 +143,8 @@ class ResumeTextExtractionTest extends TestCase
 
     public function test_unexpected_exception_propagates_to_allow_queue_retry(): void
     {
-        // Non-RuntimeException (e.g. DB blip) should propagate so the queue
-        // can retry. The document should NOT be marked failed prematurely.
+        // Non-RuntimeException (e.g. DB blip) should propagate so the queue can retry. 
+        // The document should NOT be marked failed prematurely.
         $resume    = $this->makeResume();
         $extractor = Mockery::mock(ResumeTextExtractor::class);
         $extractor->expects('extract')
@@ -165,9 +165,9 @@ class ResumeTextExtractionTest extends TestCase
 
     public function test_resume_with_failed_extraction_remains_usable(): void
     {
-        // Acceptance criterion: the system can continue with profile-only matching
-        // when extraction fails. A 'failed' ResumeDocument is still a valid record
-        // that can be attached to applications — nothing blocks on extraction_status.
+        // Acceptance criterion: the system can continue with profile-only matching when extraction fails.
+        // A 'failed' ResumeDocument is still a valid record that can be attached to applications — nothing blocks on extraction_status.
+        
         $resume = $this->makeResume([
             'extraction_status' => 'failed',
             'extracted_text'    => null,
@@ -177,6 +177,7 @@ class ResumeTextExtractionTest extends TestCase
         $this->assertNotNull($resume->id);
         $this->assertEquals('failed', $resume->extraction_status);
         $this->assertNull($resume->extracted_text);
+        
         // The record is intact; AI matching can skip to profile-only when text is null.
         $this->assertDatabaseHas('resume_documents', [
             'id'                => $resume->id,

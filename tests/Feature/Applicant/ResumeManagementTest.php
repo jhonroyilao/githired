@@ -5,10 +5,13 @@ namespace Tests\Feature\Applicant;
 use App\Enums\UserRole;
 use App\Models\ResumeDocument;
 use App\Models\User;
+use App\Jobs\ExtractResumeText;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+
 
 final class ResumeManagementTest extends TestCase
 {
@@ -19,6 +22,7 @@ final class ResumeManagementTest extends TestCase
         parent::setUp();
 
         Storage::fake('local');
+        Queue::fake();
     }
 
     public function test_applicant_can_upload_current_pdf_resume_and_profile_path_is_updated(): void
@@ -47,6 +51,10 @@ final class ResumeManagementTest extends TestCase
             'user_id' => $user->id,
             'resume_path' => $resume->file_path,
         ]);
+
+        Queue::assertPushed(ExtractResumeText::class, function ($job) use ($user) {
+            return $job->resume->user_id === $user->id;
+        });
     }
 
     public function test_non_pdf_uploads_are_rejected(): void
@@ -97,6 +105,8 @@ final class ResumeManagementTest extends TestCase
         $newResume = $user->resumeDocuments()->where('original_name', 'new-resume.pdf')->sole();
         $this->assertTrue($newResume->is_current);
         $this->assertSame($newResume->file_path, $user->profile()->first()->resume_path);
+
+        Queue::assertPushed(ExtractResumeText::class);
     }
 
     public function test_applicant_can_download_their_own_resume(): void

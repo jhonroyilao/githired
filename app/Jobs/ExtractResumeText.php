@@ -30,7 +30,7 @@ class ExtractResumeText implements ShouldQueue
         try {
             //Attempt to grab the text from the PDF
             $result = $extractor->extract($this->resume);
-        } catch (\RuntimeException $e) {
+        } catch (\DomainException $e) {
             //If the PDF is corrupted or unreadable, mark it failed immediately and stop
             $this->markFailed($e->getMessage());
             return;

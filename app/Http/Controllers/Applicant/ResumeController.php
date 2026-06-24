@@ -40,9 +40,18 @@ final class ResumeController extends Controller
         ]);
     }
 
+    public function show(): View
+    {
+        $user    = Auth::user();
+        $resumes = $user->resumeDocuments()->latest()->get();
+        $current = $resumes->firstWhere('is_current', true);
+
+        return view('applicant.resume.index', compact('resumes', 'current'));
+    }
+
     public function store(StoreResumeRequest $request, StoreResumeAction $storeResume): RedirectResponse
     {
-        $resume = $storeResume->handle($request->user(), $request->file('resume')); // capture return value
+        $resume = $storeResume->handle($request->user(), $request->file('resume'));
 
         ExtractResumeText::dispatch($resume);
 
