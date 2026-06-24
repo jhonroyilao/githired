@@ -168,7 +168,7 @@
                     <input
                         type="number"
                         name="salary_min"
-                        value="{{ old('salary_min', (int) $job->salary_min) }}"
+                        value="{{ old('salary_min', $job->salary_min) }}"
                         class="{{ $inputClass }}">
 
                     @error('salary_min')
@@ -182,7 +182,7 @@
                     <input
                         type="number"
                         name="salary_max"
-                        value="{{ old('salary_max', (int) $job->salary_max) }}"
+                        value="{{ old('salary_max', $job->salary_max) }}"
                         class="{{ $inputClass }}">
 
                     @error('salary_max')

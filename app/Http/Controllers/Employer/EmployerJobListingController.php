@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Employer;
 
+use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Employer\StoreJobListingRequest;
@@ -10,13 +11,19 @@ use App\Models\JobListing;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class EmployerJobListingController extends Controller
 {
-    public function index(): View
+    public function index(ResolveUserDestinationRouteAction $resolveDestination): View|RedirectResponse
     {
-        $jobs = auth()->user()
-            ->company
+        $company = auth()->user()->company;
+
+        if (! $company) {
+            return redirect()->route($resolveDestination->handle(auth()->user()));
+        }
+
+        $jobs = $company
             ->jobListings()
             ->latest()
             ->paginate(10);
@@ -24,8 +31,12 @@ class EmployerJobListingController extends Controller
         return view('employer.jobs.index', compact('jobs'));
     }
 
-    public function create(): View
+    public function create(ResolveUserDestinationRouteAction $resolveDestination): View|RedirectResponse
     {
+        if (! auth()->user()->company) {
+            return redirect()->route($resolveDestination->handle(auth()->user()));
+        }
+
         $categories = JobCategory::orderBy('name')->get();
 
         return view('employer.jobs.create', compact('categories'));
@@ -37,13 +48,13 @@ class EmployerJobListingController extends Controller
 
         abort_if(! $company, 403);
 
-        $job = JobListing::create([
+        JobListing::create([
             'user_id' => $request->user()->id,
             'company_id' => $company->id,
             'category_id' => $request->category_id,
 
             'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . uniqid(),
+            'slug' => Str::slug($request->title).'-'.uniqid(),
 
             'location' => $request->location,
             'location_type' => $request->location_type,
@@ -77,10 +88,7 @@ class EmployerJobListingController extends Controller
 
     public function show(JobListing $jobListing): View
     {
-        abort_if(
-            $jobListing->company_id !== auth()->user()->company?->id,
-            403
-        );
+        $this->authorizeOwnedJob($jobListing);
 
         return view('employer.jobs.show', [
             'job' => $jobListing,
@@ -89,10 +97,7 @@ class EmployerJobListingController extends Controller
 
     public function edit(JobListing $jobListing): View
     {
-        abort_if(
-            $jobListing->company_id !== auth()->user()->company?->id,
-            403
-        );
+        $this->authorizeEditableJob($jobListing);
 
         $categories = JobCategory::orderBy('name')->get();
 
@@ -106,16 +111,13 @@ class EmployerJobListingController extends Controller
         StoreJobListingRequest $request,
         JobListing $jobListing
     ): RedirectResponse {
-        abort_if(
-            $jobListing->company_id !== auth()->user()->company?->id,
-            403
-        );
+        $this->authorizeEditableJob($jobListing);
 
         $jobListing->update([
             'category_id' => $request->category_id,
 
             'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . uniqid(),
+            'slug' => Str::slug($request->title).'-'.uniqid(),
 
             'location' => $request->location,
             'location_type' => $request->location_type,
@@ -137,9 +139,34 @@ class EmployerJobListingController extends Controller
             'salary_currency' => $request->filled('salary_currency')
                 ? $request->salary_currency
                 : 'PHP',
+
+            'status' => JobStatus::Pending->value,
+            'submitted_at' => now(),
+            'approved_at' => null,
+            'approved_by' => null,
+            'rejected_at' => null,
+            'rejected_by' => null,
+            'rejection_reason' => null,
+            'published_at' => null,
         ]);
 
         return redirect()
             ->route('employer.dashboard')
-            ->with('success', 'Job listing updated successfully.');    }
+            ->with('success', 'Job listing updated and submitted for review.');
+    }
+
+    private function authorizeOwnedJob(JobListing $jobListing): void
+    {
+        abort_if(
+            $jobListing->company_id !== auth()->user()->company?->id,
+            Response::HTTP_FORBIDDEN
+        );
+    }
+
+    private function authorizeEditableJob(JobListing $jobListing): void
+    {
+        $this->authorizeOwnedJob($jobListing);
+
+        abort_if($jobListing->status === JobStatus::Closed->value, Response::HTTP_FORBIDDEN);
+    }
 }

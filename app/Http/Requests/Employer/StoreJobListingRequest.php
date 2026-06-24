@@ -2,13 +2,16 @@
 
 namespace App\Http\Requests\Employer;
 
+use App\Enums\ExperienceLevel;
+use App\Enums\JobType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreJobListingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->company()->exists() ?? false;
     }
 
     public function rules(): array
@@ -27,12 +30,12 @@ class StoreJobListingRequest extends FormRequest
 
             'type' => [
                 'required',
-                'in:full-time,part-time,contract,internship',
+                Rule::in(array_map(fn (JobType $type): string => $type->value, JobType::cases())),
             ],
 
             'experience_level' => [
                 'required',
-                'in:entry,mid,senior',
+                Rule::in(array_map(fn (ExperienceLevel $level): string => $level->value, ExperienceLevel::cases())),
             ],
 
             'description' => ['required', 'string'],
@@ -42,11 +45,11 @@ class StoreJobListingRequest extends FormRequest
             'skills_required' => ['nullable', 'string'],
 
             'salary_min' => ['nullable', 'integer', 'min:0'],
-            'salary_max' => ['nullable', 'integer', 'min:0'],
+            'salary_max' => ['nullable', 'integer', 'min:0', 'gte:salary_min'],
 
             'expires_at' => ['nullable', 'date', 'after:today'],
-            
-            'salary_currency' => ['nullable', 'string', 'max:10'],
+
+            'salary_currency' => ['nullable', 'string', 'size:3'],
         ];
     }
 }

@@ -15,9 +15,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
+use App\Http\Controllers\Employer\EmployerJobListingController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
 use App\Http\Controllers\JobController;
-use App\Http\Controllers\Employer\EmployerJobListingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -112,13 +112,13 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
     });
 
     Route::prefix('jobs')->name('jobs.')->group(function () {
-    Route::get('/', [EmployerJobListingController::class, 'index'])->name('index');
-    Route::get('/create', [EmployerJobListingController::class, 'create'])->name('create');
-    Route::post('/', [EmployerJobListingController::class, 'store'])->name('store');
+        Route::get('/', [EmployerJobListingController::class, 'index'])->name('index');
+        Route::get('/create', [EmployerJobListingController::class, 'create'])->name('create');
+        Route::post('/', [EmployerJobListingController::class, 'store'])->name('store');
 
-    Route::get('/{jobListing}', [EmployerJobListingController::class, 'show'])->name('show');
-    Route::get('/{jobListing}/edit', [EmployerJobListingController::class, 'edit'])->name('edit');
-    Route::put('/{jobListing}', [EmployerJobListingController::class, 'update'])->name('update');
+        Route::get('/{jobListing}', [EmployerJobListingController::class, 'show'])->name('show');
+        Route::get('/{jobListing}/edit', [EmployerJobListingController::class, 'edit'])->name('edit');
+        Route::put('/{jobListing}', [EmployerJobListingController::class, 'update'])->name('update');
     });
 
     Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');

@@ -72,14 +72,23 @@
                             {{ $job->salaryRange() }}
                         </span>
 
-                        <span class="text-xs font-bold text-neutral-500"> 👁 {{ number_format($job->views_count) }} views </span>
-                        
+                        <span class="text-xs font-bold text-neutral-500">{{ number_format($job->views_count) }} views</span>
+
                         <a
-                            href="{{ route('employer.jobs.edit', $job) }}"
+                            href="{{ route('employer.jobs.show', $job) }}"
                             class="bg-[#91c93c] hover:bg-[#7fae34] text-neutral-950 font-black text-xs px-4 py-1.5 rounded-lg transition"
                         >
-                            Edit
+                            View
                         </a>
+
+                        @if ($job->status !== \App\Enums\JobStatus::Closed->value)
+                            <a
+                                href="{{ route('employer.jobs.edit', $job) }}"
+                                class="bg-neutral-100 hover:bg-neutral-200 text-neutral-950 font-black text-xs px-4 py-1.5 rounded-lg transition"
+                            >
+                                Edit
+                            </a>
+                        @endif
                     </div>
                 </div>
             @empty
