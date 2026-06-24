@@ -21,6 +21,11 @@ final class DashboardController extends Controller
         return view('dashboards.employer', [
             'user' => $request->user(),
             'company' => $request->user()->company,
+            'jobs' => $request->user()
+                ->company
+                ?->jobListings()
+                ->latest()
+                ->paginate(9),
         ]);
     }
 }
