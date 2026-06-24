@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -200,6 +201,7 @@ class OnboardingFlowTest extends TestCase
     public function test_applicant_can_upload_resume_from_onboarding_links(): void
     {
         Storage::fake('local');
+        Queue::fake();
 
         $user = $this->applicantWithPreferences();
         $file = UploadedFile::fake()->create('ada-resume.pdf', 200, 'application/pdf');
@@ -221,6 +223,7 @@ class OnboardingFlowTest extends TestCase
     public function test_resume_upload_from_onboarding_preserves_unsaved_link_inputs(): void
     {
         Storage::fake('local');
+        Queue::fake();
 
         $user = $this->applicantWithPreferences();
 

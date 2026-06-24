@@ -41,11 +41,15 @@ final class ResumeController extends Controller
 
     public function store(StoreResumeRequest $request, StoreResumeAction $storeResume): RedirectResponse
     {
-        $storeResume->handle($request->user(), $request->file('resume'));
+        $resume = $storeResume->handle($request->user(), $request->file('resume'));
+
+        $statusMessage = $resume->wasRecentlyCreated
+            ? 'Resume uploaded and queued for processing.'
+            : 'Duplicate resume detected. Using your existing file.';
 
         $redirect = redirect()
             ->route($this->redirectRoute($request))
-            ->with('status', 'Resume uploaded.');
+            ->with('status', $statusMessage);
 
         if ($this->redirectRoute($request) === 'applicant.onboarding.links') {
             return $redirect->withInput($request->only('github', 'linkedin', 'website'));

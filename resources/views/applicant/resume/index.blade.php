@@ -1,4 +1,6 @@
 @php
+    use Illuminate\Support\Str;
+
     $secondaryButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black text-neutral-900 no-underline transition hover:-translate-y-0.5';
     $primaryButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-4 py-2 text-sm font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5';
     $dangerButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-signal-red bg-white px-4 py-2 text-sm font-black text-signal-red transition hover:-translate-y-0.5';
@@ -47,7 +49,25 @@
                 <div>
                     <p class="font-black text-neutral-900">{{ $currentResume->original_name ?? 'Resume PDF' }}</p>
                     <p class="text-sm font-bold text-neutral-600">{{ $currentResume->created_at->format('M d, Y') }}</p>
+
+                    {{-- Extraction status badge --}}
+                    <p class="mt-1 text-xs font-bold">
+                        @if ($currentResume->extraction_status === 'ready')
+                            <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-green-800">
+                                ✓ Text extracted
+                            </span>
+                        @elseif ($currentResume->extraction_status === 'failed')
+                            <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-red-800">
+                                ✗ Extraction failed
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-yellow-800">
+                                ⏳ Extraction pending
+                            </span>
+                        @endif
+                    </p>
                 </div>
+
                 <div class="flex flex-wrap gap-2">
                     <a href="{{ route('applicant.resume.show', $currentResume) }}" class="{{ $secondaryButtonClass }}">Download</a>
                     <form method="POST" action="{{ route('applicant.resume.destroy', $currentResume) }}">
@@ -57,6 +77,30 @@
                     </form>
                 </div>
             </div>
+
+            {{-- Extracted text preview --}}
+            @if ($currentResume->extraction_status === 'ready' && $currentResume->extracted_text)
+                <div class="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                    <p class="mb-2 text-xs font-black uppercase tracking-widest text-neutral-500">Extracted Text Preview</p>
+                    <pre class="max-h-64 overflow-y-auto whitespace-pre-wrap break-words font-sans text-sm text-neutral-700">{{ Str::limit($currentResume->extracted_text, 1500) }}</pre>
+                    @if (strlen($currentResume->extracted_text) > 1500)
+                        <p class="mt-2 text-xs font-bold text-neutral-400">
+                            Showing first 1,500 of {{ number_format(strlen($currentResume->extracted_text)) }} characters.
+                        </p>
+                    @endif
+                </div>
+
+            @elseif ($currentResume->extraction_status === 'failed')
+                <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
+                    Text extraction failed. Job matching will use your profile skills instead.
+                </div>
+
+            @elseif ($currentResume->extraction_status === 'pending')
+                <div class="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm font-bold text-yellow-800">
+                    Text extraction is in progress. Refresh the page in a moment.
+                </div>
+            @endif
+
         @else
             <p class="mt-4 rounded-2xl bg-neutral-100 p-4 font-bold text-neutral-600">No current resume uploaded.</p>
         @endif
