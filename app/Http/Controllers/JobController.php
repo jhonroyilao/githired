@@ -44,17 +44,19 @@ final class JobController extends Controller
 
     public function show(Request $request, JobListing $jobListing): View
     {
-        abort_unless($jobListing->isPubliclyVisible(), Response::HTTP_NOT_FOUND);
-
-        $jobListing->load(['company', 'category']);
-
         $user = $request->user();
-        $hasApplied = $user?->role === UserRole::Applicant->value
-            && Application::query()
-                ->where('user_id', $user->id)
-                ->where('job_listing_id', $jobListing->id)
-                ->exists();
 
+        $hasApplied = $user?->role === UserRole::Applicant->value
+        && Application::query()
+            ->where('user_id', $user->id)
+            ->where('job_listing_id', $jobListing->id)
+            ->exists();
+
+        if (!$jobListing->isPubliclyVisible() && !$hasApplied) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+        $jobListing->load(['company', 'category']);
+        
         return view('jobs.show', [
             'jobListing' => $jobListing,
             'hasApplied' => $hasApplied,

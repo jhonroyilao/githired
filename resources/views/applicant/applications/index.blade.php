@@ -18,7 +18,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-1.5">
-                @foreach(['all' => 'All', 'pending' => 'Pending', 'interview' => 'Interview', 'approved' => 'Approved', 'rejected' => 'Rejected'] as $key => $label)
+                @foreach(['all' => 'All', 'pending' => 'Pending', 'interview' => 'Interview', 'hired' => 'Hired', 'rejected' => 'Rejected'] as $key => $label)
                     <button type="submit" name="status" value="{{ $key }}" class="text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-xl border transition-all {{ request('status', 'all') === $key ? 'bg-[#1a2315] text-[#91c93c] border-neutral-900' : 'bg-white text-neutral-600 border-neutral-200' }}">
                         {{ $label }}
                     </button>
