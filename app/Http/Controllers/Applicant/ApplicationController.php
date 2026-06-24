@@ -83,6 +83,8 @@ final class ApplicationController extends Controller
             'status' => 'pending',
         ]);
 
+        $resumeDocument = $resumeDocument?->fresh();
+
         if ($shouldDispatchExtraction) {
             ExtractResumeText::dispatch($resumeDocument);
         } elseif ($resumeDocument === null || $resumeDocument->extraction_status !== 'pending') {

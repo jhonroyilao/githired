@@ -120,6 +120,40 @@ class ApplicationFlowTest extends TestCase
         ]);
     }
 
+    public function test_pending_current_resume_that_finishes_during_application_submit_prepares_match(): void
+    {
+        $applicant = $this->applicant();
+        $job = $this->job();
+        $resume = $this->resumeFor($applicant, [
+            'extraction_status' => 'pending',
+            'extracted_text' => null,
+        ]);
+
+        Application::created(function () use ($resume): void {
+            $resume->update([
+                'extraction_status' => 'ready',
+                'extracted_text' => 'Laravel queue worker and PostgreSQL experience.',
+            ]);
+        });
+
+        $response = $this->actingAs($applicant)->post(route('applicant.job-listings.apply.store', $job), [
+            'cover_letter' => 'I can help ship this role.',
+        ]);
+
+        $response->assertRedirect(route('applicant.dashboard', absolute: false));
+        $this->assertDatabaseHas('applications', [
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+        ]);
+        $this->assertDatabaseHas('ai_job_matches', [
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+            'generation_status' => 'pending',
+        ]);
+    }
+
     public function test_duplicate_applications_are_blocked(): void
     {
         $applicant = $this->applicant();
