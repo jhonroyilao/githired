@@ -7,11 +7,13 @@ use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Employer\StoreJobListingRequest;
 use App\Models\JobCategory;
-use App\Models\JobListing;
+use App\Models\JobListing; 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
+use App\Models\Application; 
 
 class EmployerJobListingController extends Controller
 {
@@ -125,4 +127,40 @@ class EmployerJobListingController extends Controller
 
         abort_if($jobListing->status === JobStatus::Closed->value, Response::HTTP_FORBIDDEN);
     }
+
+    public function applicants(Request $request, JobListing $jobListing): View{
+    
+    $this->authorizeOwnedJob($jobListing);
+    $query = $jobListing->applications()->with('user');
+
+    if ($request->filled('status') && $request->status !== 'all') {
+        $query->where('status', $request->status);
+    } else {
+        $query->where('status', '!=', 'hired');
+    }
+
+    $query->when($request->search, function($q) use ($request) {
+        $q->whereHas('user', fn($u) => $u->where('name', 'like', "%{$request->search}%"));
+    });
+
+    $sort = $request->sort === 'oldest' ? 'asc' : 'desc';
+    $query->orderBy('created_at', $sort);
+
+    return view('employer.applicants.index', [
+        'job' => $jobListing,
+        'applications' => $query->paginate(12)->withQueryString(),
+    ]);
+    }
+
+    public function showApplication(JobListing $jobListing, Application $application)
+    {
+    if ($application->job_listing_id !== $jobListing->id || $jobListing->user_id !== auth()->id()) {
+        abort(403, 'Unauthorized access.');
+    }
+
+    return view('employer.applicants.show', [
+        'job' => $jobListing,
+        'application' => $application,
+    ]);
+}
 }
