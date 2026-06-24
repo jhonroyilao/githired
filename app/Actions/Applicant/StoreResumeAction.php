@@ -12,12 +12,24 @@ final class StoreResumeAction
 {
     public function handle(User $user, UploadedFile $resume): ResumeDocument
     {
+        //Compute sha256 hash immediately from the uploaded file
+        $newHash = hash_file('sha256', $resume->getRealPath());
+
+        //Fetch the user's currently active resume
+        $currentResume = $user->resumeDocuments()->where('is_current', true)->first();
+
+        //Compare hashes. If identical, return the existing record and stop.
+        if ($currentResume && $currentResume->content_hash === $newHash) {
+            return $currentResume;
+        }
+
+        //If hash is different (or no current resume exists). Proceed with storing.
         $diskName = config('filesystems.resume_disk', 'local');
         $disk = Storage::disk($diskName);
         $path = $resume->store("resumes/{$user->id}", $diskName);
 
         try {
-            return DB::transaction(function () use ($user, $resume, $path): ResumeDocument {
+            return DB::transaction(function () use ($user, $resume, $path, $newHash): ResumeDocument {
                 $lockedUser = User::query()
                     ->whereKey($user->id)
                     ->lockForUpdate()
@@ -32,7 +44,7 @@ final class StoreResumeAction
                     'original_name' => $resume->getClientOriginalName(),
                     'mime_type' => $resume->getMimeType() ?: 'application/pdf',
                     'file_size' => $resume->getSize(),
-                    'content_hash' => hash_file('sha256', $resume->getRealPath()),
+                    'content_hash' => $newHash, // Store the new hash
                     'extraction_status' => 'pending',
                     'is_current' => true,
                 ]);
