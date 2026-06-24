@@ -26,7 +26,7 @@ class EmployerJobListingCrudTest extends TestCase
         $response = $this->actingAs($employer)->post(route('employer.jobs.store'), $this->validPayload([
             'category_id' => $category->id,
             'title' => 'Senior Laravel Engineer',
-            'skills_required' => 'Laravel, PostgreSQL, Testing',
+            'skills_required' => 'Laravel, PostgreSQL,, Testing, ',
         ]));
 
         $response->assertRedirect(route('employer.dashboard', absolute: false));
@@ -46,6 +46,13 @@ class EmployerJobListingCrudTest extends TestCase
         $this->assertNotNull($job->submitted_at);
         $this->assertSame(['Laravel', 'PostgreSQL', 'Testing'], $job->skills_required);
         $this->assertFalse($job->isPubliclyVisible());
+
+        $this->get(route('jobs.index'))
+            ->assertOk()
+            ->assertDontSee('Senior Laravel Engineer');
+
+        $this->get(route('jobs.show', $job))
+            ->assertNotFound();
     }
 
     public function test_employer_without_company_is_redirected_from_create_and_index(): void
@@ -74,6 +81,26 @@ class EmployerJobListingCrudTest extends TestCase
             ->from(route('employer.jobs.create'))
             ->post(route('employer.jobs.store'), $payload)
             ->assertSessionHasErrors('salary_currency');
+
+        $this->actingAs($employer)
+            ->from(route('employer.jobs.create'))
+            ->post(route('employer.jobs.store'), $this->validPayload([
+                'salary_currency' => '@@@',
+            ]))
+            ->assertSessionHasErrors('salary_currency');
+    }
+
+    public function test_whitespace_only_required_fields_are_rejected(): void
+    {
+        [$employer] = $this->employerWithCompany();
+
+        $this->actingAs($employer)
+            ->from(route('employer.jobs.create'))
+            ->post(route('employer.jobs.store'), $this->validPayload([
+                'title' => '   ',
+                'description' => " \n ",
+            ]))
+            ->assertSessionHasErrors(['title', 'description']);
     }
 
     public function test_employer_can_list_and_view_only_their_own_job_listings(): void
@@ -109,7 +136,13 @@ class EmployerJobListingCrudTest extends TestCase
             'approved_at' => now()->subDay(),
             'approved_by' => $employer->id,
             'published_at' => now()->subDay(),
+            'salary_currency' => 'USD',
         ]);
+
+        $this->actingAs($employer)
+            ->get(route('employer.jobs.edit', $job))
+            ->assertOk()
+            ->assertSee('value="USD"', false);
 
         $response = $this->actingAs($employer)->put(
             route('employer.jobs.update', $job),
@@ -118,6 +151,7 @@ class EmployerJobListingCrudTest extends TestCase
                 'title' => 'Updated Role',
                 'location' => 'Cebu',
                 'skills_required' => 'Laravel, Queues',
+                'salary_currency' => 'USD',
             ]),
         );
 
@@ -129,6 +163,7 @@ class EmployerJobListingCrudTest extends TestCase
         $this->assertSame('Updated Role', $job->title);
         $this->assertSame('Cebu', $job->location);
         $this->assertSame(['Laravel', 'Queues'], $job->skills_required);
+        $this->assertSame('USD', $job->salary_currency);
         $this->assertSame(JobStatus::Pending->value, $job->status);
         $this->assertNull($job->approved_at);
         $this->assertNull($job->approved_by);
@@ -160,6 +195,18 @@ class EmployerJobListingCrudTest extends TestCase
         $this->assertNull($job->salary_max);
     }
 
+    public function test_zero_salary_values_are_not_displayed_as_missing(): void
+    {
+        [$employer, $company] = $this->employerWithCompany();
+
+        $job = $this->job($employer, $company, [
+            'salary_min' => 0,
+            'salary_max' => 1000,
+        ]);
+
+        $this->assertSame('PHP 0 - 1,000', $job->salaryRange());
+    }
+
     public function test_employer_cannot_edit_another_companys_job_listing(): void
     {
         [$employer] = $this->employerWithCompany();
@@ -175,6 +222,21 @@ class EmployerJobListingCrudTest extends TestCase
                 'category_id' => $otherJob->category_id,
                 'title' => 'Hijacked Role',
             ]))
+            ->assertForbidden();
+
+        $this->assertSame('Other Role', $otherJob->fresh()->title);
+    }
+
+    public function test_employer_cannot_validate_update_for_another_companys_job_listing(): void
+    {
+        [$employer] = $this->employerWithCompany();
+        [$otherEmployer, $otherCompany] = $this->employerWithCompany('Other Company');
+        $otherJob = $this->job($otherEmployer, $otherCompany, ['title' => 'Other Role']);
+
+        $this->actingAs($employer)
+            ->put(route('employer.jobs.update', $otherJob), [
+                'title' => '',
+            ])
             ->assertForbidden();
 
         $this->assertSame('Other Role', $otherJob->fresh()->title);

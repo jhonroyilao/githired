@@ -7,7 +7,7 @@
         <p class="text-sm font-black uppercase tracking-[0.14em] text-neutral-600">Company profile</p>
         <h2 class="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-neutral-900">{{ $company?->name }}</h2>
         <p class="mt-3 max-w-2xl font-bold leading-7 text-neutral-600">{{ $company?->description }}</p>
-        
+
         <div class="mt-5 flex flex-col gap-3">
             <a href="{{ route('employer.onboarding.company') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Edit company profile</a>
 

@@ -3,7 +3,9 @@
 namespace App\Http\Requests\Employer;
 
 use App\Enums\ExperienceLevel;
+use App\Enums\JobStatus;
 use App\Enums\JobType;
+use App\Models\JobListing;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,7 +13,20 @@ class StoreJobListingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->company()->exists() ?? false;
+        $companyId = $this->user()?->company?->id;
+
+        if (! $companyId) {
+            return false;
+        }
+
+        $jobListing = $this->route('jobListing');
+
+        if (! $jobListing instanceof JobListing) {
+            return true;
+        }
+
+        return $jobListing->company_id === $companyId
+            && $jobListing->status !== JobStatus::Closed->value;
     }
 
     public function rules(): array
@@ -49,7 +64,80 @@ class StoreJobListingRequest extends FormRequest
 
             'expires_at' => ['nullable', 'date', 'after:today'],
 
-            'salary_currency' => ['nullable', 'string', 'size:3'],
+            'salary_currency' => ['nullable', 'string', 'size:3', 'regex:/^[A-Z]{3}$/'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $input = [];
+
+        foreach ([
+            'title',
+            'location',
+            'location_type',
+            'type',
+            'experience_level',
+            'description',
+            'requirements',
+            'skills_required',
+            'salary_currency',
+            'expires_at',
+        ] as $field) {
+            if (is_string($this->input($field))) {
+                $input[$field] = trim($this->input($field));
+            }
+        }
+
+        if (isset($input['salary_currency'])) {
+            $input['salary_currency'] = strtoupper($input['salary_currency']);
+
+            if ($input['salary_currency'] === '') {
+                $input['salary_currency'] = null;
+            }
+        }
+
+        $this->merge($input);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jobListingAttributes(): array
+    {
+        $validated = $this->validated();
+
+        return [
+            'category_id' => $validated['category_id'],
+            'title' => $validated['title'],
+            'location' => $validated['location'],
+            'location_type' => $validated['location_type'],
+            'type' => $validated['type'],
+            'experience_level' => $validated['experience_level'],
+            'description' => $validated['description'],
+            'requirements' => $validated['requirements'],
+            'skills_required' => $this->skillsRequired(),
+            'salary_min' => $validated['salary_min'] ?? null,
+            'salary_max' => $validated['salary_max'] ?? null,
+            'salary_currency' => $validated['salary_currency'] ?? 'PHP',
+            'expires_at' => $validated['expires_at'] ?? null,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function skillsRequired(): array
+    {
+        $skills = $this->validated('skills_required');
+
+        if (! is_string($skills) || $skills === '') {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map('trim', explode(',', $skills)),
+            fn (string $skill): bool => $skill !== '',
+        ));
     }
 }

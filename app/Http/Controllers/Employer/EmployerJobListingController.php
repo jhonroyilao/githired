@@ -48,35 +48,13 @@ class EmployerJobListingController extends Controller
 
         abort_if(! $company, 403);
 
+        $attributes = $request->jobListingAttributes();
+
         JobListing::create([
             'user_id' => $request->user()->id,
             'company_id' => $company->id,
-            'category_id' => $request->category_id,
-
-            'title' => $request->title,
-            'slug' => Str::slug($request->title).'-'.uniqid(),
-
-            'location' => $request->location,
-            'location_type' => $request->location_type,
-            'type' => $request->type,
-            'experience_level' => $request->experience_level,
-
-            'description' => $request->description,
-            'requirements' => $request->requirements,
-
-            'skills_required' => $request->skills_required
-                ? array_map('trim', explode(',', $request->skills_required))
-                : [],
-
-            'salary_min' => $request->salary_min,
-            'salary_max' => $request->salary_max,
-
-            'salary_currency' => $request->filled('salary_currency')
-                ? $request->salary_currency
-                : 'PHP',
-
-            'expires_at' => $request->expires_at,
-
+            ...$attributes,
+            'slug' => Str::slug($attributes['title']).'-'.uniqid(),
             'status' => JobStatus::Pending->value,
             'submitted_at' => now(),
         ]);
@@ -113,33 +91,11 @@ class EmployerJobListingController extends Controller
     ): RedirectResponse {
         $this->authorizeEditableJob($jobListing);
 
+        $attributes = $request->jobListingAttributes();
+
         $jobListing->update([
-            'category_id' => $request->category_id,
-
-            'title' => $request->title,
-            'slug' => Str::slug($request->title).'-'.uniqid(),
-
-            'location' => $request->location,
-            'location_type' => $request->location_type,
-            'type' => $request->type,
-            'experience_level' => $request->experience_level,
-
-            'description' => $request->description,
-            'requirements' => $request->requirements,
-
-            'skills_required' => $request->skills_required
-                ? array_map('trim', explode(',', $request->skills_required))
-                : [],
-
-            'salary_min' => $request->salary_min,
-            'salary_max' => $request->salary_max,
-
-            'expires_at' => $request->expires_at,
-
-            'salary_currency' => $request->filled('salary_currency')
-                ? $request->salary_currency
-                : 'PHP',
-
+            ...$attributes,
+            'slug' => Str::slug($attributes['title']).'-'.uniqid(),
             'status' => JobStatus::Pending->value,
             'submitted_at' => now(),
             'approved_at' => null,

@@ -166,7 +166,7 @@
                 </div>
 
                 <div>
-                    <label class="{{ $labelClass }}">Minimum Salary (PHP)</label>
+                    <label class="{{ $labelClass }}">Minimum Salary</label>
 
                     <input
                         type="number"
@@ -180,7 +180,7 @@
                 </div>
 
                 <div>
-                    <label class="{{ $labelClass }}">Maximum Salary (PHP)</label>
+                    <label class="{{ $labelClass }}">Maximum Salary</label>
 
                     <input
                         type="number"
@@ -193,22 +193,38 @@
                     @enderror
                 </div>
 
-                <div> 
-                    <label class="{{ $labelClass }}">Application Deadline</label> 
-                    <input 
-                        type="date" 
-                        name="expires_at" 
-                        value="{{ old('expires_at') }}" 
-                        class="{{ $inputClass }}"> <p class="mt-2 text-sm text-neutral-500"> Leave blank if the job has no deadline. </p> 
-                        
-                    @error('expires_at') 
-                        <div class="{{ $errorClass }}">{{ $message }}</div> 
-                    @enderror 
+                <div>
+                    <label class="{{ $labelClass }}">Salary Currency</label>
+
+                    <input
+                        type="text"
+                        name="salary_currency"
+                        value="{{ old('salary_currency', 'PHP') }}"
+                        maxlength="3"
+                        class="{{ $inputClass }}">
+
+                    @error('salary_currency')
+                        <div class="{{ $errorClass }}">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="{{ $labelClass }}">Application Deadline</label>
+
+                    <input
+                        type="date"
+                        name="expires_at"
+                        value="{{ old('expires_at') }}"
+                        class="{{ $inputClass }}">
+
+                    <p class="mt-2 text-sm text-neutral-500">Leave blank if the job has no deadline.</p>
+
+                    @error('expires_at')
+                        <div class="{{ $errorClass }}">{{ $message }}</div>
+                    @enderror
                 </div>
 
             </div>
-
-            <input type="hidden" name="salary_currency" value="PHP">
 
             <div class="mt-5">
                 <label class="{{ $labelClass }}">Skills Required</label>
