@@ -81,4 +81,14 @@ final class ApplicationController extends Controller
             ->route('applicant.dashboard')
             ->with('success', 'Your application has been submitted successfully!');
     }
+
+    public function index(Request $request): View
+    {
+        $applications = $request->user()->applications()
+            ->with(['jobListing.company']) 
+            ->latest()
+            ->get();
+
+        return view('applicant.applications.index', compact('applications'));
+    }
 }
