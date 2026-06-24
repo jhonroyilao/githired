@@ -139,9 +139,4 @@ class JobListing extends Model
 
         return $currency . ' ' . number_format($this->salary_min ?? $this->salary_max);
     }
-
-    public function getRouteKeyName(): string // slug para maiwasan ng postgre bigint error sa route binding
-    {
-        return 'slug';
-    }
 }
