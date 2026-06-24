@@ -1,5 +1,5 @@
 <x-dashboard-shell title="Employer dashboard" eyebrow="Recruiter workspace" :user="$user">
-    <p class="mt-5 max-w-2xl text-lg font-bold leading-8 text-neutral-600">
+    <p class="mt-5 max-w-8xl text-lg font-bold leading-8 text-neutral-600">
         You are signed in as a recruiter. The company profile below represents the hiring organization attached to this account.
     </p>
 
