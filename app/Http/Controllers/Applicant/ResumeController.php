@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Applicant;
 
+use App\Jobs\ExtractResumeText;
 use App\Actions\Applicant\DeleteResumeAction;
 use App\Actions\Applicant\SetCurrentResumeAction;
 use App\Actions\Applicant\StoreResumeAction;
@@ -41,7 +42,9 @@ final class ResumeController extends Controller
 
     public function store(StoreResumeRequest $request, StoreResumeAction $storeResume): RedirectResponse
     {
-        $storeResume->handle($request->user(), $request->file('resume'));
+        $resume = $storeResume->handle($request->user(), $request->file('resume')); // capture return value
+
+        ExtractResumeText::dispatch($resume);
 
         $redirect = redirect()
             ->route($this->redirectRoute($request))
