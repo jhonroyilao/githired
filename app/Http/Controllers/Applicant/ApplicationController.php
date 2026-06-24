@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Applicant;
 
+use App\Actions\Applicant\PrepareAiJobMatchAction;
 use App\Actions\Applicant\StoreResumeAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Applicant\StoreApplicationRequest;
@@ -45,6 +46,7 @@ final class ApplicationController extends Controller
     public function store(
         StoreApplicationRequest $request,
         JobListing $jobListing,
+        PrepareAiJobMatchAction $prepareAiJobMatch,
         StoreResumeAction $storeResume,
     ): RedirectResponse {
         abort_unless($jobListing->isPubliclyVisible(), Response::HTTP_NOT_FOUND);
@@ -76,6 +78,10 @@ final class ApplicationController extends Controller
             'resume_path' => $resumeDocument?->file_path ?? $user->profile?->resume_path,
             'status' => 'pending',
         ]);
+
+        if ($resumeDocument === null || $resumeDocument->extraction_status !== 'pending') {
+            $prepareAiJobMatch->handle($user, $jobListing, $resumeDocument);
+        }
 
         return redirect()
             ->route('applicant.dashboard')

@@ -6,6 +6,7 @@ use App\Enums\ExperienceLevel;
 use App\Enums\JobStatus;
 use App\Enums\JobType;
 use App\Enums\UserRole;
+use App\Jobs\ExtractResumeText;
 use App\Models\Application;
 use App\Models\Company;
 use App\Models\JobCategory;
@@ -14,6 +15,7 @@ use App\Models\ResumeDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -26,7 +28,10 @@ class ApplicationFlowTest extends TestCase
     {
         $applicant = $this->applicant();
         $job = $this->job();
-        $resume = $this->resumeFor($applicant);
+        $resume = $this->resumeFor($applicant, [
+            'extraction_status' => 'ready',
+            'extracted_text' => 'Laravel and PostgreSQL experience.',
+        ]);
 
         $response = $this->actingAs($applicant)->post(route('applicant.job-listings.apply.store', $job), [
             'cover_letter' => 'I can help ship this role.',
@@ -40,11 +45,18 @@ class ApplicationFlowTest extends TestCase
             'resume_path' => $resume->file_path,
             'status' => 'pending',
         ]);
+        $this->assertDatabaseHas('ai_job_matches', [
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+            'generation_status' => 'pending',
+        ]);
     }
 
     public function test_uploaded_resume_creates_resume_document_and_attaches_it_to_application(): void
     {
         Storage::fake('local');
+        Queue::fake();
 
         $applicant = $this->applicant();
         $job = $this->job();
@@ -67,6 +79,15 @@ class ApplicationFlowTest extends TestCase
             'status' => 'pending',
         ]);
         Storage::disk('local')->assertExists($resume->file_path);
+
+        Queue::assertPushed(ExtractResumeText::class, function ($job) use ($resume) {
+            return $job->resume->is($resume);
+        });
+        $this->assertDatabaseMissing('ai_job_matches', [
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+        ]);
     }
 
     public function test_duplicate_applications_are_blocked(): void
@@ -134,9 +155,9 @@ class ApplicationFlowTest extends TestCase
         ]);
     }
 
-    private function resumeFor(User $user): ResumeDocument
+    private function resumeFor(User $user, array $overrides = []): ResumeDocument
     {
-        return $user->resumeDocuments()->create([
+        return $user->resumeDocuments()->create(array_merge([
             'file_path' => "resumes/{$user->id}/resume.pdf",
             'original_name' => 'resume.pdf',
             'mime_type' => 'application/pdf',
@@ -144,7 +165,7 @@ class ApplicationFlowTest extends TestCase
             'content_hash' => str_repeat('b', 64),
             'extraction_status' => 'pending',
             'is_current' => true,
-        ]);
+        ], $overrides));
     }
 
     private function job(array $overrides = []): JobListing
