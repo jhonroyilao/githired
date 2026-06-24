@@ -89,7 +89,7 @@
                     </div>
 
                     
-                    <form action="{{ route('applicant.job-listings.apply.store', $jobListing->id) }}" method="POST" enctype="multipart/form-data" class="bg-white border-2 border-neutral-200 rounded-2xl p-5 space-y-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]">
+                    <form action="{{ route('applicant.job-listings.apply.store', $jobListing->id) }}" method="POST" enctype="multipart/form-data" class="bg-white border-2 border-neutral-200 rounded-2xl p-5 space-y-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]" data-application-resume-form>
                         @csrf
                         
                         <div class="border-b border-neutral-100 pb-2">
@@ -109,11 +109,18 @@
                             <label class="block text-xs font-black text-neutral-950 uppercase tracking-wide">Attach System CV / Resume</label>
                             
                             <div class="relative group border-2 border-dashed border-neutral-200 hover:border-[#91c93c] bg-neutral-50 p-4 rounded-xl text-center transition-all cursor-pointer">
-                                <input type="file" name="resume" id="resume" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                <input type="file" name="resume" id="resume" accept="application/pdf,.pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                                 <div class="text-xs font-bold text-neutral-600">
                                     📁 <span class="text-[#5f8f22] group-hover:text-[#91c93c] underline">Upload modern file</span>
                                 </div>
                                 <p class="text-[9px] text-neutral-400 mt-0.5">PDF up to 5MB</p>
+                            </div>
+
+                            <div class="hidden items-center justify-between gap-2 rounded-lg border border-[#91c93c]/20 bg-[#91c93c]/10 p-2 text-[10px] font-semibold text-[#5f8f22]" data-selected-resume>
+                                <span class="min-w-0 truncate" data-selected-resume-name></span>
+                                <button type="button" class="shrink-0 font-black underline decoration-2 underline-offset-4" data-clear-selected-resume>
+                                    Clear
+                                </button>
                             </div>
 
                             @if($profile?->resume_path)
@@ -160,4 +167,33 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('[data-application-resume-form]').forEach((form) => {
+            const input = form.querySelector('input[type="file"][name="resume"]');
+            const selectedResume = form.querySelector('[data-selected-resume]');
+            const selectedResumeName = form.querySelector('[data-selected-resume-name]');
+            const clearButton = form.querySelector('[data-clear-selected-resume]');
+
+            if (! input || ! selectedResume || ! selectedResumeName || ! clearButton) {
+                return;
+            }
+
+            const syncSelectedResume = () => {
+                const file = input.files[0];
+
+                selectedResume.classList.toggle('hidden', ! file);
+                selectedResume.classList.toggle('flex', Boolean(file));
+                selectedResumeName.textContent = file ? file.name : '';
+            };
+
+            input.addEventListener('change', syncSelectedResume);
+
+            clearButton.addEventListener('click', () => {
+                input.value = '';
+                syncSelectedResume();
+                input.focus();
+            });
+        });
+    </script>
 </x-dashboard-shell>
