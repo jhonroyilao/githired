@@ -82,13 +82,32 @@ final class ApplicationController extends Controller
             ->with('success', 'Your application has been submitted successfully!');
     }
 
-    public function index(Request $request): View
+    /**
+     * display the user's job applications with filtering and pagination
+     * switched from simple 'get()' to 'paginate()' to improve performance 
+     * and user experience when handling a large number of applications
+     * also added conditional filtering for status and job search
+     */
+   public function index(Request $request): View
     {
-        $applications = $request->user()->applications()
-            ->with(['jobListing.company']) 
-            ->latest()
-            ->get();
+    $query = $request->user()->applications()->with(['jobListing.company']);
+    // filter by Status
+    if ($request->filled('status') && $request->status !== 'all') {
+        $query->where('status', $request->status);
+    }
+    // filter by search 
+    if ($request->filled('search')) {
+        $searchTerm = $request->search;
+        $query->whereHas('jobListing', function ($q) use ($searchTerm) {
+            $q->where('title', 'like', "%{$searchTerm}%")
+              ->orWhereHas('company', function ($c) use ($searchTerm) {
+                  $c->where('name', 'like', "%{$searchTerm}%");
+              });
+        });
+    }
 
-        return view('applicant.applications.index', compact('applications'));
+    $applications = $query->latest()->paginate(10)->withQueryString();
+
+    return view('applicant.applications.index', compact('applications'));
     }
 }
