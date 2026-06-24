@@ -58,6 +58,7 @@ class ExtractResumeText implements ShouldQueue
         );
 
         $this->markFailed('Job failed after maximum retries: '.$e->getMessage());
+        $this->prepareApplicationMatches(app(PrepareAiJobMatchAction::class));
     }
 
     // Helper to cleanly update the database status when things go wrong

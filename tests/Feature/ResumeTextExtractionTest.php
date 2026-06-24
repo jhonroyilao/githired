@@ -262,6 +262,36 @@ class ResumeTextExtractionTest extends TestCase
         ]);
     }
 
+    public function test_permanent_extraction_failure_prepares_application_match_with_profile_only_fallback(): void
+    {
+        $user = $this->applicant();
+        $job = $this->job();
+        $resume = $this->makeResume([
+            'user_id' => $user->id,
+            'extraction_status' => 'pending',
+        ]);
+        $user->applications()->create([
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+            'resume_path' => $resume->file_path,
+            'status' => 'pending',
+        ]);
+
+        (new ExtractResumeText($resume))->failed(new \Exception('File missing on disk.'));
+
+        $resumeHash = app(BuildAiJobMatchInput::class)
+            ->handle($user->fresh(['profile']), $job, $resume->fresh())['resume_hash'];
+
+        $this->assertSame('failed', $resume->fresh()->extraction_status);
+        $this->assertDatabaseHas('ai_job_matches', [
+            'user_id' => $user->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+            'resume_hash' => $resumeHash,
+            'generation_status' => 'pending',
+        ]);
+    }
+
     private function applicant(): User
     {
         $user = User::factory()->create([

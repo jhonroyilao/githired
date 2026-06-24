@@ -90,6 +90,36 @@ class ApplicationFlowTest extends TestCase
         ]);
     }
 
+    public function test_uploaded_resume_with_sync_queue_prepares_match_after_application_exists(): void
+    {
+        Storage::fake('local');
+
+        $applicant = $this->applicant();
+        $job = $this->job();
+        $file = UploadedFile::fake()->create('application-resume.pdf', 128, 'application/pdf');
+
+        $response = $this->actingAs($applicant)->post(route('applicant.job-listings.apply.store', $job), [
+            'resume' => $file,
+        ]);
+
+        $response->assertRedirect(route('applicant.dashboard', absolute: false));
+
+        $resume = ResumeDocument::query()->where('user_id', $applicant->id)->first();
+
+        $this->assertNotNull($resume);
+        $this->assertDatabaseHas('applications', [
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+        ]);
+        $this->assertDatabaseHas('ai_job_matches', [
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+            'generation_status' => 'pending',
+        ]);
+    }
+
     public function test_duplicate_applications_are_blocked(): void
     {
         $applicant = $this->applicant();

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 final class StoreResumeAction
 {
-    public function handle(User $user, UploadedFile $resume): ResumeDocument
+    public function handle(User $user, UploadedFile $resume, bool $dispatchExtraction = true): ResumeDocument
     {
         $newHash = hash_file('sha256', $resume->getRealPath());
         $diskName = config('filesystems.resume_disk', 'local');
@@ -73,7 +73,9 @@ final class StoreResumeAction
             return $resumeDocument;
         }
 
-        ExtractResumeText::dispatch($resumeDocument);
+        if ($dispatchExtraction) {
+            ExtractResumeText::dispatch($resumeDocument);
+        }
 
         return $resumeDocument;
     }

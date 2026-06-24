@@ -6,6 +6,7 @@ use App\Actions\Applicant\PrepareAiJobMatchAction;
 use App\Actions\Applicant\StoreResumeAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Applicant\StoreApplicationRequest;
+use App\Jobs\ExtractResumeText;
 use App\Models\Application;
 use App\Models\JobListing;
 use Illuminate\Http\RedirectResponse;
@@ -63,8 +64,11 @@ final class ApplicationController extends Controller
         }
 
         $resumeDocument = null;
+        $shouldDispatchExtraction = false;
         if ($request->hasFile('resume')) {
-            $resumeDocument = $storeResume->handle($user, $request->file('resume'));
+            $resumeDocument = $storeResume->handle($user, $request->file('resume'), dispatchExtraction: false);
+            $shouldDispatchExtraction = $resumeDocument->wasRecentlyCreated
+                && $resumeDocument->extraction_status === 'pending';
         } else {
             $resumeDocument = $user->currentResumeDocument
                 ?? $user->resumeDocuments()->current()->first();
@@ -79,7 +83,9 @@ final class ApplicationController extends Controller
             'status' => 'pending',
         ]);
 
-        if ($resumeDocument === null || $resumeDocument->extraction_status !== 'pending') {
+        if ($shouldDispatchExtraction) {
+            ExtractResumeText::dispatch($resumeDocument);
+        } elseif ($resumeDocument === null || $resumeDocument->extraction_status !== 'pending') {
             $prepareAiJobMatch->handle($user, $jobListing, $resumeDocument);
         }
 

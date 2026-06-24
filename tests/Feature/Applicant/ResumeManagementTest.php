@@ -8,6 +8,7 @@ use App\Models\ResumeDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -96,6 +97,42 @@ final class ResumeManagementTest extends TestCase
 
         $this->assertSame(1, $user->resumeDocuments()->count());
         $this->assertSame('failed', $current->fresh()->extraction_status);
+        Queue::assertNotPushed(ExtractResumeText::class);
+    }
+
+    public function test_existing_profile_resume_paths_can_be_backfilled_into_resume_documents(): void
+    {
+        $user = $this->applicant();
+        $path = "resumes/{$user->id}/legacy-resume.pdf";
+        $content = $this->pdfContent('legacy resume');
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $path]);
+        Storage::disk('local')->put($path, $content);
+
+        Artisan::call('resumes:backfill-documents');
+
+        $resume = $user->resumeDocuments()->first();
+
+        $this->assertNotNull($resume);
+        $this->assertSame($path, $resume->file_path);
+        $this->assertSame(hash('sha256', $content), $resume->content_hash);
+        $this->assertSame('pending', $resume->extraction_status);
+        Queue::assertPushed(ExtractResumeText::class, function ($job) use ($resume) {
+            return $job->resume->is($resume);
+        });
+    }
+
+    public function test_resume_backfill_skips_users_that_already_have_current_resume_documents(): void
+    {
+        $user = $this->applicant();
+        $existing = $this->resumeFor($user);
+        $path = "resumes/{$user->id}/legacy-resume.pdf";
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $path]);
+        Storage::disk('local')->put($path, $this->pdfContent('legacy resume'));
+
+        Artisan::call('resumes:backfill-documents');
+
+        $this->assertSame(1, $user->resumeDocuments()->count());
+        $this->assertTrue($existing->fresh()->is_current);
         Queue::assertNotPushed(ExtractResumeText::class);
     }
 
