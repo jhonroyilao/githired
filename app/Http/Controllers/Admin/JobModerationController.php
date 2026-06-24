@@ -11,5 +11,47 @@ use Illuminate\View\View;
 
 class JobModerationController extends Controller
 {
-    
+    public function index(): View
+    {
+        $jobs = JobListing::with(['company', 'user']) 
+            ->where('status', JobStatus::Pending->value) 
+            ->when( 
+                request('sort') === 'oldest', 
+                fn ($query) => $query->oldest(), 
+                fn ($query) => $query->latest() ) 
+            ->paginate(20);
+        return view('admin.jobs.pending', ['jobs' => $jobs, 'user' => auth()->user()]);
+    }
+    public function approve(Request $request, JobListing $jobListing): RedirectResponse 
+    {
+        $jobListing->update([
+            'status' => JobStatus::Active->value,
+            'approved_at' => now(),
+            'approved_by' => $request->user()->id,
+            'published_at' => now(),
+            'rejected_at' => null,
+            'rejected_by' => null,
+            'rejection_reason' => null,
+        ]);
+
+        return back()->with('success','Job approved successfully.');
+
+    }
+
+    public function reject(Request $request, JobListing $jobListing): RedirectResponse
+    {
+
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:1000',],
+        ]);
+
+        $jobListing->update([
+            'status' => JobStatus::Rejected->value,
+            'rejected_at' => now(),
+            'rejected_by' => $request->user()->id,
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        return back()->with('success', 'Job rejected successfully.');
+    }
 }
