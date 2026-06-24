@@ -59,8 +59,8 @@ class StoreJobListingRequest extends FormRequest
 
             'skills_required' => ['nullable', 'string'],
 
-            'salary_min' => ['nullable', 'integer', 'min:0'],
-            'salary_max' => ['nullable', 'integer', 'min:0', 'gte:salary_min'],
+            'salary_min' => ['nullable', 'numeric', 'min:0'],
+            'salary_max' => ['nullable', 'numeric', 'min:0', 'gte:salary_min'],
 
             'expires_at' => ['nullable', 'date', 'after:today'],
 

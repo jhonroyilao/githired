@@ -195,6 +195,25 @@ class EmployerJobListingCrudTest extends TestCase
         $this->assertNull($job->salary_max);
     }
 
+    public function test_editing_job_accepts_decimal_salary_values_from_form(): void
+    {
+        [$employer, $company] = $this->employerWithCompany();
+        $job = $this->job($employer, $company);
+
+        $this->actingAs($employer)
+            ->put(route('employer.jobs.update', $job), $this->validPayload([
+                'category_id' => $job->category_id,
+                'salary_min' => '50000.00',
+                'salary_max' => '90000.00',
+            ]))
+            ->assertRedirect(route('employer.dashboard', absolute: false));
+
+        $job->refresh();
+
+        $this->assertSame('50000.00', $job->salary_min);
+        $this->assertSame('90000.00', $job->salary_max);
+    }
+
     public function test_zero_salary_values_are_not_displayed_as_missing(): void
     {
         [$employer, $company] = $this->employerWithCompany();

@@ -169,6 +169,7 @@
                         type="number"
                         name="salary_min"
                         value="{{ old('salary_min', $job->salary_min) }}"
+                        step="0.01"
                         class="{{ $inputClass }}">
 
                     @error('salary_min')
@@ -183,6 +184,7 @@
                         type="number"
                         name="salary_max"
                         value="{{ old('salary_max', $job->salary_max) }}"
+                        step="0.01"
                         class="{{ $inputClass }}">
 
                     @error('salary_max')
