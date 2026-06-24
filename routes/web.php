@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
 use App\Http\Controllers\Employer\EmployerJobListingController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
+use App\Http\Controllers\Admin\JobModerationController;
 use App\Http\Controllers\JobController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -132,4 +133,9 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
 
 Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+    Route::prefix('jobs')->name('jobs.')->group(function () {
+        Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
+        Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
+        Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
+    });
 });
