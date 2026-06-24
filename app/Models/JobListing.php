@@ -127,13 +127,13 @@ class JobListing extends Model
 
     public function salaryRange(): string
     {
-        if (!$this->salary_min && !$this->salary_max) {
+        if (is_null($this->salary_min) && is_null($this->salary_max)) {
             return 'Negotiable';
         }
 
         $currency = $this->salary_currency ?? 'PHP';
 
-        if ($this->salary_min && $this->salary_max) {
+        if (! is_null($this->salary_min) && ! is_null($this->salary_max)) {
             return $currency . ' ' . number_format($this->salary_min) . ' - ' . number_format($this->salary_max);
         }
 
