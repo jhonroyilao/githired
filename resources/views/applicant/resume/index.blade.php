@@ -1,4 +1,6 @@
 @php
+    use Illuminate\Support\Str;
+    
     $secondaryButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black text-neutral-900 no-underline transition hover:-translate-y-0.5';
     $primaryButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-4 py-2 text-sm font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5';
     $dangerButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-signal-red bg-white px-4 py-2 text-sm font-black text-signal-red transition hover:-translate-y-0.5';
@@ -38,8 +40,6 @@
             <button type="submit" class="{{ $primaryButtonClass }}">Upload resume</button>
         </form>
     </section>
-
-    @php use Illuminate\Support\Str; @endphp
 
     <section class="mt-5 rounded-2xl border border-neutral-200 bg-white p-5">
         <h2 class="text-xl font-black text-neutral-900">Current resume</h2>
