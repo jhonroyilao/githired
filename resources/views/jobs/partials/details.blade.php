@@ -1,23 +1,20 @@
-        {{-- Back Navigation --}}
-    <a href="{{ auth()->check() ? url('/applicant/dashboard') : route('jobs.index') }}" 
+    <a href="{{ $backUrl }}"
        class="text-xs font-black text-neutral-500 hover:text-[#5f8f22] transition inline-flex items-center gap-1.5 uppercase tracking-wider mb-6">
-        ← Back to {{ auth()->check() ? 'Dashboard' : 'Jobs' }}
+        ← Back to {{ $backLabel }}
     </a>
 
     <div class="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
-        
-        {{-- Main Content Article --}}
+
         <article class="bg-white border-2 border-neutral-200 rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(26,35,21,0.06)]">
             <span class="inline-block text-[10px] bg-[#91c93c]/20 text-[#5f8f22] font-black px-2 py-0.5 rounded uppercase tracking-wider mb-3">
                 {{ $jobListing->category->name ?? 'General' }}
             </span>
-            
+
             <h1 class="text-4xl font-black tracking-tight text-neutral-950">{{ $jobListing->title }}</h1>
             <p class="mt-3 text-lg font-bold text-neutral-600">
                 {{ $jobListing->company->name ?? 'Company' }} · <span class="text-neutral-400 font-medium">{{ $jobListing->location }}</span>
             </p>
 
-            {{-- Stats Grid with Black Outline --}}
             <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
                 @foreach([
                     'Salary' => $jobListing->salaryRange() ?? 'Undisclosed',
@@ -60,7 +57,6 @@
             </div>
         </article>
 
-        {{-- Sidebar Application Card --}}
         <aside class="lg:sticky lg:top-8">
             <div class="bg-neutral-950 border-2 border-neutral-950 rounded-2xl p-6 text-white shadow-[4px_4px_0px_0px_#91c93c]">
                 <h2 class="text-lg font-black tracking-tight text-white">Interested?</h2>

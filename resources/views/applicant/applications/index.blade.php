@@ -1,6 +1,6 @@
 <x-dashboard-shell title="My Job Applications" eyebrow="Applicant Control Center">
     <div class="space-y-6">
-        
+
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b-2 border-neutral-200 pb-4">
             <div>
                 <h1 class="text-2xl font-black text-neutral-950 tracking-tight uppercase">Application Tracker</h1>
@@ -28,24 +28,35 @@
 
         @forelse($applications as $application)
             @php
+                $jobListing = $application->jobListing;
+                $isClickable = $jobListing && ! $jobListing->trashed();
                 $statusColor = match($application->status) {
-                    'approved', 'hired' => 'bg-green-50 text-green-700 border-green-200',
+                    'hired' => 'bg-green-50 text-green-700 border-green-200',
                     'rejected' => 'bg-red-50 text-red-700 border-red-200',
                     'interview' => 'bg-blue-50 text-blue-700 border-blue-200',
                     default => 'bg-amber-50 text-amber-700 border-amber-200',
                 };
             @endphp
 
-            <div onclick="window.location='{{ route('jobs.show', $application->jobListing->id) }}'"
-                 class="bg-white border-2 border-neutral-200 rounded-2xl p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-1 transition-all hover:border-neutral-950 hover:shadow-[4px_4px_0px_0px_#1a2315] cursor-pointer group">
-                
+            <div @if($isClickable) onclick="window.location='{{ route('jobs.show', $jobListing) }}'" @endif
+                 class="bg-white border-2 border-neutral-200 rounded-2xl p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-1 transition-all {{ $isClickable ? 'hover:border-neutral-950 hover:shadow-[4px_4px_0px_0px_#1a2315] cursor-pointer group' : '' }}">
+
                 <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-xl bg-neutral-950 text-[#91c93c] font-black flex items-center justify-center shrink-0">
-                        {{ substr($application->jobListing->company->name ?? '?', 0, 1) }}
+                        {{ substr($jobListing?->company?->name ?? '?', 0, 1) }}
                     </div>
                     <div>
-                        <h2 class="text-base font-black text-neutral-950 group-hover:text-[#5f8f22]">{{ $application->jobListing->title }}</h2>
-                        <p class="text-xs font-bold text-neutral-500">{{ $application->jobListing->company->name ?? 'N/A' }} · {{ $application->jobListing->location }}</p>
+                        <h2 class="text-base font-black text-neutral-950 {{ $jobListing ? 'group-hover:text-[#5f8f22]' : '' }}">
+                            {{ $jobListing?->title ?? 'Deleted job listing' }}
+                        </h2>
+                        <p class="text-xs font-bold text-neutral-500">
+                            {{ $jobListing?->company?->name ?? 'N/A' }} · {{ $jobListing?->location ?? 'No longer available' }}
+                        </p>
+                        @if($jobListing && $jobListing->trashed())
+                            <span class="mt-2 inline-flex text-[10px] font-black uppercase tracking-wider text-neutral-500">
+                                Archived listing
+                            </span>
+                        @endif
                     </div>
                 </div>
 

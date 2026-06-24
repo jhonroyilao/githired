@@ -7,4 +7,3 @@
         @include('jobs.partials.details', ['jobListing' => $jobListing, 'hasApplied' => $hasApplied])
     </x-app-shell>
 @endauth
-

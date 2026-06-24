@@ -100,11 +100,11 @@ final class ApplicationController extends Controller
    public function index(Request $request): View
    {
     $query = $request->user()->applications()->with(['jobListing.company']);
-   
+
     if ($request->filled('status') && $request->status !== 'all') {
         $query->where('status', $request->status);
     }
-   
+
     if ($request->filled('search')) {
         $searchTerm = $request->search;
         $query->whereHas('jobListing', function ($q) use ($searchTerm) {
