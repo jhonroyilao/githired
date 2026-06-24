@@ -142,7 +142,7 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <a href="{{ route('jobs.show', $job->slug) }}" class="hover:text-[#91c93c] transition">
+                                        <a href="{{ route('applicant.job-listings.apply', $job->id) }}" class="hover:text-[#91c93c] transition">
                                         <h3 class="font-black text-sm text-neutral-950 leading-tight">{{ $job->title }}</h3>
                                         </a>
                                         <p class="text-xs font-bold text-neutral-500">{{ $job->company->name ?? 'Anonymous Company' }}</p>
