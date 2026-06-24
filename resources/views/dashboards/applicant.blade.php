@@ -142,7 +142,9 @@
                                         @endif
                                     </div>
                                     <div>
+                                        <a href="{{ route('applicant.job-listings.apply', $job->id) }}" class="hover:text-[#91c93c] transition">
                                         <h3 class="font-black text-sm text-neutral-950 leading-tight">{{ $job->title }}</h3>
+                                        </a>
                                         <p class="text-xs font-bold text-neutral-500">{{ $job->company->name ?? 'Anonymous Company' }}</p>
                                     </div>
                                 </div>
@@ -202,7 +204,7 @@
                                 @if(in_array($job->id, $appliedListingIds))
                                     <span class="bg-neutral-200 text-neutral-500 font-black text-xs px-3 py-1.5 rounded-lg select-none">Applied</span>
                                 @else
-                                    <a href="{{ route('jobs.show', $job) }}" class="bg-[#91c93c] hover:bg-[#7fae34] text-neutral-950 font-black text-xs px-4 py-1.5 rounded-lg transition">Details</a>
+                                    <a href="{{ route('applicant.job-listings.apply', $job->id) }}" class="bg-[#91c93c] hover:bg-[#7fae34] text-neutral-950 font-black text-xs px-4 py-1.5 rounded-lg transition">Details</a>
                                 @endif
                             </div>
                         </div>

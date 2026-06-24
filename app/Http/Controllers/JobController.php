@@ -42,22 +42,35 @@ final class JobController extends Controller
         ]);
     }
 
-    public function show(Request $request, JobListing $jobListing): View
+    public function show(
+        Request $request,
+        JobListing $jobListing,
+        ResolveUserDestinationRouteAction $resolveDestination,
+    ): View
     {
-        abort_unless($jobListing->isPubliclyVisible(), Response::HTTP_NOT_FOUND);
-
-        $jobListing->load(['company', 'category']);
-
         $user = $request->user();
+
         $hasApplied = $user?->role === UserRole::Applicant->value
             && Application::query()
                 ->where('user_id', $user->id)
                 ->where('job_listing_id', $jobListing->id)
                 ->exists();
 
+        if (! $jobListing->isPubliclyVisible() && ! $hasApplied) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        $jobListing->load(['company', 'category']);
+
+        $backUrl = $user
+            ? route($resolveDestination->dashboard($user))
+            : route('jobs.index');
+
         return view('jobs.show', [
             'jobListing' => $jobListing,
             'hasApplied' => $hasApplied,
+            'backUrl' => $backUrl,
+            'backLabel' => $user ? 'Dashboard' : 'Jobs',
         ]);
     }
 }
