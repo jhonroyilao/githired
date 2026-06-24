@@ -3,10 +3,13 @@
 namespace Tests\Feature\Applicant;
 
 use App\Enums\UserRole;
+use App\Jobs\ExtractResumeText;
 use App\Models\ResumeDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -19,6 +22,7 @@ final class ResumeManagementTest extends TestCase
         parent::setUp();
 
         Storage::fake('local');
+        Queue::fake();
     }
 
     public function test_applicant_can_upload_current_pdf_resume_and_profile_path_is_updated(): void
@@ -47,6 +51,89 @@ final class ResumeManagementTest extends TestCase
             'user_id' => $user->id,
             'resume_path' => $resume->file_path,
         ]);
+
+        Queue::assertPushed(ExtractResumeText::class, function ($job) use ($user) {
+            return $job->resume->user_id === $user->id;
+        });
+    }
+
+    public function test_same_current_resume_upload_reuses_existing_document_without_extracting_again(): void
+    {
+        $user = $this->applicant();
+        $content = $this->pdfContent('same resume');
+        $current = $this->resumeFor($user, [
+            'content_hash' => hash('sha256', $content),
+            'extraction_status' => 'ready',
+            'extracted_text' => 'Existing extracted text.',
+        ]);
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $current->file_path]);
+
+        $response = $this->actingAs($user)->post(route('applicant.resume.store'), [
+            'resume' => $this->pdfUpload('same-resume.pdf', $content),
+        ]);
+
+        $response->assertRedirect(route('applicant.resume'));
+        $response->assertSessionHas('status', 'Duplicate resume detected. Using your existing file.');
+
+        $this->assertSame(1, $user->resumeDocuments()->count());
+        $this->assertTrue($current->fresh()->is_current);
+        $this->assertSame($current->file_path, $user->profile()->first()->resume_path);
+        Queue::assertNotPushed(ExtractResumeText::class);
+    }
+
+    public function test_failed_current_resume_with_same_hash_does_not_auto_retry_extraction(): void
+    {
+        $user = $this->applicant();
+        $content = $this->pdfContent('failed resume');
+        $current = $this->resumeFor($user, [
+            'content_hash' => hash('sha256', $content),
+            'extraction_status' => 'failed',
+            'extraction_error' => 'No extractable text found.',
+        ]);
+
+        $this->actingAs($user)->post(route('applicant.resume.store'), [
+            'resume' => $this->pdfUpload('failed-resume.pdf', $content),
+        ]);
+
+        $this->assertSame(1, $user->resumeDocuments()->count());
+        $this->assertSame('failed', $current->fresh()->extraction_status);
+        Queue::assertNotPushed(ExtractResumeText::class);
+    }
+
+    public function test_existing_profile_resume_paths_can_be_backfilled_into_resume_documents(): void
+    {
+        $user = $this->applicant();
+        $path = "resumes/{$user->id}/legacy-resume.pdf";
+        $content = $this->pdfContent('legacy resume');
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $path]);
+        Storage::disk('local')->put($path, $content);
+
+        Artisan::call('resumes:backfill-documents');
+
+        $resume = $user->resumeDocuments()->first();
+
+        $this->assertNotNull($resume);
+        $this->assertSame($path, $resume->file_path);
+        $this->assertSame(hash('sha256', $content), $resume->content_hash);
+        $this->assertSame('pending', $resume->extraction_status);
+        Queue::assertPushed(ExtractResumeText::class, function ($job) use ($resume) {
+            return $job->resume->is($resume);
+        });
+    }
+
+    public function test_resume_backfill_skips_users_that_already_have_current_resume_documents(): void
+    {
+        $user = $this->applicant();
+        $existing = $this->resumeFor($user);
+        $path = "resumes/{$user->id}/legacy-resume.pdf";
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $path]);
+        Storage::disk('local')->put($path, $this->pdfContent('legacy resume'));
+
+        Artisan::call('resumes:backfill-documents');
+
+        $this->assertSame(1, $user->resumeDocuments()->count());
+        $this->assertTrue($existing->fresh()->is_current);
+        Queue::assertNotPushed(ExtractResumeText::class);
     }
 
     public function test_non_pdf_uploads_are_rejected(): void
@@ -97,6 +184,8 @@ final class ResumeManagementTest extends TestCase
         $newResume = $user->resumeDocuments()->where('original_name', 'new-resume.pdf')->sole();
         $this->assertTrue($newResume->is_current);
         $this->assertSame($newResume->file_path, $user->profile()->first()->resume_path);
+
+        Queue::assertPushed(ExtractResumeText::class);
     }
 
     public function test_applicant_can_download_their_own_resume(): void
@@ -269,5 +358,17 @@ final class ResumeManagementTest extends TestCase
             'extraction_status' => 'pending',
             'is_current' => true,
         ], $attributes));
+    }
+
+    private function pdfUpload(string $name, string $content): UploadedFile
+    {
+        return UploadedFile::fake()
+            ->createWithContent($name, $content)
+            ->mimeType('application/pdf');
+    }
+
+    private function pdfContent(string $marker): string
+    {
+        return "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n% {$marker}\n%%EOF\n";
     }
 }
