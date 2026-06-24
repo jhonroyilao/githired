@@ -40,19 +40,11 @@ final class ResumeController extends Controller
         ]);
     }
 
-    public function show(): View
-    {
-        $user    = Auth::user();
-        $resumes = $user->resumeDocuments()->latest()->get();
-        $current = $resumes->firstWhere('is_current', true);
-
-        return view('applicant.resume.index', compact('resumes', 'current'));
-    }
-
     public function store(StoreResumeRequest $request, StoreResumeAction $storeResume): RedirectResponse
     {
         $resume = $storeResume->handle($request->user(), $request->file('resume'));
 
+        // Only dispatch if the Action actually created a new database row
         if ($resume->wasRecentlyCreated) {
             ExtractResumeText::dispatch($resume);
             $statusMessage = 'Resume uploaded and queued for processing.';
