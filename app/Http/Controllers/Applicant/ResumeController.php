@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Applicant;
 
-use App\Jobs\ExtractResumeText;
 use App\Actions\Applicant\DeleteResumeAction;
 use App\Actions\Applicant\SetCurrentResumeAction;
 use App\Actions\Applicant\StoreResumeAction;
@@ -44,13 +43,9 @@ final class ResumeController extends Controller
     {
         $resume = $storeResume->handle($request->user(), $request->file('resume'));
 
-        // Only dispatch if the Action actually created a new database row
-        if ($resume->wasRecentlyCreated) {
-            ExtractResumeText::dispatch($resume);
-            $statusMessage = 'Resume uploaded and queued for processing.';
-        } else {
-            $statusMessage = 'Duplicate resume detected. Using your existing file.';
-        }
+        $statusMessage = $resume->wasRecentlyCreated
+            ? 'Resume uploaded and queued for processing.'
+            : 'Duplicate resume detected. Using your existing file.';
 
         $redirect = redirect()
             ->route($this->redirectRoute($request))

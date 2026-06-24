@@ -3,15 +3,14 @@
 namespace Tests\Feature\Applicant;
 
 use App\Enums\UserRole;
+use App\Jobs\ExtractResumeText;
 use App\Models\ResumeDocument;
 use App\Models\User;
-use App\Jobs\ExtractResumeText;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
-
 
 final class ResumeManagementTest extends TestCase
 {
@@ -55,6 +54,49 @@ final class ResumeManagementTest extends TestCase
         Queue::assertPushed(ExtractResumeText::class, function ($job) use ($user) {
             return $job->resume->user_id === $user->id;
         });
+    }
+
+    public function test_same_current_resume_upload_reuses_existing_document_without_extracting_again(): void
+    {
+        $user = $this->applicant();
+        $content = $this->pdfContent('same resume');
+        $current = $this->resumeFor($user, [
+            'content_hash' => hash('sha256', $content),
+            'extraction_status' => 'ready',
+            'extracted_text' => 'Existing extracted text.',
+        ]);
+        $user->profile()->firstOrCreate([])->update(['resume_path' => $current->file_path]);
+
+        $response = $this->actingAs($user)->post(route('applicant.resume.store'), [
+            'resume' => $this->pdfUpload('same-resume.pdf', $content),
+        ]);
+
+        $response->assertRedirect(route('applicant.resume'));
+        $response->assertSessionHas('status', 'Duplicate resume detected. Using your existing file.');
+
+        $this->assertSame(1, $user->resumeDocuments()->count());
+        $this->assertTrue($current->fresh()->is_current);
+        $this->assertSame($current->file_path, $user->profile()->first()->resume_path);
+        Queue::assertNotPushed(ExtractResumeText::class);
+    }
+
+    public function test_failed_current_resume_with_same_hash_does_not_auto_retry_extraction(): void
+    {
+        $user = $this->applicant();
+        $content = $this->pdfContent('failed resume');
+        $current = $this->resumeFor($user, [
+            'content_hash' => hash('sha256', $content),
+            'extraction_status' => 'failed',
+            'extraction_error' => 'No extractable text found.',
+        ]);
+
+        $this->actingAs($user)->post(route('applicant.resume.store'), [
+            'resume' => $this->pdfUpload('failed-resume.pdf', $content),
+        ]);
+
+        $this->assertSame(1, $user->resumeDocuments()->count());
+        $this->assertSame('failed', $current->fresh()->extraction_status);
+        Queue::assertNotPushed(ExtractResumeText::class);
     }
 
     public function test_non_pdf_uploads_are_rejected(): void
@@ -279,5 +321,17 @@ final class ResumeManagementTest extends TestCase
             'extraction_status' => 'pending',
             'is_current' => true,
         ], $attributes));
+    }
+
+    private function pdfUpload(string $name, string $content): UploadedFile
+    {
+        return UploadedFile::fake()
+            ->createWithContent($name, $content)
+            ->mimeType('application/pdf');
+    }
+
+    private function pdfContent(string $marker): string
+    {
+        return "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n% {$marker}\n%%EOF\n";
     }
 }

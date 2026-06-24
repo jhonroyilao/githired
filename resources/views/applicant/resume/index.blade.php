@@ -1,6 +1,6 @@
 @php
     use Illuminate\Support\Str;
-    
+
     $secondaryButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-neutral-900 bg-white px-4 py-2 text-sm font-black text-neutral-900 no-underline transition hover:-translate-y-0.5';
     $primaryButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-4 py-2 text-sm font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5';
     $dangerButtonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-signal-red bg-white px-4 py-2 text-sm font-black text-signal-red transition hover:-translate-y-0.5';
@@ -93,9 +93,6 @@
             @elseif ($currentResume->extraction_status === 'failed')
                 <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
                     Text extraction failed. Job matching will use your profile skills instead.
-                    @if ($currentResume->extraction_error)
-                        <p class="mt-1 text-xs font-semibold opacity-75">{{ $currentResume->extraction_error }}</p>
-                    @endif
                 </div>
 
             @elseif ($currentResume->extraction_status === 'pending')

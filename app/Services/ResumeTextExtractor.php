@@ -12,16 +12,16 @@ class ResumeTextExtractor
         private readonly Parser $parser
     ) {}
 
-    //Grab text and a fresh hash from the saved PDF
+    // Grab text and a fresh hash from the saved PDF
     public function extract(ResumeDocument $resume): array
     {
         $disk = Storage::disk(config('filesystems.resume_disk', 'local'));
 
-        if (!$disk->exists($resume->file_path)) {
+        if (! $disk->exists($resume->file_path)) {
             throw new \Exception("Resume file not found on disk for document #{$resume->id}.");
         }
 
-        //Read the file once to grab both the raw bytes and the hash
+        // Read the file once to grab both the raw bytes and the hash
         $bytes = $disk->get($resume->file_path);
         $hash = hash('sha256', $bytes);
 
@@ -33,7 +33,7 @@ class ResumeTextExtractor
             throw new \DomainException("PDF parser error: {$e->getMessage()}", 0, $e);
         }
 
-        //Make sure the PDF was not just a giant image or locked behind a password
+        // Make sure the PDF was not just a giant image or locked behind a password
         if (trim($text) === '') {
             throw new \DomainException('No extractable text found. The PDF may be image-only or password-protected.');
         }

@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ResumeTextExtractor::class, function () {
-            return new ResumeTextExtractor(new Parser());
+            return new ResumeTextExtractor(new Parser);
         });
     }
 
