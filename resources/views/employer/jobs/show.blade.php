@@ -13,14 +13,22 @@
                 </p>
             </div>
 
-            @if ($job->status !== \App\Enums\JobStatus::Closed->value)
+            <div class="flex gap-2">
                 <a
-                    href="{{ route('employer.jobs.edit', $job) }}"
-                    class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-5 font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5"
+                    href="{{ route('employer.jobs.applicants', $job) }}"
+                    class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-neutral-200 bg-white px-5 font-black text-neutral-900 shadow-sm transition hover:bg-neutral-50"
                 >
-                    Edit Job
+                    View Applicants
                 </a>
-            @endif
+                @if ($job->status !== \App\Enums\JobStatus::Closed->value)
+                    <a
+                        href="{{ route('employer.jobs.edit', $job) }}"
+                        class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-5 font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5"
+                    >
+                        Edit Job
+                    </a>
+                @endif
+            </div>
         </div>
 
         <div class="mt-6 flex flex-wrap gap-2">
@@ -34,6 +42,17 @@
                 {{ number_format($job->views_count) }} views
             </span>
         </div>
+
+        @if ($job->status === \App\Enums\JobStatus::Rejected->value && $job->rejection_reason)
+            <section class="mt-6 rounded-xl border border-red-200 bg-red-50 p-5">
+                <h2 class="text-sm font-black uppercase tracking-[0.14em] text-red-700">
+                    Rejection reason
+                </h2>
+                <p class="mt-3 whitespace-pre-line text-sm font-bold leading-6 text-red-800">
+                    {{ $job->rejection_reason }}
+                </p>
+            </section>
+        @endif
 
         <section class="mt-8">
             <h2 class="text-xl font-black text-neutral-950">Description</h2>

@@ -14,6 +14,7 @@ final class UpdateEmployerCompanyAction
      */
     public function handle(User $user, array $attributes): void
     {
+        $imageDisk = config('filesystems.image_disk', 'public');
         $company = $user->company()->firstOrNew([]);
 
         $company->fill([
@@ -27,16 +28,16 @@ final class UpdateEmployerCompanyAction
         ]);
 
         if (($attributes['remove_logo'] ?? false) && $company->logo_path) {
-            Storage::disk('public')->delete($company->logo_path);
+            Storage::disk($imageDisk)->delete($company->logo_path);
             $company->logo_path = null;
         }
 
         if (($attributes['logo'] ?? null) instanceof UploadedFile) {
             if ($company->logo_path) {
-                Storage::disk('public')->delete($company->logo_path);
+                Storage::disk($imageDisk)->delete($company->logo_path);
             }
 
-            $company->logo_path = $attributes['logo']->store('company-logos', 'public');
+            $company->logo_path = $attributes['logo']->store('company-logos', $imageDisk);
         }
 
         $company->save();

@@ -49,10 +49,10 @@ class JobManagementController extends Controller
             'jobs'          => $jobs,
             'pendingCount'  => JobListing::where('status', JobStatus::Pending->value)->count(),
             'activeCount'   => JobListing::where('status', JobStatus::Active->value)->count(),
-            'closedCount'   => JobListing::where('status', JobStatus::Closed->value)->count(),
+            'hiddenCount'   => JobListing::where('status', JobStatus::Closed->value)->count(),
             'rejectedCount' => JobListing::where('status', JobStatus::Rejected->value)->count(),
             'deletedCount'  => JobListing::onlyTrashed()->count(),
-            'totalCount'    => JobListing::withTrashed()->count(),
+            'totalCount'    => JobListing::count(),
         ]);
     }
 
@@ -61,10 +61,15 @@ class JobManagementController extends Controller
         JobListing $jobListing
     ): RedirectResponse
     {
-        $jobListing->update([
-            'status' => JobStatus::Closed->value,
-            'closed_at' => now(),
-        ]);
+        $updated = JobListing::query()
+            ->whereKey($jobListing->getKey())
+            ->where('status', JobStatus::Active->value)
+            ->update([
+                'status' => JobStatus::Closed->value,
+                'closed_at' => now(),
+            ]);
+
+        abort_if($updated === 0, Response::HTTP_CONFLICT);
 
         return back()->with(
             'success',

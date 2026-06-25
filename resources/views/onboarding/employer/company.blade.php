@@ -7,6 +7,7 @@
     $primaryButtonClass = 'inline-flex min-h-[3.35rem] min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-6 py-3 font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5 max-sm:w-full';
     $logoMarkedForRemoval = old('remove_logo') === '1';
     $hasLogo = filled($company?->logo_path) && ! $logoMarkedForRemoval;
+    $logoUrl = $hasLogo ? \App\Support\StorageUrl::image($company->logo_path) : null;
     $logoPlaceholder = asset('assets/avatar.svg');
 @endphp
 
@@ -71,7 +72,7 @@
                 <div class="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-neutral-950/45 bg-primarygreen-100/60">
                     <img
                         id="logo-preview"
-                        src="{{ $hasLogo ? asset('storage/'.$company->logo_path) : $logoPlaceholder }}"
+                        src="{{ $logoUrl ?? $logoPlaceholder }}"
                         alt=""
                         class="h-full w-full object-cover"
                         data-placeholder-src="{{ $logoPlaceholder }}"

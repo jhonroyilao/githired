@@ -8,6 +8,10 @@
 
     <div class="mt-8">
         <form method="GET" class="flex gap-3">
+            @if(request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+
             <input type="text" name="search" value="{{ request('search') }}"
                 placeholder="Search by job title, company, or location..."
                 class="flex-1 rounded-xl border border-neutral-200 bg-white px-4 py-3 font-medium">
@@ -36,14 +40,14 @@
         </a>
         <a href="{{ route('admin.jobs.all', ['status' => 'closed']) }}"
             class="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-800 hover:shadow transition">
-            Closed <span class="text-base font-black">{{ $closedCount }}</span>
+            Hidden <span class="text-base font-black">{{ $hiddenCount }}</span>
         </a>
         <a href="{{ route('admin.jobs.all', ['status' => 'rejected']) }}"
             class="inline-flex items-center gap-2 rounded-full border border-red-300 bg-red-50 px-4 py-2 text-sm font-bold text-red-800 hover:shadow transition">
             Rejected <span class="text-base font-black">{{ $rejectedCount }}</span>
         </a>
-        <a href="{{ route('admin.jobs.all', ['status' => 'deleted']) }}" 
-            class="inline-flex items-center gap-2 rounded-full border border-brown-300 bg-brown-50 px-4 py-2 text-sm font-bold text-brown-800 hover:shadow transition">
+        <a href="{{ route('admin.jobs.all', ['status' => 'deleted']) }}"
+            class="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-neutral-100 px-4 py-2 text-sm font-bold text-neutral-800 hover:shadow transition">
             Deleted <span class="text-base font-black">{{ $deletedCount }}</span>
         </a>
         <a href="{{ route('admin.jobs.all') }}"
@@ -88,7 +92,7 @@
                                     bg-neutral-100 text-neutral-600
                                 @endif
                             ">
-                                {{ $job->trashed() ? 'Deleted' : ucfirst($job->status) }}
+                                {{ $job->trashed() ? 'Deleted' : ($job->status === \App\Enums\JobStatus::Closed->value ? 'Hidden' : ucfirst($job->status)) }}
                             </span>
 
                             <span class="rounded-lg bg-neutral-100 px-3 py-1 text-xs font-black text-neutral-600 group-open:hidden">
@@ -153,6 +157,12 @@
                                     Reject
                                 </button>
 
+                                <button type="button"
+                                    onclick="document.getElementById('delete-{{ $job->id }}').classList.toggle('hidden')"
+                                    class="rounded-lg bg-red-100 px-5 py-2 font-black text-red-700 hover:bg-red-200">
+                                    Soft Delete
+                                </button>
+
                             @elseif($job->status === \App\Enums\JobStatus::Closed->value)
                                 <form method="POST" action="{{ route('admin.jobs.reactivate', $job) }}">
                                     @csrf
@@ -165,7 +175,7 @@
                                 <button type="button"
                                     onclick="document.getElementById('delete-{{ $job->id }}').classList.toggle('hidden')"
                                     class="rounded-lg bg-red-100 px-5 py-2 font-black text-red-700 hover:bg-red-200">
-                                    Delete
+                                    Soft Delete
                                 </button>
 
                             @elseif($job->status === \App\Enums\JobStatus::Active->value)
@@ -174,14 +184,14 @@
                                     @csrf
                                     <button type="submit"
                                         class="rounded-lg bg-orange-100 px-5 py-2 font-black text-orange-700 hover:bg-orange-200">
-                                        Close Listing
+                                        Hide Listing
                                     </button>
                                 </form>
 
                                 <button type="button"
                                     onclick="document.getElementById('delete-{{ $job->id }}').classList.toggle('hidden')"
                                     class="rounded-lg bg-red-100 px-5 py-2 font-black text-red-700 hover:bg-red-200">
-                                    Delete
+                                    Soft Delete
                                 </button>
 
                             @elseif($job->status === \App\Enums\JobStatus::Rejected->value)

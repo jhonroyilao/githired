@@ -6,12 +6,16 @@ use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Employer\StoreJobListingRequest;
+use App\Models\Application;
 use App\Models\JobCategory;
 use App\Models\JobListing;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmployerJobListingController extends Controller
 {
@@ -124,5 +128,69 @@ class EmployerJobListingController extends Controller
         $this->authorizeOwnedJob($jobListing);
 
         abort_if($jobListing->status === JobStatus::Closed->value, Response::HTTP_FORBIDDEN);
+    }
+
+    public function applicants(Request $request, JobListing $jobListing): View
+    {
+        $this->authorizeOwnedJob($jobListing);
+
+        $query = $jobListing->applications()->with('user.profile');
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        } else {
+            $query->where('status', '!=', 'hired');
+        }
+
+        $query->when($request->search, function ($q) use ($request) {
+            $q->whereHas('user', fn ($u) => $u->where('name', 'like', "%{$request->search}%"));
+        });
+
+        $sort = $request->sort === 'oldest' ? 'asc' : 'desc';
+        $query->orderBy('created_at', $sort);
+
+        return view('employer.applicants.index', [
+            'job' => $jobListing,
+            'applications' => $query->paginate(12)->withQueryString(),
+        ]);
+    }
+
+    public function showApplication(JobListing $jobListing, Application $application): View
+    {
+        $this->authorizeApplication($jobListing, $application);
+
+        $application->loadMissing(['user.profile', 'resumeDocument']);
+
+        return view('employer.applicants.show', [
+            'job' => $jobListing,
+            'application' => $application,
+        ]);
+    }
+
+    public function downloadApplicationResume(JobListing $jobListing, Application $application): StreamedResponse
+    {
+        $this->authorizeApplication($jobListing, $application);
+
+        $application->loadMissing('resumeDocument');
+
+        $path = $application->resumeDocument?->file_path ?? $application->resume_path;
+        abort_if(blank($path), Response::HTTP_NOT_FOUND);
+
+        $disk = Storage::disk(config('filesystems.resume_disk', 'local'));
+        abort_unless($disk->exists($path), Response::HTTP_NOT_FOUND);
+
+        return $disk->download(
+            $path,
+            $application->resumeDocument?->original_name ?? basename($path),
+        );
+    }
+
+    private function authorizeApplication(JobListing $jobListing, Application $application): void
+    {
+        abort_if(
+            $application->job_listing_id !== $jobListing->id
+                || $jobListing->user_id !== auth()->id(),
+            Response::HTTP_FORBIDDEN
+        );
     }
 }

@@ -7,6 +7,7 @@
     $primaryButtonClass = 'inline-flex min-h-12 min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-6 py-3 text-lg font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5 max-sm:w-full';
     $avatarMarkedForRemoval = old('remove_avatar') === '1';
     $hasAvatar = filled($profile?->avatar_path) && ! $avatarMarkedForRemoval;
+    $avatarUrl = $hasAvatar ? \App\Support\StorageUrl::image($profile->avatar_path) : null;
     $avatarPlaceholder = asset('assets/avatar.svg');
 @endphp
 
@@ -18,7 +19,7 @@
             <div class="size-24 shrink-0 overflow-hidden rounded-full border-[0.35rem] border-primarygreen-100 bg-primarygreen-100">
                 <img
                     id="avatar-preview"
-                    src="{{ $hasAvatar ? asset('storage/'.$profile->avatar_path) : $avatarPlaceholder }}"
+                    src="{{ $avatarUrl ?? $avatarPlaceholder }}"
                     alt=""
                     class="h-full w-full object-cover"
                     data-placeholder-src="{{ $avatarPlaceholder }}"
