@@ -1,4 +1,9 @@
 <x-dashboard-shell title="Applicant Details">
+    @php
+        $avatarUrl = \App\Support\StorageUrl::image($application->user->profile?->avatar_path);
+        $resumeName = $application->resumeDocument?->original_name ?? ($application->resume_path ? basename($application->resume_path) : null);
+    @endphp
+
     <div class="max-w-5xl mx-auto space-y-6">
         <a href="{{ route('employer.jobs.applicants', $job) }}" class="text-xs font-bold text-neutral-500 hover:text-neutral-950 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -11,7 +16,7 @@
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-6">
                         <div class="w-28 h-28 rounded-2xl flex items-center justify-center overflow-hidden">
-                             <img src="{{ $application->user->profile_photo_path ? asset('storage/'.$application->user->profile_photo_path) : asset('assets/avatar.svg') }}" class="w-full h-full object-cover">
+                             <img src="{{ $avatarUrl ?? asset('assets/avatar.svg') }}" class="w-full h-full object-cover">
                         </div>
                         <div>
                             <h1 class="text-3xl font-black text-neutral-950">{{ $application->user->name }}</h1>
@@ -49,10 +54,15 @@
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-neutral-100">
-                        <a href="{{ asset('storage/' . $application->resume_path) }}" target="_blank" 
-                           class="block w-full text-center py-4 bg-neutral-950 text-white rounded-2xl font-black hover:bg-neutral-800 transition shadow-lg hover:shadow-xl">
-                            Download Resume
-                        </a>
+                        @if($resumeName)
+                            <p class="mb-3 text-xs font-bold text-neutral-500 break-all">{{ $resumeName }}</p>
+                            <a href="{{ route('employer.jobs.applicants.resume', [$job, $application]) }}" target="_blank"
+                               class="block w-full text-center py-4 bg-neutral-950 text-white rounded-2xl font-black hover:bg-neutral-800 transition shadow-lg hover:shadow-xl">
+                                Download Resume
+                            </a>
+                        @else
+                            <p class="text-xs font-bold text-neutral-500">No resume attached.</p>
+                        @endif
                     </div>
                 </div>
 

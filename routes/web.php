@@ -123,7 +123,9 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
         Route::put('/{jobListing}', [EmployerJobListingController::class, 'update'])->name('update');
         
         Route::get('/{jobListing}/applicants', [EmployerJobListingController::class, 'applicants'])->name('applicants');
-        Route::get('jobs/{jobListing}/applicants/{application}', [EmployerJobListingController::class, 'showApplication'])->name('employer.applicants.show');    });
+        Route::get('/{jobListing}/applicants/{application}', [EmployerJobListingController::class, 'showApplication'])->name('applicants.show');
+        Route::get('/{jobListing}/applicants/{application}/resume', [EmployerJobListingController::class, 'downloadApplicationResume'])->name('applicants.resume');
+    });
 
     Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
 });

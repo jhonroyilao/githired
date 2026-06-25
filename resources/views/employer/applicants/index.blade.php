@@ -37,6 +37,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @forelse ($applications as $application)
                 @php
+                    $avatarUrl = \App\Support\StorageUrl::image($application->user->profile?->avatar_path);
                     $statusColor = match($application->status) {
                         'hired' => 'bg-green-50 text-green-700 border-green-200',
                         'rejected' => 'bg-red-50 text-red-700 border-red-200',
@@ -47,7 +48,7 @@
                 <div class="bg-white border-2 border-neutral-200 rounded-2xl p-5 flex flex-col justify-between hover:border-neutral-950 hover:shadow-[4px_4px_0px_0px_#1a2315] transition-all group">
                     <div class="flex flex-col items-center text-center">
                         <div class="w-16 h-16 rounded-full bg-neutral-100 border-2 border-neutral-200 flex items-center justify-center overflow-hidden mb-3">
-                            <img src="{{ $application->user->profile_photo_path ? asset('storage/'.$application->user->profile_photo_path) : asset('assets/avatar.svg') }}" class="w-full h-full object-cover">
+                            <img src="{{ $avatarUrl ?? asset('assets/avatar.svg') }}" class="w-full h-full object-cover">
                         </div>
                         <h2 class="text-sm font-black text-neutral-950">{{ $application->user->name }}</h2>
                         <p class="text-[10px] font-bold text-neutral-500">{{ $application->user->email }}</p>
@@ -66,7 +67,7 @@
                         </div>
                     </div>
 
-                <a href="{{ route('employer.jobs.employer.applicants.show', [$job, $application]) }}" 
+                <a href="{{ route('employer.jobs.applicants.show', [$job, $application]) }}"
                 class="w-full text-center py-2 bg-neutral-950 text-[#91c93c] text-[10px] font-black uppercase rounded-xl hover:bg-[#1a2315] transition">
                     View Details
                 </a>

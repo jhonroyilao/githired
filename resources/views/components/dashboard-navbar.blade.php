@@ -54,9 +54,9 @@
             <div class="flex items-center gap-3 border-l border-neutral-700 pl-4">
                 <div class="w-9 h-9 rounded-full overflow-hidden bg-neutral-700 border border-neutral-600 flex items-center justify-center">
                     @if(isset($user->avatar_path) && $user->avatar_path)
-                        <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        <img src="{{ \App\Support\StorageUrl::image($user->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                     @elseif(isset($user->profile->avatar_path) && $user->profile->avatar_path)
-                        <img src="{{ asset('storage/' . $user->profile->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        <img src="{{ \App\Support\StorageUrl::image($user->profile->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                     @else
                         <img src="{{ asset('assets/avatar.svg') }}" alt="Default Avatar Placeholder" class="w-full h-full object-cover">
                     @endif

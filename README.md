@@ -135,6 +135,17 @@ Or run the combined development script:
 composer run dev
 ```
 
+Resume PDF text extraction runs through Laravel queues. Local development uses
+`QUEUE_CONNECTION=sync` by default so extraction completes automatically during
+upload. If you switch to `QUEUE_CONNECTION=database`, keep a queue worker
+running as well:
+
+```bash
+php artisan queue:listen --tries=1 --timeout=0
+```
+
+The combined `composer run dev` script already starts that worker.
+
 Build frontend assets:
 
 ```bash

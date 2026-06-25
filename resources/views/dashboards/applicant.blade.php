@@ -96,10 +96,10 @@
             
             <div class="bg-white border border-neutral-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-8">
                 <div class="w-32 h-32 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center shrink-0 border border-neutral-200">
-                    @if(isset($user->avatar_url) && $user->avatar_url)
-                        <img src="{{ asset($user->avatar_url) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
-                    @elseif(isset($profile->avatar_url) && $profile->avatar_url)
-                        <img src="{{ asset($profile->avatar_url) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                    @if(isset($user->avatar_path) && $user->avatar_path)
+                        <img src="{{ \App\Support\StorageUrl::image($user->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                    @elseif(isset($profile->avatar_path) && $profile->avatar_path)
+                        <img src="{{ \App\Support\StorageUrl::image($profile->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                     @else
                         <img src="{{ asset('assets/avatar.svg') }}" alt="Default Avatar" class="w-full h-full object-cover">
                     @endif
@@ -136,7 +136,7 @@
                                 <div class="flex items-center gap-3 mb-3">
                                     <div class="w-9 h-9 rounded-xl bg-neutral-950 flex items-center justify-center overflow-hidden shrink-0">
                                         @if($job->company && $job->company->logo_path)
-                                            <img src="{{ asset('storage/' . $job->company->logo_path) }}" alt="{{ $job->company->name }}" class="w-full h-full object-cover">
+                                            <img src="{{ \App\Support\StorageUrl::image($job->company->logo_path) }}" alt="{{ $job->company->name }}" class="w-full h-full object-cover">
                                         @else
                                             <span class="text-sm text-white font-bold uppercase">{{ substr($job->company->name ?? 'J', 0, 1) }}</span>
                                         @endif
@@ -182,7 +182,7 @@
                                 <div class="flex items-center gap-3 mb-3">
                                     <div class="w-9 h-9 rounded-xl bg-neutral-950 flex items-center justify-center overflow-hidden shrink-0">
                                         @if($job->company && $job->company->logo_path)
-                                            <img src="{{ asset('storage/' . $job->company->logo_path) }}" alt="{{ $job->company->name }}" class="w-full h-full object-cover">
+                                            <img src="{{ \App\Support\StorageUrl::image($job->company->logo_path) }}" alt="{{ $job->company->name }}" class="w-full h-full object-cover">
                                         @else
                                             <span class="text-sm text-white font-bold uppercase">{{ substr($job->company->name ?? 'J', 0, 1) }}</span>
                                         @endif

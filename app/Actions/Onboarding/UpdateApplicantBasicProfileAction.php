@@ -15,6 +15,8 @@ final class UpdateApplicantBasicProfileAction
     public function handle(User $user, array $attributes): void
     {
         DB::transaction(function () use ($user, $attributes): void {
+            $imageDisk = config('filesystems.image_disk', 'public');
+
             $user->update([
                 'name' => $attributes['name'],
             ]);
@@ -27,16 +29,16 @@ final class UpdateApplicantBasicProfileAction
             ]);
 
             if (($attributes['remove_avatar'] ?? false) && $profile->avatar_path) {
-                Storage::disk('public')->delete($profile->avatar_path);
+                Storage::disk($imageDisk)->delete($profile->avatar_path);
                 $profile->avatar_path = null;
             }
 
             if (($attributes['avatar'] ?? null) instanceof UploadedFile) {
                 if ($profile->avatar_path) {
-                    Storage::disk('public')->delete($profile->avatar_path);
+                    Storage::disk($imageDisk)->delete($profile->avatar_path);
                 }
 
-                $profile->avatar_path = $attributes['avatar']->store('avatars', 'public');
+                $profile->avatar_path = $attributes['avatar']->store('avatars', $imageDisk);
             }
 
             $profile->save();
