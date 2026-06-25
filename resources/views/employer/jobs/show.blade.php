@@ -14,19 +14,21 @@
             </div>
 
             <div class="flex gap-2">
-            <a href="{{ route('employer.jobs.applicants', $job) }}" 
-            class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-neutral-200 bg-white px-5 font-black text-neutral-900 shadow-sm transition hover:bg-neutral-50">
-                    View Applicants
-            </a>
-            @if ($job->status !== \App\Enums\JobStatus::Closed->value)
                 <a
-                    href="{{ route('employer.jobs.edit', $job) }}"
-                    class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-5 font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5"
+                    href="{{ route('employer.jobs.applicants', $job) }}"
+                    class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-neutral-200 bg-white px-5 font-black text-neutral-900 shadow-sm transition hover:bg-neutral-50"
                 >
-                    Edit Job
+                    View Applicants
                 </a>
-            @endif
-        </div>
+                @if ($job->status !== \App\Enums\JobStatus::Closed->value)
+                    <a
+                        href="{{ route('employer.jobs.edit', $job) }}"
+                        class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-5 font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5"
+                    >
+                        Edit Job
+                    </a>
+                @endif
+            </div>
         </div>
 
         <div class="mt-6 flex flex-wrap gap-2">
