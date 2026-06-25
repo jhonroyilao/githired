@@ -35,8 +35,8 @@ Route::get('/', function (ResolveUserDestinationRouteAction $resolveDestination)
         return redirect()->route($resolveDestination->handle($user));
     }
 
-    return redirect()->route('login');
-});
+    return view('public.landing');
+})->name('home');
 
 Route::view('/mockup', 'mockup');
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
