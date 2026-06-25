@@ -9,8 +9,7 @@
         <p class="mt-3 max-w-2xl font-bold leading-7 text-neutral-600">{{ $company?->description }}</p>
 
         <div class="mt-5 flex flex-col gap-3">
-            <a href="{{ route('employer.onboarding.company') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Edit company profile</a>
-
+            <a href="{{ route('employer.company.edit') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Edit Company Profile</a>
             <a href="{{ route('employer.jobs.create') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Create Job</a>
         </div>
     </div>

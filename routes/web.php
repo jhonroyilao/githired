@@ -59,7 +59,7 @@ Route::post('/logout', LogoutController::class)->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| Applicant Routes
+| pplicant Routes
 |--------------------------------------------------------------------------
 */
 
@@ -111,6 +111,12 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
         Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
+        
+    });
+
+    Route::prefix('company')->name('company.')->group(function () {
+        Route::get('/edit', [App\Http\Controllers\Employer\ProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('update');
     });
 
     Route::prefix('jobs')->name('jobs.')->group(function () {
@@ -125,6 +131,7 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
         Route::get('/{jobListing}/applicants/{application}', [EmployerJobListingController::class, 'showApplication'])->name('applicants.show');
         Route::get('/{jobListing}/applicants/{application}/resume', [EmployerJobListingController::class, 'downloadApplicationResume'])->name('applicants.resume');
         Route::patch('/{jobListing}/applicants/{application}/status', [EmployerJobListingController::class, 'updateApplicationStatus'])->name('applicants.status.update');
+
     });
 
     Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
