@@ -2,7 +2,9 @@
 
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Enums\UserRole;
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\JobModerationController;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
 use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
@@ -132,4 +134,11 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
 
 Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+    Route::prefix('jobs')->name('jobs.')->group(function () {
+        Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
+        Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
+        Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
+    });
 });
