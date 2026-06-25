@@ -28,9 +28,7 @@ class JobModerationController extends Controller
 
     public function approve(Request $request, JobListing $jobListing): RedirectResponse
     {
-        $this->ensurePending($jobListing);
-
-        $jobListing->update([
+        $this->updatePendingJob($jobListing, [
             'status' => JobStatus::Active->value,
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
@@ -45,14 +43,15 @@ class JobModerationController extends Controller
 
     public function reject(Request $request, JobListing $jobListing): RedirectResponse
     {
-        $this->ensurePending($jobListing);
-
         $request->validate([
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        $jobListing->update([
+        $this->updatePendingJob($jobListing, [
             'status' => JobStatus::Rejected->value,
+            'approved_at' => null,
+            'approved_by' => null,
+            'published_at' => null,
             'rejected_at' => now(),
             'rejected_by' => $request->user()->id,
             'rejection_reason' => $request->rejection_reason,
@@ -61,17 +60,9 @@ class JobModerationController extends Controller
         return back()->with('success', 'Job rejected successfully.');
     }
 
-    private function ensurePending(JobListing $jobListing): void
+    public function reapprove(Request $request, JobListing $jobListing): RedirectResponse
     {
-        abort_unless(
-            $jobListing->status === JobStatus::Pending->value,
-            Response::HTTP_CONFLICT
-        );
-    }
-
-        public function reapprove(Request $request, JobListing $jobListing): RedirectResponse
-    {
-        $jobListing->update([
+        $this->updateJobWithStatus($jobListing, JobStatus::Rejected, [
             'status'           => JobStatus::Active->value,
             'approved_at'      => now(),
             'approved_by'      => $request->user()->id,
@@ -86,7 +77,7 @@ class JobModerationController extends Controller
 
     public function reactivate(Request $request, JobListing $jobListing): RedirectResponse
     {
-        $jobListing->update([
+        $this->updateJobWithStatus($jobListing, JobStatus::Closed, [
             'status'      => JobStatus::Active->value,
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
@@ -96,5 +87,19 @@ class JobModerationController extends Controller
 
         return back()->with('success', 'Job listing is now active.');
     }
-}
 
+    private function updatePendingJob(JobListing $jobListing, array $attributes): void
+    {
+        $this->updateJobWithStatus($jobListing, JobStatus::Pending, $attributes);
+    }
+
+    private function updateJobWithStatus(JobListing $jobListing, JobStatus $status, array $attributes): void
+    {
+        $updated = JobListing::query()
+            ->whereKey($jobListing->getKey())
+            ->where('status', $status->value)
+            ->update($attributes);
+
+        abort_if($updated === 0, Response::HTTP_CONFLICT);
+    }
+}

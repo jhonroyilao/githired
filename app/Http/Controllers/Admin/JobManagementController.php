@@ -8,10 +8,11 @@ use App\Models\JobListing;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class JobManagementController extends Controller
 {
-        public function index(): View
+    public function index(): View
     {
         $query = JobListing::query();
 
@@ -94,6 +95,22 @@ class JobManagementController extends Controller
         return back()->with(
             'success',
             'Job listing has been soft deleted.'
+        );
+    }
+
+    public function restore(JobListing $jobListing): RedirectResponse
+    {
+        abort_unless($jobListing->trashed(), Response::HTTP_CONFLICT);
+
+        $jobListing->restore();
+        $jobListing->update([
+            'deleted_by' => null,
+            'delete_reason' => null,
+        ]);
+
+        return back()->with(
+            'success',
+            'Job listing has been restored.'
         );
     }
 }

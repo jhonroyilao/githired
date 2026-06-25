@@ -2,8 +2,10 @@
 
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Enums\UserRole;
-use App\Http\Controllers\Admin\AdminProfileController as AdminAdminProfileController;
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\JobManagementController;
+use App\Http\Controllers\Admin\JobModerationController;
 use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
 use App\Http\Controllers\Applicant\Onboarding\BasicProfileController;
@@ -18,10 +20,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
 use App\Http\Controllers\Employer\EmployerJobListingController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
-use App\Http\Controllers\Admin\JobModerationController;
-use App\Http\Controllers\Admin\JobManagementController;
 use App\Http\Controllers\JobController;
-use App\Http\Controllers\Admin\AdminProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -134,19 +133,19 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
 */
 
 Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
-        Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+    Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
 
-        Route::prefix('jobs')->name('jobs.')->group(function () {
-            Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
-            Route::get('/all', [JobManagementController::class, 'index'])->name('all');
-            Route::post('/{id}/restore', [JobManagementController::class, 'restore'])->name('restore'); // ← fixed
-            Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
-            Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
-            Route::post('/{jobListing}/hide', [JobManagementController::class, 'hide'])->name('hide');
-            Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reapprove'])->name('reapprove');
-            Route::post('/{jobListing}/reactivate', [JobModerationController::class, 'activate'])->name('reactivate');
-            Route::delete('/{jobListing}', [JobManagementController::class, 'destroy'])->name('destroy');
-        });
+    Route::prefix('jobs')->name('jobs.')->group(function () {
+        Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
+        Route::get('/all', [JobManagementController::class, 'index'])->name('all');
+        Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
+        Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
+        Route::post('/{jobListing}/hide', [JobManagementController::class, 'hide'])->name('hide');
+        Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reapprove'])->name('reapprove');
+        Route::post('/{jobListing}/reactivate', [JobModerationController::class, 'reactivate'])->name('reactivate');
+        Route::post('/{jobListing}/restore', [JobManagementController::class, 'restore'])->withTrashed()->name('restore');
+        Route::delete('/{jobListing}', [JobManagementController::class, 'destroy'])->name('destroy');
     });
+});
