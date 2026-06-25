@@ -3,6 +3,7 @@
 namespace App\Actions\Onboarding;
 
 use App\Models\User;
+use App\Support\StorageUrl;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -28,13 +29,13 @@ final class UpdateEmployerCompanyAction
         ]);
 
         if (($attributes['remove_logo'] ?? false) && $company->logo_path) {
-            Storage::disk($imageDisk)->delete($company->logo_path);
+            Storage::disk($imageDisk)->delete(StorageUrl::imageObjectPath($company->logo_path));
             $company->logo_path = null;
         }
 
         if (($attributes['logo'] ?? null) instanceof UploadedFile) {
             if ($company->logo_path) {
-                Storage::disk($imageDisk)->delete($company->logo_path);
+                Storage::disk($imageDisk)->delete(StorageUrl::imageObjectPath($company->logo_path));
             }
 
             $company->logo_path = $attributes['logo']->store('company-logos', $imageDisk);

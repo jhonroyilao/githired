@@ -7,6 +7,7 @@ use App\Enums\JobType;
 use App\Enums\UserRole;
 use App\Enums\WorkPreference;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 
 final class UpdateProfileRequest extends FormRequest
@@ -52,11 +53,13 @@ final class UpdateProfileRequest extends FormRequest
             'work_preference' => ['required', Rule::enum(WorkPreference::class)],
             'experience_level' => ['required', Rule::enum(ExperienceLevel::class)],
             'skills' => ['required', 'string', 'max:500', 'regex:/[^,\s]/'],
+            'avatar' => ['nullable', 'image', 'max:10240'],
+            'remove_avatar' => ['nullable', 'boolean'],
         ];
     }
 
     /**
-     * @return array{name: string, headline: string, bio: string, location: string, phone: string, website?: string|null, linkedin?: string|null, github?: string|null, desired_job_type: string, work_preference: string, experience_level: string, skills: array<int, string>}
+     * @return array{name: string, headline: string, bio: string, location: string, phone: string, website?: string|null, linkedin?: string|null, github?: string|null, desired_job_type: string, work_preference: string, experience_level: string, skills: array<int, string>, avatar?: UploadedFile|null, remove_avatar: bool}
      */
     public function profileAttributes(): array
     {
@@ -75,6 +78,8 @@ final class UpdateProfileRequest extends FormRequest
             'work_preference' => $validated['work_preference'],
             'experience_level' => $validated['experience_level'],
             'skills' => $this->normalizedSkills($validated['skills']),
+            'avatar' => $this->file('avatar'),
+            'remove_avatar' => $this->boolean('remove_avatar'),
         ];
     }
 
