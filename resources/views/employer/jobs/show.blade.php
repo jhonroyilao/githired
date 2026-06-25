@@ -15,7 +15,7 @@
 
             <div class="flex gap-2">
             <a href="{{ route('employer.jobs.applicants', $job) }}" 
-                   class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-neutral-200 bg-white px-5 font-black text-neutral-900 shadow-sm transition hover:bg-neutral-50">
+            class="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-neutral-200 bg-white px-5 font-black text-neutral-900 shadow-sm transition hover:bg-neutral-50">
                     View Applicants
             </a>
             @if ($job->status !== \App\Enums\JobStatus::Closed->value)
