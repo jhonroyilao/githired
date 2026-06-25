@@ -1,5 +1,5 @@
 <x-dashboard-shell title="Employer dashboard" eyebrow="Recruiter workspace" :user="$user">
-    <p class="mt-5 max-w-2xl text-lg font-bold leading-8 text-neutral-600">
+    <p class="mt-5 max-w-7xl text-lg font-bold leading-8 text-neutral-600">
         You are signed in as a recruiter. The company profile below represents the hiring organization attached to this account.
     </p>
 
@@ -65,6 +65,12 @@
                         <p class="text-xs text-neutral-600 line-clamp-3 mb-4">
                             {{ $job->description }}
                         </p>
+
+                        @if($job->status === \App\Enums\JobStatus::Rejected->value && $job->rejection_reason)
+                            <p class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-bold leading-5 text-red-700">
+                                {{ $job->rejection_reason }}
+                            </p>
+                        @endif
                     </div>
 
                     <div class="border-t border-neutral-100 pt-3 flex items-center justify-between">

@@ -20,7 +20,9 @@
             ['label' => 'Company profile', 'route' => 'employer.onboarding.company'],
         ],
         \App\Enums\UserRole::Admin->value => [
+            ['label' => 'Edit Profile', 'route' => 'admin.profile.edit'],
             ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
+            ['label' => 'Approval', 'route' => 'admin.jobs.pending'],
         ],
         default => [
             ['label' => 'Find jobs', 'route' => 'applicant.dashboard'],
