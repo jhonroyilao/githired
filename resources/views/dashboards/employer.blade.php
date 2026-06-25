@@ -20,7 +20,7 @@
             Your Job Listings
         </h2>
 
-        <div class="grid gap-4 sm:grid-cols-3">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
             @forelse($jobs as $job)
                 <div class="bg-white border border-neutral-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition duration-200">
 
