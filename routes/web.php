@@ -121,7 +121,7 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
         Route::get('/{jobListing}', [EmployerJobListingController::class, 'show'])->name('show');
         Route::get('/{jobListing}/edit', [EmployerJobListingController::class, 'edit'])->name('edit');
         Route::put('/{jobListing}', [EmployerJobListingController::class, 'update'])->name('update');
-        
+
         Route::get('/{jobListing}/applicants', [EmployerJobListingController::class, 'applicants'])->name('applicants');
         Route::get('/{jobListing}/applicants/{application}', [EmployerJobListingController::class, 'showApplication'])->name('applicants.show');
         Route::get('/{jobListing}/applicants/{application}/resume', [EmployerJobListingController::class, 'downloadApplicationResume'])->name('applicants.resume');

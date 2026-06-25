@@ -21,11 +21,11 @@
                     <option value="newest" @selected(request('sort') == 'newest')>Newest First</option>
                     <option value="oldest" @selected(request('sort') == 'oldest')>Oldest First</option>
                 </select>
-                
-               <div class="flex items-center gap-2">
+
+                <div class="flex items-center gap-2">
                     @foreach(['all' => 'Active', 'pending' => 'Pending', 'interview' => 'Interview', 'hired' => 'Hired', 'rejected' => 'Rejected'] as $key => $label)
-                        <button type="submit" name="status" value="{{ $key }}" 
-                            class="text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-xl border-2 transition-all 
+                        <button type="submit" name="status" value="{{ $key }}"
+                            class="text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-xl border-2 transition-all
                             {{ request('status', 'all') == $key ? 'bg-[#1a2315] text-[#91c93c] border-neutral-900' : 'bg-white text-neutral-600 border-neutral-200' }}">
                             {{ $label }}
                         </button>
@@ -67,10 +67,10 @@
                         </div>
                     </div>
 
-                <a href="{{ route('employer.jobs.applicants.show', [$job, $application]) }}"
-                class="w-full text-center py-2 bg-neutral-950 text-[#91c93c] text-[10px] font-black uppercase rounded-xl hover:bg-[#1a2315] transition">
-                    View Details
-                </a>
+                    <a href="{{ route('employer.jobs.applicants.show', [$job, $application]) }}"
+                       class="w-full text-center py-2 bg-neutral-950 text-[#91c93c] text-[10px] font-black uppercase rounded-xl hover:bg-[#1a2315] transition">
+                        View Details
+                    </a>
                 </div>
             @empty
                 <div class="col-span-full text-center py-12 border-2 border-dashed border-neutral-200 rounded-2xl">
