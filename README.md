@@ -1,4 +1,4 @@
-# GitHired
+# GitHired: A Job Application System for Developers
 
 GitHired is a Laravel job portal for applicants, employers, and moderation-only
 admins. The database has been extended to support the core job portal workflow
