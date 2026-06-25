@@ -88,6 +88,10 @@
                 {{ $item['label'] }}
             </a>
         @endforeach
+        <form action="{{ route('logout') }}" method="POST" class="px-2 pt-2 border-t border-neutral-700">
+            @csrf
+            <button type="submit" class="text-red-400 font-bold text-sm">Log out</button>
+        </form>
     </div>
 </nav>
 
