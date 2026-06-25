@@ -6,11 +6,14 @@ use App\Enums\ExperienceLevel;
 use App\Enums\JobStatus;
 use App\Enums\JobType;
 use App\Enums\UserRole;
+use App\Models\Application;
 use App\Models\Company;
 use App\Models\JobCategory;
 use App\Models\JobListing;
+use App\Models\ResumeDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -279,6 +282,46 @@ class EmployerJobListingCrudTest extends TestCase
                 'title' => 'Updated Closed Role',
             ]))
             ->assertForbidden();
+    }
+
+    public function test_employer_can_download_application_resume_after_applicant_removes_it_from_profile(): void
+    {
+        Storage::fake('local');
+
+        [$employer, $company] = $this->employerWithCompany();
+        $applicant = User::factory()->create(['role' => UserRole::Applicant->value]);
+        $job = $this->job($employer, $company);
+        $resume = ResumeDocument::query()->create([
+            'user_id' => $applicant->id,
+            'file_path' => "resumes/{$applicant->id}/submitted.pdf",
+            'original_name' => 'submitted.pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 256,
+            'content_hash' => hash('sha256', 'submitted resume'),
+            'extraction_status' => 'ready',
+            'is_current' => true,
+        ]);
+        Storage::disk('local')->put($resume->file_path, 'submitted resume');
+        $applicant->profile()->firstOrCreate([])->update(['resume_path' => $resume->file_path]);
+
+        Application::query()->create([
+            'user_id' => $applicant->id,
+            'job_listing_id' => $job->id,
+            'resume_document_id' => $resume->id,
+            'resume_path' => $resume->file_path,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($applicant)
+            ->delete(route('applicant.resume.destroy', $resume))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('resume_documents', ['id' => $resume->id]);
+        Storage::disk('local')->assertExists($resume->file_path);
+
+        $this->actingAs($employer)
+            ->get(route('employer.jobs.applicants.resume', [$job, Application::sole()]))
+            ->assertOk();
     }
 
     /**
