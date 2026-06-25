@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\JobStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -101,22 +103,37 @@ class JobListing extends Model
         return $this->hasMany(AiJobMatch::class);
     }
 
-    // ── Scopes ──────────────────────────────────────────────
-    public function scopeActive($query)
+    public function scopePubliclyVisible(Builder $query): Builder
     {
-        return $query->where('status', 'active')->whereNull('deleted_at');
+        return $query->where('status', JobStatus::Active->value)
+            ->whereNotNull('approved_at')
+            ->whereNotNull('published_at')
+            ->whereNull('closed_at')
+            ->where(function (Builder $query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 
-    // ── Helpers ─────────────────────────────────────────────
+    public function isPubliclyVisible(): bool
+    {
+        return $this->status === JobStatus::Active->value
+            && ! is_null($this->approved_at)
+            && ! is_null($this->published_at)
+            && is_null($this->closed_at)
+            && (is_null($this->expires_at) || $this->expires_at->isFuture())
+            && ! $this->trashed();
+    }
+
     public function salaryRange(): string
     {
-        if (!$this->salary_min && !$this->salary_max) {
+        if (is_null($this->salary_min) && is_null($this->salary_max)) {
             return 'Negotiable';
         }
 
         $currency = $this->salary_currency ?? 'PHP';
 
-        if ($this->salary_min && $this->salary_max) {
+        if (! is_null($this->salary_min) && ! is_null($this->salary_max)) {
             return $currency . ' ' . number_format($this->salary_min) . ' - ' . number_format($this->salary_max);
         }
 

@@ -32,7 +32,7 @@ class Application extends Model
 
     public function jobListing(): BelongsTo
     {
-        return $this->belongsTo(JobListing::class);
+        return $this->belongsTo(JobListing::class)->withTrashed();
     }
 
     public function resumeDocument(): BelongsTo

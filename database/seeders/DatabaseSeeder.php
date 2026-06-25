@@ -30,17 +30,19 @@ class DatabaseSeeder extends Seeder
 
         $categories = [];
         foreach ($categoryNames as $name => $icon) {
-            $categories[$name] = JobCategory::create([
-                'name' => $name,
+            $categories[$name] = JobCategory::updateOrCreate([
                 'slug' => Str::slug($name),
+            ], [
+                'name' => $name,
                 'icon' => $icon,
             ]);
         }
 
         // ── 1. ADMIN ──────────────────────────────────────────────
-        $admin = User::create([
+        $admin = User::updateOrCreate([
+            'email' => 'admin@githired.com',
+        ], [
             'name'     => 'GitHired Admin',
-            'email'    => 'admin@githired.com',
             'role'     => 'admin',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
@@ -102,18 +104,20 @@ class DatabaseSeeder extends Seeder
         $createdCompanies = [];
 
         foreach ($employers as $emp) {
-            $user = User::create([
+            $user = User::updateOrCreate([
+                'email' => $emp['email'],
+            ], [
                 'name'     => $emp['name'],
-                'email'    => $emp['email'],
                 'role'     => 'employer',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]);
 
-            $company = Company::create([
+            $company = Company::updateOrCreate([
+                'slug' => Str::slug($emp['company']['name']),
+            ], [
                 'user_id'     => $user->id,
                 'name'        => $emp['company']['name'],
-                'slug'        => Str::slug($emp['company']['name']),
                 'industry'    => $emp['company']['industry'],
                 'size'        => $emp['company']['size'],
                 'location'    => $emp['company']['location'],
@@ -305,13 +309,17 @@ class DatabaseSeeder extends Seeder
         $createdJobs = [];
         foreach ($jobs as $job) {
             $empIdx  = $job['employer_idx'];
+            $slug = Str::slug($createdCompanies[$empIdx]->name . '-' . $job['title']);
 
-            $listing = JobListing::create([
+            $listing = JobListing::updateOrCreate([
+                'user_id' => $createdEmployers[$empIdx]->id,
+                'title' => $job['title'],
+            ], [
                 'user_id'          => $createdEmployers[$empIdx]->id,
                 'company_id'       => $createdCompanies[$empIdx]->id,
                 'category_id'      => $categories[$job['category']]->id, // ← linked here
                 'title'            => $job['title'],
-                'slug'             => Str::slug($job['title']) . '-' . Str::random(5),
+                'slug'             => $slug,
                 'location'         => $job['location'],
                 'location_type'    => $job['location_type'],
                 'type'             => $job['type'],
@@ -331,26 +339,32 @@ class DatabaseSeeder extends Seeder
 
         // ── 4. SAMPLE APPLICANTS ──────────────────────────────────
         $applicants = [
-            ['name' => 'Juan dela Cruz',   'email' => 'juan@email.com',    'headline' => 'Full Stack Developer', 'skills' => ['PHP', 'Laravel', 'Vue.js', 'MySQL']],
-            ['name' => 'Maria Santos',     'email' => 'maria@email.com',   'headline' => 'React Frontend Dev',   'skills' => ['React', 'JavaScript', 'TypeScript', 'Tailwind CSS']],
-            ['name' => 'Carlo Mendoza',    'email' => 'carlo@email.com',   'headline' => 'DevOps Engineer',      'skills' => ['AWS', 'Docker', 'Linux', 'CI/CD']],
-            ['name' => 'Ana Reyes',        'email' => 'ana@email.com',     'headline' => 'UI/UX Designer',       'skills' => ['Figma', 'HTML', 'CSS', 'Bootstrap']],
+            ['name' => 'Juan dela Cruz',   'email' => 'juan@email.com',    'headline' => 'Full Stack Developer', 'desired_job_type' => 'full-time', 'work_preference' => 'hybrid', 'experience_level' => 'mid', 'skills' => ['PHP', 'Laravel', 'Vue.js', 'MySQL']],
+            ['name' => 'Maria Santos',     'email' => 'maria@email.com',   'headline' => 'React Frontend Dev',   'desired_job_type' => 'full-time', 'work_preference' => 'remote', 'experience_level' => 'mid', 'skills' => ['React', 'JavaScript', 'TypeScript', 'Tailwind CSS']],
+            ['name' => 'Carlo Mendoza',    'email' => 'carlo@email.com',   'headline' => 'DevOps Engineer',      'desired_job_type' => 'contract', 'work_preference' => 'remote', 'experience_level' => 'senior', 'skills' => ['AWS', 'Docker', 'Linux', 'CI/CD']],
+            ['name' => 'Ana Reyes',        'email' => 'ana@email.com',     'headline' => 'UI/UX Designer',       'desired_job_type' => 'full-time', 'work_preference' => 'onsite', 'experience_level' => 'entry', 'skills' => ['Figma', 'HTML', 'CSS', 'Bootstrap']],
         ];
 
         $createdApplicants = [];
         foreach ($applicants as $ap) {
-            $user = User::create([
+            $user = User::updateOrCreate([
+                'email' => $ap['email'],
+            ], [
                 'name'     => $ap['name'],
-                'email'    => $ap['email'],
                 'role'     => 'applicant',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]);
 
-            Profile::create([
+            Profile::updateOrCreate([
+                'user_id'  => $user->id,
+            ], [
                 'user_id'  => $user->id,
                 'headline' => $ap['headline'],
                 'location' => 'Philippines',
+                'desired_job_type' => $ap['desired_job_type'],
+                'work_preference' => $ap['work_preference'],
+                'experience_level' => $ap['experience_level'],
                 'skills'   => $ap['skills'],
             ]);
 
@@ -359,14 +373,17 @@ class DatabaseSeeder extends Seeder
 
         // ── 5. SAMPLE APPLICATIONS (with status log history) ──────
         // Helper closure to create an application AND its initial log entry
-        $createApplication = function ($applicantUser, $jobListing, $statusHistory, $coverLetter = null) use ($admin) {
-            $application = Application::create([
+        $createApplication = function ($applicantUser, $jobListing, $statusHistory, $coverLetter = null) {
+            $application = Application::updateOrCreate([
                 'user_id'        => $applicantUser->id,
                 'job_listing_id' => $jobListing->id,
+            ], [
                 'status'         => end($statusHistory)['status'], // final/current status
                 'cover_letter'   => $coverLetter,
                 'status_updated_at' => now()->subDays($statusHistory[0]['days_ago']),
             ]);
+
+            $application->statusLogs()->delete();
 
             // Build status log history (simulates status changing over time)
             $previousStatus = null;

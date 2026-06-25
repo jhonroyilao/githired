@@ -11,8 +11,8 @@ Last reviewed: 2026-06-19
 ### Applicant
 
 - Role-based account support for applicants.
-- Applicant profile data: headline, bio, location, contact links, avatar, and
-  skills.
+- Applicant profile data: headline, bio, location, contact links, job search
+  preferences, avatar, and skills.
 - PDF resume document model with extracted text support for future AI matching.
 - Approved job browsing data model with category, location, type, experience,
   salary, and full-text search support.
@@ -134,6 +134,17 @@ Or run the combined development script:
 ```bash
 composer run dev
 ```
+
+Resume PDF text extraction runs through Laravel queues. Local development uses
+`QUEUE_CONNECTION=sync` by default so extraction completes automatically during
+upload. If you switch to `QUEUE_CONNECTION=database`, keep a queue worker
+running as well:
+
+```bash
+php artisan queue:listen --tries=1 --timeout=0
+```
+
+The combined `composer run dev` script already starts that worker.
 
 Build frontend assets:
 
@@ -287,6 +298,9 @@ erDiagram
         text website
         text linkedin
         text github
+        text desired_job_type
+        text work_preference
+        text experience_level
         text resume_path
         text avatar_path
         jsonb skills
