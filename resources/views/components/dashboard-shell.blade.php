@@ -22,7 +22,6 @@
         \App\Enums\UserRole::Admin->value => [
             ['label' => 'Edit Profile', 'route' => 'admin.profile.edit'],
             ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
-            ['label' => 'Review All Listings', 'route' => 'admin.jobs.all'],
             ['label' => 'Approval', 'route' => 'admin.jobs.pending'],
         ],
         default => [

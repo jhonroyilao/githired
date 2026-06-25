@@ -1,4 +1,4 @@
-<x-dashboard-shell title="Admin Dashboard" eyebrow="Admin Workspace" :user="$user">
+<x-dashboard-shell title="Admin dashboard" eyebrow="Admin Workspace" :user="$user">
 
     <p class="mt-5 max-w-2xl text-lg font-bold leading-8 text-neutral-600">
         You are signed in as an administrator.

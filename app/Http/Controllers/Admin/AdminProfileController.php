@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminProfileController extends Controller
@@ -18,16 +19,20 @@ class AdminProfileController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email'],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($request->user()->id),
+            ],
         ]);
 
         $user = auth()->user();
 
         $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
         ]);
 
         return back()->with(

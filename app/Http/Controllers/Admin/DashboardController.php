@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\JobListing;
-use App\Enums\JobStatus;
 use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;

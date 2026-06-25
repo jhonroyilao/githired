@@ -8,22 +8,28 @@ use App\Models\JobListing;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class JobModerationController extends Controller
 {
     public function index(): View
     {
-        $jobs = JobListing::with(['company', 'user']) 
-            ->where('status', JobStatus::Pending->value) 
-            ->when( 
-                request('sort') === 'oldest', 
-                fn ($query) => $query->oldest(), 
-                fn ($query) => $query->latest() ) 
+        $jobs = JobListing::with(['company', 'user'])
+            ->where('status', JobStatus::Pending->value)
+            ->when(
+                request('sort') === 'oldest',
+                fn ($query) => $query->oldest(),
+                fn ($query) => $query->latest()
+            )
             ->paginate(20);
+
         return view('admin.jobs.pending', ['jobs' => $jobs, 'user' => auth()->user()]);
     }
-    public function approve(Request $request, JobListing $jobListing): RedirectResponse 
+
+    public function approve(Request $request, JobListing $jobListing): RedirectResponse
     {
+        $this->ensurePending($jobListing);
+
         $jobListing->update([
             'status' => JobStatus::Active->value,
             'approved_at' => now(),
@@ -34,15 +40,15 @@ class JobModerationController extends Controller
             'rejection_reason' => null,
         ]);
 
-        return back()->with('success','Job approved successfully.');
-
+        return back()->with('success', 'Job approved successfully.');
     }
 
     public function reject(Request $request, JobListing $jobListing): RedirectResponse
     {
+        $this->ensurePending($jobListing);
 
         $request->validate([
-            'rejection_reason' => ['required', 'string', 'max:1000',],
+            'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
 
         $jobListing->update([
@@ -53,5 +59,13 @@ class JobModerationController extends Controller
         ]);
 
         return back()->with('success', 'Job rejected successfully.');
+    }
+
+    private function ensurePending(JobListing $jobListing): void
+    {
+        abort_unless(
+            $jobListing->status === JobStatus::Pending->value,
+            Response::HTTP_CONFLICT
+        );
     }
 }
