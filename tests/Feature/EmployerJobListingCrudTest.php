@@ -130,6 +130,41 @@ class EmployerJobListingCrudTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_employer_dashboard_search_filters_their_job_listings(): void
+    {
+        [$employer, $company] = $this->employerWithCompany();
+
+        $this->job($employer, $company, [
+            'title' => 'Senior Laravel Engineer',
+            'location' => 'Manila',
+            'status' => JobStatus::Active->value,
+            'approved_at' => now()->subDay(),
+            'approved_by' => $employer->id,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->job($employer, $company, [
+            'title' => 'Product Designer',
+            'location' => 'Cebu',
+            'status' => JobStatus::Pending->value,
+            'description' => 'Design product interfaces.',
+            'requirements' => 'Figma and product thinking.',
+            'skills_required' => ['Figma'],
+        ]);
+
+        $this->actingAs($employer)
+            ->get(route('employer.dashboard', ['search' => 'Cebu']))
+            ->assertOk()
+            ->assertSee('Product Designer')
+            ->assertDontSee('Senior Laravel Engineer');
+
+        $this->actingAs($employer)
+            ->get(route('employer.dashboard', ['search' => 'Pending']))
+            ->assertOk()
+            ->assertSee('Product Designer')
+            ->assertDontSee('Senior Laravel Engineer');
+    }
+
     public function test_employer_can_edit_owned_job_and_resubmit_it_for_moderation(): void
     {
         [$employer, $company] = $this->employerWithCompany();

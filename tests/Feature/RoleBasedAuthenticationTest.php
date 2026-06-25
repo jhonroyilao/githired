@@ -179,7 +179,7 @@ class RoleBasedAuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('logout'));
 
-        $response->assertRedirect(route('login', absolute: false));
+        $response->assertRedirect(route('home', absolute: false));
         $this->assertGuest();
     }
 
@@ -236,7 +236,7 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertSee('Employer dashboard');
         $response->assertSee('Acme Careers');
         $response->assertSee(route('employer.dashboard'), false);
-        $response->assertSee(route('employer.onboarding.company'), false);
+        $response->assertSee(route('employer.company.edit'), false);
         $response->assertDontSee(route('applicant.dashboard'), false);
         $response->assertSee('Company profile');
         $response->assertDontSee('href="#"', false);
@@ -282,6 +282,42 @@ class RoleBasedAuthenticationTest extends TestCase
         $this->assertStringNotContainsString('href="#"', $html);
         $this->assertStringNotContainsString('Missing route', $html);
         $this->assertStringContainsString(route('applicant.dashboard'), $html);
+    }
+
+    public function test_dashboard_navbar_shows_applicant_avatar(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Ada Applicant',
+            'role' => UserRole::Applicant->value,
+        ]);
+        $user->profile()->create(array_merge($this->completeApplicantProfileAttributes(), [
+            'avatar_path' => 'avatars/ada.png',
+        ]));
+
+        $html = Blade::render('<x-dashboard-navbar :user="$user" />', [
+            'user' => $user->fresh('profile'),
+        ]);
+
+        $this->assertStringContainsString('http://localhost/storage/avatars/ada.png', $html);
+        $this->assertStringContainsString('alt="Ada Applicant"', $html);
+    }
+
+    public function test_dashboard_navbar_shows_employer_company_logo(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Eli Employer',
+            'role' => UserRole::Employer->value,
+        ]);
+        $user->company()->create(array_merge($this->completeCompanyAttributes(), [
+            'logo_path' => 'company-logos/acme.png',
+        ]));
+
+        $html = Blade::render('<x-dashboard-navbar :user="$user" />', [
+            'user' => $user->fresh('company'),
+        ]);
+
+        $this->assertStringContainsString('http://localhost/storage/company-logos/acme.png', $html);
+        $this->assertStringContainsString('alt="Acme Careers"', $html);
     }
 
     public function test_incomplete_authenticated_user_visiting_login_is_redirected_to_onboarding(): void

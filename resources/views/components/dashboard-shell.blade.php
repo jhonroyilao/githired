@@ -17,7 +17,7 @@
     $navItems ??= match ($role) {
         \App\Enums\UserRole::Employer->value => [
             ['label' => 'Dashboard', 'route' => 'employer.dashboard'],
-            ['label' => 'Company profile', 'route' => 'employer.onboarding.company'],
+            ['label' => 'Company Profile', 'route' => 'employer.company.edit'],
         ],
         \App\Enums\UserRole::Admin->value => [
             ['label' => 'Edit Profile', 'route' => 'admin.profile.edit'],
@@ -27,7 +27,7 @@
         ],
         default => [
             ['label' => 'Find jobs', 'route' => 'applicant.dashboard'],
-            ['label' => 'My applications', 'route' => 'applicant.applications.index'],
+            ['label' => 'My Applications', 'route' => 'applicant.applications.index'],
             ['label' => 'Resume', 'route' => 'applicant.resume'],
             ['label' => 'Profile', 'route' => 'applicant.profile.edit'],
         ],

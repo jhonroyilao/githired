@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Employer\DashboardController as EmployerDashboardController;
 use App\Http\Controllers\Employer\EmployerJobListingController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
+use App\Http\Controllers\Employer\ProfileController;
 use App\Http\Controllers\JobController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
                 ? 'applicant.onboarding.links'
                 : 'applicant.resume')
             ->with('status', 'Resume already removed.'));
+    Route::put('/password', [ApplicantProfileController::class, 'updatePassword'])->name('password.update');
     Route::get('/job-listings/{jobListing}/apply', [ApplicationController::class, 'create'])->name('job-listings.apply');
     Route::post('/job-listings/{jobListing}/apply', [ApplicationController::class, 'store'])->name('job-listings.apply.store');
 });
@@ -111,6 +113,13 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/company', [CompanyProfileController::class, 'create'])->name('company');
         Route::post('/company', [CompanyProfileController::class, 'store'])->name('company.store');
+
+    });
+
+    Route::prefix('company')->name('company.')->group(function () {
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [ProfileController::class, 'update'])->name('update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     });
 
     Route::prefix('jobs')->name('jobs.')->group(function () {
@@ -125,6 +134,7 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
         Route::get('/{jobListing}/applicants/{application}', [EmployerJobListingController::class, 'showApplication'])->name('applicants.show');
         Route::get('/{jobListing}/applicants/{application}/resume', [EmployerJobListingController::class, 'downloadApplicationResume'])->name('applicants.resume');
         Route::patch('/{jobListing}/applicants/{application}/status', [EmployerJobListingController::class, 'updateApplicationStatus'])->name('applicants.status.update');
+
     });
 
     Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
