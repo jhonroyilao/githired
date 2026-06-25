@@ -1,3 +1,6 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    {{-- Back Button --}}
     <a href="{{ $backUrl }}"
        class="text-xs font-black text-neutral-500 hover:text-[#5f8f22] transition inline-flex items-center gap-1.5 uppercase tracking-wider mb-6">
         ← Back to {{ $backLabel }}
@@ -82,3 +85,4 @@
             </div>
         </aside>
     </div>
+</div>
