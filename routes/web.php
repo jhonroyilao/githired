@@ -19,6 +19,7 @@ use App\Http\Controllers\Employer\DashboardController as EmployerDashboardContro
 use App\Http\Controllers\Employer\EmployerJobListingController;
 use App\Http\Controllers\Employer\Onboarding\CompanyProfileController;
 use App\Http\Controllers\Admin\JobModerationController;
+use App\Http\Controllers\Admin\JobManagementController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use Illuminate\Http\Request;
@@ -134,12 +135,18 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
 */
 
 Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
-    Route::get('/profile', [AdminProfileController::class, 'edit']) ->name('profile.edit');
-    Route::put('/profile', [AdminProfileController::class, 'update']) ->name('profile.update');
-    Route::prefix('jobs')->name('jobs.')->group(function () {
-        Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
-        Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
-        Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
+        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+        Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+
+        Route::prefix('jobs')->name('jobs.')->group(function () {
+            Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
+            Route::get('/all', [JobManagementController::class, 'index'])->name('all');
+            Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
+            Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
+            Route::post('/{jobListing}/hide', [JobManagementController::class, 'hide'])->name('hide');
+            Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reapprove'])->name('reapprove');
+            Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reactivate'])->name('reactivate');
+            Route::delete('/{jobListing}', [JobManagementController::class, 'destroy'])->name('destroy');
+        });
     });
-});
