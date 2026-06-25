@@ -150,15 +150,6 @@
                     </div>
                 </div>
 
-                <div class="bg-amber-50 border-2 border-amber-200 rounded-3xl p-6">
-                    <h4 class="text-amber-900 font-black text-sm mb-2">Update Status</h4>
-                    <p class="text-amber-700 text-xs font-medium mb-4">Change the application status to manage your hiring pipeline.</p>
-                    <select class="w-full bg-white border border-amber-200 rounded-xl p-2 text-sm font-bold text-amber-900">
-                        <option>Interview</option>
-                        <option>Shortlisted</option>
-                        <option>Rejected</option>
-                    </select>
-                </div>
             </div>
         </div>
     </div>
