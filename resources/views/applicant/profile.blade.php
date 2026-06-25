@@ -5,6 +5,10 @@
     $errorClass = 'mt-1.5 text-sm font-bold text-signal-red';
     $secondaryButtonClass = 'inline-flex min-h-12 min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-neutral-900 bg-neutral-50/75 px-6 py-3 text-lg font-black text-neutral-900 no-underline transition hover:-translate-y-0.5 max-sm:w-full';
     $primaryButtonClass = 'inline-flex min-h-12 min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-6 py-3 text-lg font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5 max-sm:w-full';
+    $avatarMarkedForRemoval = old('remove_avatar') === '1';
+    $hasAvatar = filled($profile?->avatar_path) && ! $avatarMarkedForRemoval;
+    $avatarUrl = $hasAvatar ? \App\Support\StorageUrl::image($profile->avatar_path) : null;
+    $avatarPlaceholder = asset('assets/avatar.svg');
 @endphp
 
 <x-dashboard-shell title="Edit applicant profile" eyebrow="Job seeker workspace" :user="$user">
@@ -28,9 +32,60 @@
         </p>
     </div>
 
-    <form method="POST" action="{{ route('applicant.profile.update') }}" class="mt-7">
+    <form method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data" class="mt-7">
         @csrf
         @method('PUT')
+
+        <div class="mb-6 flex items-center gap-4 max-sm:flex-col max-sm:items-start">
+            <div class="size-24 shrink-0 overflow-hidden rounded-full border-[0.35rem] border-primarygreen-100 bg-primarygreen-100">
+                <img
+                    id="avatar-preview"
+                    src="{{ $avatarUrl ?? $avatarPlaceholder }}"
+                    alt="{{ $user->name }}"
+                    class="h-full w-full object-cover"
+                    data-placeholder-src="{{ $avatarPlaceholder }}"
+                >
+            </div>
+
+            <div>
+                <label for="avatar" class="{{ $labelClass }}">Profile picture</label>
+                <div class="flex flex-wrap items-center gap-3">
+                    <label for="avatar" class="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-5 text-base font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5">
+                        Upload image
+                    </label>
+                    <span id="avatar-file-name" class="text-sm font-extrabold text-neutral-600" aria-live="polite">
+                        {{ $avatarMarkedForRemoval ? 'File will be cleared on save' : ($hasAvatar ? 'Current image saved' : 'No image selected') }}
+                    </span>
+                    <button
+                        type="button"
+                        class="inline-flex size-11 items-center justify-center rounded-xl border-2 border-neutral-900 bg-neutral-50/75 text-neutral-900 transition hover:-translate-y-0.5 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primarygreen/25"
+                        data-remove-upload="avatar"
+                        data-remove-button="avatar"
+                        aria-label="Clear uploaded image"
+                        title="Clear uploaded image"
+                        @unless($hasAvatar) hidden @endunless
+                    >
+                        <i class="bi bi-x-lg text-lg" aria-hidden="true"></i>
+                        <span class="sr-only">Clear uploaded image</span>
+                    </button>
+                </div>
+                <input id="avatar-remove" name="remove_avatar" type="hidden" value="{{ $avatarMarkedForRemoval ? '1' : '0' }}">
+                <input
+                    id="avatar"
+                    name="avatar"
+                    type="file"
+                    accept="image/*"
+                    class="sr-only"
+                    data-file-name-target="avatar-file-name"
+                    data-preview-target="avatar-preview"
+                    data-remove-target="avatar-remove"
+                >
+                <p class="{{ $helpClass }}">PNG or JPEG under 10 MB.</p>
+                @error('avatar')
+                    <div class="{{ $errorClass }}">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
 
         <div class="grid gap-x-6 gap-y-4 sm:grid-cols-2">
             <div>

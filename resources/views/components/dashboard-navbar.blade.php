@@ -6,6 +6,17 @@
     'settingsUrl' => null,
 ])
 
+@php
+    $profileImagePath = match ($user?->role) {
+        \App\Enums\UserRole::Employer->value => $user?->company?->logo_path,
+        default => $user?->profile?->avatar_path,
+    };
+    $profileImageUrl = \App\Support\StorageUrl::image($profileImagePath);
+    $profileImageAlt = $user?->role === \App\Enums\UserRole::Employer->value
+        ? ($user?->company?->name ?? $user?->name ?? 'Company logo')
+        : ($user?->name ?? 'Profile picture');
+@endphp
+
 <nav class="bg-[#1a2315] text-white px-6 py-4 sticky top-0 z-50 transition-shadow duration-200 hover:shadow-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         
@@ -53,10 +64,8 @@
             
             <div class="flex items-center gap-3 border-l border-neutral-700 pl-4">
                 <div class="w-9 h-9 rounded-full overflow-hidden bg-neutral-700 border border-neutral-600 flex items-center justify-center">
-                    @if(isset($user->avatar_path) && $user->avatar_path)
-                        <img src="{{ \App\Support\StorageUrl::image($user->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
-                    @elseif(isset($user->profile->avatar_path) && $user->profile->avatar_path)
-                        <img src="{{ \App\Support\StorageUrl::image($user->profile->avatar_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                    @if($profileImageUrl)
+                        <img src="{{ $profileImageUrl }}" alt="{{ $profileImageAlt }}" class="w-full h-full object-cover">
                     @else
                         <img src="{{ asset('assets/avatar.svg') }}" alt="Default Avatar Placeholder" class="w-full h-full object-cover">
                     @endif

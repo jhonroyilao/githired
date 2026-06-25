@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ApplicantProfileEditingTest extends TestCase
@@ -114,6 +117,49 @@ class ApplicantProfileEditingTest extends TestCase
             'user_id' => $otherUser->id,
             'headline' => 'Do Not Change',
         ]);
+    }
+
+    public function test_applicant_can_replace_avatar_from_profile_editor(): void
+    {
+        Storage::fake('public');
+        /** @var FilesystemAdapter $publicStorage */
+        $publicStorage = Storage::disk('public');
+
+        $user = $this->applicantWithProfile([
+            'avatar_path' => 'avatars/current-avatar.jpg',
+        ]);
+        $publicStorage->put('avatars/current-avatar.jpg', 'avatar');
+
+        $response = $this->actingAs($user)->put(route('applicant.profile.update'), $this->validPayload([
+            'avatar' => UploadedFile::fake()->image('new-avatar.jpg'),
+        ]));
+
+        $response->assertRedirect(route('applicant.profile.edit', absolute: false));
+        $publicStorage->assertMissing('avatars/current-avatar.jpg');
+
+        $avatarPath = $user->profile()->first()->avatar_path;
+        $this->assertNotNull($avatarPath);
+        $publicStorage->assertExists($avatarPath);
+    }
+
+    public function test_applicant_can_remove_avatar_from_profile_editor(): void
+    {
+        Storage::fake('public');
+        /** @var FilesystemAdapter $publicStorage */
+        $publicStorage = Storage::disk('public');
+
+        $user = $this->applicantWithProfile([
+            'avatar_path' => 'avatars/current-avatar.jpg',
+        ]);
+        $publicStorage->put('avatars/current-avatar.jpg', 'avatar');
+
+        $response = $this->actingAs($user)->put(route('applicant.profile.update'), $this->validPayload([
+            'remove_avatar' => '1',
+        ]));
+
+        $response->assertRedirect(route('applicant.profile.edit', absolute: false));
+        $publicStorage->assertMissing('avatars/current-avatar.jpg');
+        $this->assertNull($user->profile()->first()->avatar_path);
     }
 
     public function test_employer_cannot_access_applicant_profile_editor(): void
