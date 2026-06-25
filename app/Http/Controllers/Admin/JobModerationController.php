@@ -28,9 +28,7 @@ class JobModerationController extends Controller
 
     public function approve(Request $request, JobListing $jobListing): RedirectResponse
     {
-        $this->ensurePending($jobListing);
-
-        $jobListing->update([
+        $this->updatePendingJob($jobListing, [
             'status' => JobStatus::Active->value,
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
@@ -45,14 +43,15 @@ class JobModerationController extends Controller
 
     public function reject(Request $request, JobListing $jobListing): RedirectResponse
     {
-        $this->ensurePending($jobListing);
-
         $request->validate([
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        $jobListing->update([
+        $this->updatePendingJob($jobListing, [
             'status' => JobStatus::Rejected->value,
+            'approved_at' => null,
+            'approved_by' => null,
+            'published_at' => null,
             'rejected_at' => now(),
             'rejected_by' => $request->user()->id,
             'rejection_reason' => $request->rejection_reason,
@@ -61,11 +60,13 @@ class JobModerationController extends Controller
         return back()->with('success', 'Job rejected successfully.');
     }
 
-    private function ensurePending(JobListing $jobListing): void
+    private function updatePendingJob(JobListing $jobListing, array $attributes): void
     {
-        abort_unless(
-            $jobListing->status === JobStatus::Pending->value,
-            Response::HTTP_CONFLICT
-        );
+        $updated = JobListing::query()
+            ->whereKey($jobListing->getKey())
+            ->where('status', JobStatus::Pending->value)
+            ->update($attributes);
+
+        abort_if($updated === 0, Response::HTTP_CONFLICT);
     }
 }

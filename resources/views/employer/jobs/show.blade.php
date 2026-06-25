@@ -35,6 +35,17 @@
             </span>
         </div>
 
+        @if ($job->status === \App\Enums\JobStatus::Rejected->value && $job->rejection_reason)
+            <section class="mt-6 rounded-xl border border-red-200 bg-red-50 p-5">
+                <h2 class="text-sm font-black uppercase tracking-[0.14em] text-red-700">
+                    Rejection reason
+                </h2>
+                <p class="mt-3 whitespace-pre-line text-sm font-bold leading-6 text-red-800">
+                    {{ $job->rejection_reason }}
+                </p>
+            </section>
+        @endif
+
         <section class="mt-8">
             <h2 class="text-xl font-black text-neutral-950">Description</h2>
             <p class="mt-3 whitespace-pre-line leading-7 text-neutral-700">{{ $job->description }}</p>
