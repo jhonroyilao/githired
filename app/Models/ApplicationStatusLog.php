@@ -17,6 +17,8 @@ class ApplicationStatusLog extends Model
         'old_status',
         'new_status',
         'changed_by',
+        'changed_by_name',
+        'changed_by_email',
         'note',
         'created_at',
     ];
