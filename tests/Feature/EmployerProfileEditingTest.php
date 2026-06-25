@@ -124,6 +124,31 @@ class EmployerProfileEditingTest extends TestCase
             'user_id' => $user->id,
             'slug' => 'Invalid Slug',
         ]);
+
+        $this->followingRedirects()
+            ->actingAs($user)
+            ->from(route('employer.company.edit'))
+            ->put(route('employer.company.update'), $this->validPayload([
+                'slug' => 'Invalid Slug',
+                'description' => str_repeat('A', 1001),
+            ]))
+            ->assertOk()
+            ->assertSee('The slug field format is invalid.')
+            ->assertSee('The description field must not be greater than 1000 characters.');
+    }
+
+    public function test_company_profile_editor_can_mark_logo_for_removal(): void
+    {
+        $user = $this->employerWithCompany([
+            'logo_path' => 'company-logos/current-logo.jpg',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('employer.company.edit'))
+            ->assertOk()
+            ->assertSee('name="remove_logo"', false)
+            ->assertSee('data-remove-upload="logo"', false)
+            ->assertSee('Current logo saved');
     }
 
     public function test_employer_can_update_password_from_company_profile_editor(): void

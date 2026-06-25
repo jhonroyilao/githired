@@ -4,8 +4,6 @@
     $helpClass = 'mt-1.5 text-xs font-bold text-neutral-600/70';
     $errorClass = 'mt-1.5 text-sm font-bold text-signal-red';
     $primaryButtonClass = 'inline-flex min-h-12 min-w-[11.5rem] items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-6 py-3 text-lg font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5 max-sm:w-full';
-    
-    // Logo logic
     $logoMarkedForRemoval = old('remove_logo') === '1';
     $hasLogo = filled($company?->logo_path) && ! $logoMarkedForRemoval;
     $logoUrl = $hasLogo ? \App\Support\StorageUrl::image($company->logo_path) : null;
@@ -29,16 +27,23 @@
 
             <form method="POST" action="{{ route('employer.company.update') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
-                @method('PUT') 
+                @method('PUT')
 
                 <div class="grid gap-6 sm:grid-cols-2">
                     <div>
                         <label for="name" class="{{ $labelClass }}">Company Name</label>
                         <input id="name" name="name" type="text" value="{{ old('name', $company?->name) }}" class="{{ $inputClass }}" required>
+                        @error('name')
+                            <div class="{{ $errorClass }}">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div>
                         <label for="slug" class="{{ $labelClass }}">Company Slug</label>
                         <input id="slug" name="slug" type="text" value="{{ old('slug', $company?->slug) }}" class="{{ $inputClass }}">
+                        <p class="{{ $helpClass }}">Leave blank to generate from the company name.</p>
+                        @error('slug')
+                            <div class="{{ $errorClass }}">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
@@ -46,39 +51,93 @@
                     <div>
                         <label for="industry" class="{{ $labelClass }}">Industry</label>
                         <input id="industry" name="industry" type="text" value="{{ old('industry', $company?->industry) }}" class="{{ $inputClass }}" required>
+                        @error('industry')
+                            <div class="{{ $errorClass }}">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div>
                         <label for="size" class="{{ $labelClass }}">Company Size</label>
                         <input id="size" name="size" type="text" value="{{ old('size', $company?->size) }}" class="{{ $inputClass }}" required>
+                        @error('size')
+                            <div class="{{ $errorClass }}">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
                 <div>
                     <label for="location" class="{{ $labelClass }}">Location</label>
                     <input id="location" name="location" type="text" value="{{ old('location', $company?->location) }}" class="{{ $inputClass }}" required>
+                    @error('location')
+                        <div class="{{ $errorClass }}">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div>
                     <label for="website" class="{{ $labelClass }}">Website</label>
                     <input id="website" name="website" type="url" value="{{ old('website', $company?->website) }}" class="{{ $inputClass }}">
+                    @error('website')
+                        <div class="{{ $errorClass }}">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="border-t border-neutral-100 pt-6">
-                    <label class="{{ $labelClass }}">Company Logo</label>
-                    <div class="flex items-center gap-6">
+                    <label for="logo" class="{{ $labelClass }}">Company Logo</label>
+                    <div class="flex flex-wrap items-center gap-6">
                         <div class="size-24 rounded-2xl overflow-hidden border-2 border-neutral-200">
-                            <img id="logo-preview" src="{{ $logoUrl ?? $logoPlaceholder }}" class="h-full w-full object-cover">
+                            <img
+                                id="logo-preview"
+                                src="{{ $logoUrl ?? $logoPlaceholder }}"
+                                alt=""
+                                class="h-full w-full object-cover"
+                                data-placeholder-src="{{ $logoPlaceholder }}"
+                            >
                         </div>
-                        <label class="cursor-pointer bg-neutral-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-neutral-800">
-                            Change Logo
-                            <input type="file" name="logo" class="hidden" data-preview-target="logo-preview">
-                        </label>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label for="logo" class="cursor-pointer bg-neutral-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-neutral-800">
+                                    Change Logo
+                                </label>
+                                <button
+                                    type="button"
+                                    class="inline-flex size-10 items-center justify-center rounded-xl border-2 border-neutral-900 bg-neutral-50/75 text-neutral-900 transition hover:-translate-y-0.5 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primarygreen/25"
+                                    data-remove-upload="logo"
+                                    data-remove-button="logo"
+                                    aria-label="Clear uploaded logo"
+                                    title="Clear uploaded logo"
+                                    @unless($hasLogo) hidden @endunless
+                                >
+                                    <i class="bi bi-x-lg text-base" aria-hidden="true"></i>
+                                    <span class="sr-only">Clear uploaded logo</span>
+                                </button>
+                            </div>
+                            <span id="logo-file-name" class="mt-2 block text-sm font-extrabold text-neutral-600" aria-live="polite">
+                                {{ $logoMarkedForRemoval ? 'File will be cleared on save' : ($hasLogo ? 'Current logo saved' : 'No logo selected') }}
+                            </span>
+                        </div>
                     </div>
+                    <input id="logo-remove" name="remove_logo" type="hidden" value="{{ $logoMarkedForRemoval ? '1' : '0' }}">
+                    <input
+                        id="logo"
+                        name="logo"
+                        type="file"
+                        accept="image/*"
+                        class="sr-only"
+                        data-file-name-target="logo-file-name"
+                        data-preview-target="logo-preview"
+                        data-remove-target="logo-remove"
+                    >
+                    <p class="{{ $helpClass }}">Optional PNG or JPEG under 10 MB.</p>
+                    @error('logo')
+                        <div class="{{ $errorClass }}">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div>
                     <label for="description" class="{{ $labelClass }}">Company Description</label>
                     <textarea id="description" name="description" rows="5" class="{{ $inputClass }}">{{ old('description', $company?->description) }}</textarea>
+                    @error('description')
+                        <div class="{{ $errorClass }}">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="pt-4 flex items-center justify-end gap-3">
@@ -102,7 +161,7 @@
             action="{{ route('employer.company.password.update') }}"
             class="mt-6"
         >
-            @csrf   
+            @csrf
             @method('PUT')
 
             <div class="space-y-5">
