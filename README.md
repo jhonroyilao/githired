@@ -1,4 +1,4 @@
-# GitHired
+# GitHired: A Job Application System for Developers
 
 GitHired is a Laravel job portal for applicants, employers, and moderation-only
 admins. The database has been extended to support the core job portal workflow
@@ -51,31 +51,6 @@ Last reviewed: 2026-06-19
 - Match score, score breakdown, matching skills, missing skills, explanation,
   suggested action, provider/model metadata, and input hashes.
 - Postgres JSONB skill fields and GIN indexes for profile/job skill matching.
-
-## Current Implementation Status
-
-Implemented or scaffolded in the repository:
-
-- Public landing page: `GET /`
-- UI mockup page: `GET /mockup`
-- Auth, public, applicant, employer, and admin Blade views.
-- Domain models for users, profiles, companies, job categories, jobs,
-  applications, status logs, resume documents, saved jobs, app notifications,
-  and AI job matches.
-- Schema migrations split by concern.
-- Applicant dashboard controller that calculates application stats, recent
-  applications, recommended jobs, and profile completeness.
-
-Still to wire at the application layer:
-
-- Real login/register/logout controllers and role redirects.
-- Role middleware for applicant, employer, and admin route groups.
-- Public job browsing and job detail controllers.
-- Applicant profile, resume upload, application submission, and application
-  detail controllers.
-- Employer job CRUD and applicant status update controllers.
-- Admin moderation screens/actions for approve, reject, and soft-delete.
-- AI job matching service and OpenAI integration.
 
 ## Tech Stack
 

@@ -3,21 +3,28 @@
 namespace App\Actions\Applicant;
 
 use App\Models\User;
+use App\Support\StorageUrl;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 final class UpdateProfileAction
 {
     /**
-     * @param  array{name: string, headline: string, bio: string, location: string, phone: string, website?: string|null, linkedin?: string|null, github?: string|null, desired_job_type: string, work_preference: string, experience_level: string, skills: array<int, string>}  $attributes
+     * @param  array{name: string, headline: string, bio: string, location: string, phone: string, website?: string|null, linkedin?: string|null, github?: string|null, desired_job_type: string, work_preference: string, experience_level: string, skills: array<int, string>, avatar?: UploadedFile|null, remove_avatar?: bool}  $attributes
      */
     public function handle(User $user, array $attributes): void
     {
         DB::transaction(function () use ($user, $attributes): void {
+            $imageDisk = config('filesystems.image_disk', 'public');
+
             $user->update([
                 'name' => $attributes['name'],
             ]);
 
-            $user->profile()->firstOrCreate([])->update([
+            $profile = $user->profile()->firstOrCreate([]);
+
+            $profile->fill([
                 'headline' => $attributes['headline'],
                 'bio' => $attributes['bio'],
                 'location' => $attributes['location'],
@@ -30,6 +37,21 @@ final class UpdateProfileAction
                 'experience_level' => $attributes['experience_level'],
                 'skills' => $attributes['skills'],
             ]);
+
+            if (($attributes['remove_avatar'] ?? false) && $profile->avatar_path) {
+                Storage::disk($imageDisk)->delete(StorageUrl::imageObjectPath($profile->avatar_path));
+                $profile->avatar_path = null;
+            }
+
+            if (($attributes['avatar'] ?? null) instanceof UploadedFile) {
+                if ($profile->avatar_path) {
+                    Storage::disk($imageDisk)->delete(StorageUrl::imageObjectPath($profile->avatar_path));
+                }
+
+                $profile->avatar_path = $attributes['avatar']->store('avatars', $imageDisk);
+            }
+
+            $profile->save();
         });
     }
 }
