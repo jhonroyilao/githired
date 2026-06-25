@@ -125,6 +125,7 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
         Route::get('/{jobListing}/applicants', [EmployerJobListingController::class, 'applicants'])->name('applicants');
         Route::get('/{jobListing}/applicants/{application}', [EmployerJobListingController::class, 'showApplication'])->name('applicants.show');
         Route::get('/{jobListing}/applicants/{application}/resume', [EmployerJobListingController::class, 'downloadApplicationResume'])->name('applicants.resume');
+        Route::patch('/{jobListing}/applicants/{application}/status', [EmployerJobListingController::class, 'updateApplicationStatus'])->name('applicants.status.update');
     });
 
     Route::get('/dashboard', EmployerDashboardController::class)->name('dashboard');
