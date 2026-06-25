@@ -16,6 +16,8 @@ final class StorageUrl
         $disk = config('filesystems.image_disk', 'public');
 
         if ($disk === 'supabase-images') {
+            $path = self::imageObjectPath($path);
+
             return self::supabasePublicUrl(
                 config('filesystems.disks.supabase-images.endpoint'),
                 config('filesystems.disks.supabase-images.bucket'),
@@ -24,6 +26,31 @@ final class StorageUrl
         }
 
         return Storage::disk($disk)->url($path);
+    }
+
+    public static function imageObjectPath(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        $bucket = config('filesystems.image_disk') === 'supabase-images'
+            ? config('filesystems.disks.supabase-images.bucket')
+            : null;
+
+        return self::withoutBucketPrefix($path, $bucket);
+    }
+
+    private static function withoutBucketPrefix(string $path, ?string $bucket): string
+    {
+        $path = ltrim($path, '/');
+        $bucket = trim((string) $bucket, '/');
+
+        if ($bucket !== '' && Str::startsWith($path, $bucket.'/')) {
+            return Str::after($path, $bucket.'/');
+        }
+
+        return $path;
     }
 
     private static function supabasePublicUrl(?string $endpoint, ?string $bucket, string $path): ?string
@@ -37,6 +64,6 @@ final class StorageUrl
             ->replace('/storage/v1/s3', '/storage/v1/object/public')
             ->rtrim('/');
 
-        return $baseUrl . '/' . trim($bucket, '/') . '/' . ltrim($path, '/');
+        return $baseUrl.'/'.trim($bucket, '/').'/'.ltrim($path, '/');
     }
 }

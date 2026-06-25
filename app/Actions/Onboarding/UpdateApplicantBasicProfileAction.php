@@ -3,6 +3,7 @@
 namespace App\Actions\Onboarding;
 
 use App\Models\User;
+use App\Support\StorageUrl;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -29,13 +30,13 @@ final class UpdateApplicantBasicProfileAction
             ]);
 
             if (($attributes['remove_avatar'] ?? false) && $profile->avatar_path) {
-                Storage::disk($imageDisk)->delete($profile->avatar_path);
+                Storage::disk($imageDisk)->delete(StorageUrl::imageObjectPath($profile->avatar_path));
                 $profile->avatar_path = null;
             }
 
             if (($attributes['avatar'] ?? null) instanceof UploadedFile) {
                 if ($profile->avatar_path) {
-                    Storage::disk($imageDisk)->delete($profile->avatar_path);
+                    Storage::disk($imageDisk)->delete(StorageUrl::imageObjectPath($profile->avatar_path));
                 }
 
                 $profile->avatar_path = $attributes['avatar']->store('avatars', $imageDisk);
