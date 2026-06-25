@@ -97,6 +97,7 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
                 ? 'applicant.onboarding.links'
                 : 'applicant.resume')
             ->with('status', 'Resume already removed.'));
+    Route::put('/password',[ApplicantProfileController::class, 'updatePassword'])->name('password.update');
     Route::get('/job-listings/{jobListing}/apply', [ApplicationController::class, 'create'])->name('job-listings.apply');
     Route::post('/job-listings/{jobListing}/apply', [ApplicationController::class, 'store'])->name('job-listings.apply.store');
 });
