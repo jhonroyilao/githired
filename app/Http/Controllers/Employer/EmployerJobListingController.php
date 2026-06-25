@@ -6,11 +6,14 @@ use App\Actions\Onboarding\ResolveUserDestinationRouteAction;
 use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Employer\StoreJobListingRequest;
+use App\Http\Requests\Employer\UpdateApplicationStatusRequest;
 use App\Models\Application;
+use App\Models\ApplicationStatusLog;
 use App\Models\JobCategory;
 use App\Models\JobListing;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -159,7 +162,7 @@ class EmployerJobListingController extends Controller
     {
         $this->authorizeApplication($jobListing, $application);
 
-        $application->loadMissing(['user.profile', 'resumeDocument']);
+        $application->loadMissing(['user.profile', 'resumeDocument', 'statusLogs.changedByUser']);
 
         return view('employer.applicants.show', [
             'job' => $jobListing,
@@ -183,6 +186,42 @@ class EmployerJobListingController extends Controller
             $path,
             $application->resumeDocument?->original_name ?? basename($path),
         );
+    }
+
+    public function updateApplicationStatus(UpdateApplicationStatusRequest $request, JobListing $jobListing, Application $application): RedirectResponse
+    {
+        if ($application->job_listing_id !== $jobListing->id) {
+            abort(404);
+        }
+
+        $oldStatus = $application->status;
+        $newStatus = $request->validated('status');
+
+        if ($oldStatus === $newStatus) {
+            return back()->with('info', 'No change. The status is already '.ucfirst($newStatus).'.');
+        }
+
+        DB::transaction(function () use ($application, $oldStatus, $newStatus, $request): void {
+            $application->update([
+                'status' => $newStatus,
+                'status_updated_at' => now(),
+            ]);
+
+            ApplicationStatusLog::create([
+                'application_id' => $application->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'changed_by' => $request->user()->id,
+                'changed_by_name' => $request->user()->name,
+                'changed_by_email' => $request->user()->email,
+                'note' => $request->validated('note'),
+            ]);
+        });
+
+        return redirect()->route('employer.jobs.applicants.show', [
+            'jobListing' => $jobListing->id,
+            'application' => $application->id,
+        ])->with('success', 'Status updated to '.ucfirst($newStatus).'.');
     }
 
     private function authorizeApplication(JobListing $jobListing, Application $application): void
