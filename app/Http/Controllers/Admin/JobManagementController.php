@@ -11,11 +11,20 @@ use Illuminate\View\View;
 
 class JobManagementController extends Controller
 {
-    public function index(): View
+        public function index(): View
     {
-        $query = JobListing::with(['company', 'user']);
+        $query = JobListing::query();
 
-        // Search
+        $status = request('status');
+
+        if ($status === 'deleted') {
+            $query->onlyTrashed();
+        } elseif (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        $query->with(['company', 'user']);
+
         if ($search = request('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -26,41 +35,23 @@ class JobManagementController extends Controller
             });
         }
 
-        // Status Filter
-        $status = request('status');
-
-        if ($status === 'deleted') {
-            $query->onlyTrashed();
-        } elseif (! empty($status)) {
-            $query->where('status', $status);
-        }
-
-        // Sort
         $query->when(
             request('sort') === 'oldest',
             fn ($q) => $q->oldest(),
             fn ($q) => $q->latest()
         );
 
-        $jobs = $query
-            ->paginate(20)
-            ->withQueryString();
+        $jobs = $query->paginate(20)->withQueryString();
 
         return view('admin.jobs.all', [
-            'user' => auth()->user(),
-            'jobs' => $jobs,
-
-            'pendingCount' => JobListing::where('status', JobStatus::Pending->value)->count(),
-
-            'activeCount' => JobListing::where('status', JobStatus::Active->value)->count(),
-
-            'hiddenCount' => JobListing::where('status', JobStatus::Closed->value)->count(),
-
+            'user'          => auth()->user(),
+            'jobs'          => $jobs,
+            'pendingCount'  => JobListing::where('status', JobStatus::Pending->value)->count(),
+            'activeCount'   => JobListing::where('status', JobStatus::Active->value)->count(),
+            'closedCount'   => JobListing::where('status', JobStatus::Closed->value)->count(),
             'rejectedCount' => JobListing::where('status', JobStatus::Rejected->value)->count(),
-
-            'deletedCount' => JobListing::onlyTrashed()->count(),
-
-            'totalCount' => JobListing::withTrashed()->count(),
+            'deletedCount'  => JobListing::onlyTrashed()->count(),
+            'totalCount'    => JobListing::withTrashed()->count(),
         ]);
     }
 

@@ -36,17 +36,18 @@
         </a>
         <a href="{{ route('admin.jobs.all', ['status' => 'closed']) }}"
             class="inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-800 hover:shadow transition">
-            Hidden <span class="text-base font-black">{{ $hiddenCount }}</span>
+            Closed <span class="text-base font-black">{{ $closedCount }}</span>
         </a>
         <a href="{{ route('admin.jobs.all', ['status' => 'rejected']) }}"
             class="inline-flex items-center gap-2 rounded-full border border-red-300 bg-red-50 px-4 py-2 text-sm font-bold text-red-800 hover:shadow transition">
             Rejected <span class="text-base font-black">{{ $rejectedCount }}</span>
         </a>
-        <span class="inline-flex items-center gap-2 rounded-full border border-pink-300 bg-pink-50 px-4 py-2 text-sm font-bold text-pink-800 hover:shadow transition">
+        <a href="{{ route('admin.jobs.all', ['status' => 'deleted']) }}" 
+            class="inline-flex items-center gap-2 rounded-full border border-brown-300 bg-brown-50 px-4 py-2 text-sm font-bold text-brown-800 hover:shadow transition">
             Deleted <span class="text-base font-black">{{ $deletedCount }}</span>
-        </span>
+        </a>
         <a href="{{ route('admin.jobs.all') }}"
-            class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-bold text-neutral-600 hover:shadow transition">
+                class="inline-flex items-center gap-2 rounded-full border border-pink-300 bg-pink-50 px-4 py-2 text-sm font-bold text-pink-800 hover:shadow transition">
             Total <span class="text-base font-black">{{ $totalCount }}</span>
         </a>
     </div>
@@ -164,7 +165,7 @@
                                 <button type="button"
                                     onclick="document.getElementById('delete-{{ $job->id }}').classList.toggle('hidden')"
                                     class="rounded-lg bg-red-100 px-5 py-2 font-black text-red-700 hover:bg-red-200">
-                                    Soft Delete
+                                    Delete
                                 </button>
 
                             @elseif($job->status === \App\Enums\JobStatus::Active->value)
@@ -173,14 +174,14 @@
                                     @csrf
                                     <button type="submit"
                                         class="rounded-lg bg-orange-100 px-5 py-2 font-black text-orange-700 hover:bg-orange-200">
-                                        Hide Listing
+                                        Close Listing
                                     </button>
                                 </form>
 
                                 <button type="button"
                                     onclick="document.getElementById('delete-{{ $job->id }}').classList.toggle('hidden')"
                                     class="rounded-lg bg-red-100 px-5 py-2 font-black text-red-700 hover:bg-red-200">
-                                    Soft Delete
+                                    Delete
                                 </button>
 
                             @elseif($job->status === \App\Enums\JobStatus::Rejected->value)

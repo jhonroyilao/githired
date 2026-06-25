@@ -119,7 +119,6 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
         Route::get('/', [EmployerJobListingController::class, 'index'])->name('index');
         Route::get('/create', [EmployerJobListingController::class, 'create'])->name('create');
         Route::post('/', [EmployerJobListingController::class, 'store'])->name('store');
-
         Route::get('/{jobListing}', [EmployerJobListingController::class, 'show'])->name('show');
         Route::get('/{jobListing}/edit', [EmployerJobListingController::class, 'edit'])->name('edit');
         Route::put('/{jobListing}', [EmployerJobListingController::class, 'update'])->name('update');
@@ -142,11 +141,12 @@ Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->na
         Route::prefix('jobs')->name('jobs.')->group(function () {
             Route::get('/pending', [JobModerationController::class, 'index'])->name('pending');
             Route::get('/all', [JobManagementController::class, 'index'])->name('all');
+            Route::post('/{id}/restore', [JobManagementController::class, 'restore'])->name('restore'); // ← fixed
             Route::post('/{jobListing}/approve', [JobModerationController::class, 'approve'])->name('approve');
             Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
             Route::post('/{jobListing}/hide', [JobManagementController::class, 'hide'])->name('hide');
             Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reapprove'])->name('reapprove');
-            Route::post('/{jobListing}/reactivate', [JobModerationController::class, 'reactivate'])->name('reactivate');
+            Route::post('/{jobListing}/reactivate', [JobModerationController::class, 'activate'])->name('reactivate');
             Route::delete('/{jobListing}', [JobManagementController::class, 'destroy'])->name('destroy');
         });
     });
