@@ -118,6 +118,7 @@ Route::middleware(['auth', 'role:'.UserRole::Employer->value])->prefix('employer
     Route::prefix('company')->name('company.')->group(function () {
         Route::get('/edit', [App\Http\Controllers\Employer\ProfileController::class, 'edit'])->name('edit');
         Route::put('/update', [App\Http\Controllers\Employer\ProfileController::class, 'update'])->name('update');
+        Route::put('/password',[App\Http\Controllers\Employer\ProfileController::class, 'updatePassword'])->name('password.update');
     });
 
     Route::prefix('jobs')->name('jobs.')->group(function () {
