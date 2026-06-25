@@ -146,7 +146,7 @@ Route::middleware(['auth', 'role:'.UserRole::Admin->value])->prefix('admin')->na
             Route::post('/{jobListing}/reject', [JobModerationController::class, 'reject'])->name('reject');
             Route::post('/{jobListing}/hide', [JobManagementController::class, 'hide'])->name('hide');
             Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reapprove'])->name('reapprove');
-            Route::post('/{jobListing}/reapprove', [JobModerationController::class, 'reactivate'])->name('reactivate');
+            Route::post('/{jobListing}/reactivate', [JobModerationController::class, 'reactivate'])->name('reactivate');
             Route::delete('/{jobListing}', [JobManagementController::class, 'destroy'])->name('destroy');
         });
     });
