@@ -86,7 +86,7 @@ Route::middleware(['auth', 'role:'.UserRole::Applicant->value])->prefix('applica
     Route::get('/dashboard', ApplicantDashboardController::class)->name('dashboard');
     Route::get('/profile', [ApplicantProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ApplicantProfileController::class, 'update'])->name('profile.update');
-    Route::get('/applications', fn () => 'applications index')->name('applications.index');
+    Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/resume', [ResumeController::class, 'index'])->name('resume');
     Route::post('/resume', [ResumeController::class, 'store'])->name('resume.store');
     Route::get('/resume/{resumeDocument}', [ResumeController::class, 'show'])->name('resume.show');

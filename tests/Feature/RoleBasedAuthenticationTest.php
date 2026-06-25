@@ -202,7 +202,7 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertSee(route('applicant.resume'), false);
         $response->assertSee('Find jobs');
         $response->assertSee('Resume');
-        $response->assertDontSee(route('applicant.applications.index'), false);
+        $response->assertSee(route('applicant.applications.index'), false);
         $response->assertDontSee('href="#"', false);
         $response->assertSee('Log out');
     }

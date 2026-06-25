@@ -27,6 +27,7 @@
         ],
         default => [
             ['label' => 'Find jobs', 'route' => 'applicant.dashboard'],
+            ['label' => 'My applications', 'route' => 'applicant.applications.index'],
             ['label' => 'Resume', 'route' => 'applicant.resume'],
             ['label' => 'Profile', 'route' => 'applicant.profile.edit'],
         ],
