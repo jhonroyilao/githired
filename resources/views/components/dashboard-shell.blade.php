@@ -23,6 +23,7 @@
             ['label' => 'Edit Profile', 'route' => 'admin.profile.edit'],
             ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
             ['label' => 'Approval', 'route' => 'admin.jobs.pending'],
+            ['label' => 'Manage All Listings', 'route' => 'admin.jobs.all'],
         ],
         default => [
             ['label' => 'Find jobs', 'route' => 'applicant.dashboard'],
