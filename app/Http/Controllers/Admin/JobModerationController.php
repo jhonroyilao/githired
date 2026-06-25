@@ -68,4 +68,33 @@ class JobModerationController extends Controller
             Response::HTTP_CONFLICT
         );
     }
+
+        public function reapprove(Request $request, JobListing $jobListing): RedirectResponse
+    {
+        $jobListing->update([
+            'status'           => JobStatus::Active->value,
+            'approved_at'      => now(),
+            'approved_by'      => $request->user()->id,
+            'published_at'     => now(),
+            'rejected_at'      => null,
+            'rejected_by'      => null,
+            'rejection_reason' => null,
+        ]);
+
+        return back()->with('success', 'Job listing re-approved successfully.');
+    }
+
+    public function reactivate(Request $request, JobListing $jobListing): RedirectResponse
+    {
+        $jobListing->update([
+            'status'      => JobStatus::Active->value,
+            'approved_at' => now(),
+            'approved_by' => $request->user()->id,
+            'published_at' => now(),
+            'closed_at'   => null,
+        ]);
+
+        return back()->with('success', 'Job listing is now active.');
+    }
 }
+
