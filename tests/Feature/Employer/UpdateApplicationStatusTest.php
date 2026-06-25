@@ -29,29 +29,29 @@ class UpdateApplicationStatusTest extends TestCase
 
         $company = Company::create([
             'user_id' => $employer->id,
-            'name'    => 'Test Corp',
-            'slug'    => 'test-corp-' . uniqid(),
+            'name' => 'Test Corp',
+            'slug' => 'test-corp-'.uniqid(),
         ]);
 
         $category = JobCategory::create([
             'name' => 'Engineering',
-            'slug' => 'engineering-' . uniqid(),
+            'slug' => 'engineering-'.uniqid(),
         ]);
 
         $job = JobListing::create([
-            'user_id'          => $employer->id,
-            'company_id'       => $company->id,
-            'category_id'      => $category->id,
-            'title'            => 'Software Engineer',
-            'slug'             => 'software-engineer-' . uniqid(),
-            'location'         => 'Manila',
-            'location_type'    => 'onsite',
-            'type'             => 'full-time',
+            'user_id' => $employer->id,
+            'company_id' => $company->id,
+            'category_id' => $category->id,
+            'title' => 'Software Engineer',
+            'slug' => 'software-engineer-'.uniqid(),
+            'location' => 'Manila',
+            'location_type' => 'onsite',
+            'type' => 'full-time',
             'experience_level' => 'mid',
-            'description'      => 'Description',
-            'requirements'     => 'Requirements',
-            'status'           => 'active',
-            'published_at'     => now(),
+            'description' => 'Description',
+            'requirements' => 'Requirements',
+            'status' => 'active',
+            'published_at' => now(),
         ]);
 
         return [$employer, $job];
@@ -65,9 +65,9 @@ class UpdateApplicationStatusTest extends TestCase
         $applicant = User::factory()->create(['role' => UserRole::Applicant->value]);
 
         return Application::create([
-            'user_id'        => $applicant->id,
+            'user_id' => $applicant->id,
             'job_listing_id' => $job->id,
-            'status'         => $status,
+            'status' => $status,
         ]);
     }
 
@@ -84,11 +84,11 @@ class UpdateApplicationStatusTest extends TestCase
         $application = $this->makeApplication($job, 'pending');
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job, $application), ['status' => 'interview'])
-             ->assertRedirect(route('employer.jobs.applicants.show', [$job, $application]));
+            ->patch($this->updateUrl($job, $application), ['status' => 'interview'])
+            ->assertRedirect(route('employer.jobs.applicants.show', [$job, $application]));
 
         $this->assertDatabaseHas('applications', [
-            'id'     => $application->id,
+            'id' => $application->id,
             'status' => 'interview',
         ]);
     }
@@ -99,18 +99,24 @@ class UpdateApplicationStatusTest extends TestCase
         $application = $this->makeApplication($job, 'pending');
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job, $application), [
-                 'status' => 'interview',
-                 'note'   => 'Technical interview on Friday.',
-             ]);
+            ->patch($this->updateUrl($job, $application), [
+                'status' => 'interview',
+                'note' => 'Technical interview on Friday.',
+            ]);
 
         $this->assertDatabaseHas('application_status_logs', [
             'application_id' => $application->id,
-            'old_status'     => 'pending',
-            'new_status'     => 'interview',
-            'changed_by'     => $employer->id,
-            'note'           => 'Technical interview on Friday.',
+            'old_status' => 'pending',
+            'new_status' => 'interview',
+            'changed_by' => $employer->id,
+            'changed_by_name' => $employer->name,
+            'changed_by_email' => $employer->email,
+            'note' => 'Technical interview on Friday.',
         ]);
+
+        $log = ApplicationStatusLog::where('application_id', $application->id)->first();
+
+        $this->assertNotNull($log?->created_at);
     }
 
     public function test_status_updated_at_is_stamped_on_change(): void
@@ -121,7 +127,7 @@ class UpdateApplicationStatusTest extends TestCase
         $this->assertNull($application->status_updated_at);
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job, $application), ['status' => 'hired']);
+            ->patch($this->updateUrl($job, $application), ['status' => 'hired']);
 
         $this->assertNotNull($application->fresh()->status_updated_at);
     }
@@ -132,12 +138,12 @@ class UpdateApplicationStatusTest extends TestCase
         $application = $this->makeApplication($job, 'pending');
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job, $application), ['status' => 'shortlisted'])
-             ->assertSessionHasErrors('status');
+            ->patch($this->updateUrl($job, $application), ['status' => 'shortlisted'])
+            ->assertSessionHasErrors('status');
 
         // Status must remain unchanged in the database.
         $this->assertDatabaseHas('applications', [
-            'id'     => $application->id,
+            'id' => $application->id,
             'status' => 'pending',
         ]);
     }
@@ -148,8 +154,8 @@ class UpdateApplicationStatusTest extends TestCase
         $application = $this->makeApplication($job);
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job, $application), [])
-             ->assertSessionHasErrors('status');
+            ->patch($this->updateUrl($job, $application), [])
+            ->assertSessionHasErrors('status');
     }
 
     public function test_no_log_entry_is_created_when_status_is_unchanged(): void
@@ -158,8 +164,8 @@ class UpdateApplicationStatusTest extends TestCase
         $application = $this->makeApplication($job, 'pending');
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job, $application), ['status' => 'pending'])
-             ->assertRedirect();
+            ->patch($this->updateUrl($job, $application), ['status' => 'pending'])
+            ->assertRedirect();
 
         $this->assertDatabaseCount('application_status_logs', 0);
     }
@@ -173,11 +179,11 @@ class UpdateApplicationStatusTest extends TestCase
 
         // employer1 tries to update an application on employer2's job.
         $this->actingAs($employer1)
-             ->patch($this->updateUrl($job2, $application), ['status' => 'interview'])
-             ->assertForbidden();
+            ->patch($this->updateUrl($job2, $application), ['status' => 'interview'])
+            ->assertForbidden();
 
         $this->assertDatabaseHas('applications', [
-            'id'     => $application->id,
+            'id' => $application->id,
             'status' => 'pending',
         ]);
         $this->assertDatabaseCount('application_status_logs', 0);
@@ -189,27 +195,27 @@ class UpdateApplicationStatusTest extends TestCase
 
         // A second job for the same employer.
         $job2 = JobListing::create([
-            'user_id'          => $employer->id,
-            'company_id'       => Company::where('user_id', $employer->id)->first()->id,
-            'category_id'      => JobCategory::first()->id,
-            'title'            => 'Designer',
-            'slug'             => 'designer-' . uniqid(),
-            'location'         => 'Cebu',
-            'location_type'    => 'remote',
-            'type'             => 'part-time',
+            'user_id' => $employer->id,
+            'company_id' => Company::where('user_id', $employer->id)->first()->id,
+            'category_id' => JobCategory::first()->id,
+            'title' => 'Designer',
+            'slug' => 'designer-'.uniqid(),
+            'location' => 'Cebu',
+            'location_type' => 'remote',
+            'type' => 'part-time',
             'experience_level' => 'entry',
-            'description'      => 'Desc',
-            'requirements'     => 'Req',
-            'status'           => 'active',
-            'published_at'     => now(),
+            'description' => 'Desc',
+            'requirements' => 'Req',
+            'status' => 'active',
+            'published_at' => now(),
         ]);
 
         // Application belongs to job1, but we submit via job2's URL.
         $application = $this->makeApplication($job1);
 
         $this->actingAs($employer)
-             ->patch($this->updateUrl($job2, $application), ['status' => 'interview'])
-             ->assertNotFound();
+            ->patch($this->updateUrl($job2, $application), ['status' => 'interview'])
+            ->assertNotFound();
     }
 
     public function test_unauthenticated_request_is_redirected_to_login(): void
@@ -218,7 +224,7 @@ class UpdateApplicationStatusTest extends TestCase
         $application = $this->makeApplication($job);
 
         $this->patch($this->updateUrl($job, $application), ['status' => 'interview'])
-             ->assertRedirect(route('login'));
+            ->assertRedirect(route('login'));
     }
 
     public function test_applicant_cannot_update_application_status(): void
@@ -231,5 +237,11 @@ class UpdateApplicationStatusTest extends TestCase
         $this->actingAs($applicant)
             ->patch($this->updateUrl($job, $application), ['status' => 'interview'])
             ->assertRedirect();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'status' => 'pending',
+        ]);
+        $this->assertDatabaseCount('application_status_logs', 0);
     }
 }

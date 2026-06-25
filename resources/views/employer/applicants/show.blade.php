@@ -257,6 +257,10 @@
                                     <span class="text-xs text-neutral-400">
                                         by {{ $log->changedByUser->name }}
                                     </span>
+                                @elseif($log->changed_by_name)
+                                    <span class="text-xs text-neutral-400">
+                                        by {{ $log->changed_by_name }}
+                                    </span>
                                 @endif
                             </div>
 

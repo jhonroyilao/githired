@@ -188,7 +188,7 @@ class EmployerJobListingController extends Controller
         );
     }
 
-    public function updateApplicationStatus( UpdateApplicationStatusRequest $request, JobListing $jobListing, Application $application, ): RedirectResponse
+    public function updateApplicationStatus(UpdateApplicationStatusRequest $request, JobListing $jobListing, Application $application): RedirectResponse
     {
         if ($application->job_listing_id !== $jobListing->id) {
             abort(404);
@@ -198,28 +198,30 @@ class EmployerJobListingController extends Controller
         $newStatus = $request->validated('status');
 
         if ($oldStatus === $newStatus) {
-            return back()->with('info', 'No change. The status is already ' . ucfirst($newStatus) . '.');
+            return back()->with('info', 'No change. The status is already '.ucfirst($newStatus).'.');
         }
 
         DB::transaction(function () use ($application, $oldStatus, $newStatus, $request): void {
             $application->update([
-                'status'            => $newStatus,
+                'status' => $newStatus,
                 'status_updated_at' => now(),
             ]);
 
             ApplicationStatusLog::create([
                 'application_id' => $application->id,
-                'old_status'     => $oldStatus,
-                'new_status'     => $newStatus,
-                'changed_by'     => $request->user()->id,
-                'note'           => $request->validated('note'),
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'changed_by' => $request->user()->id,
+                'changed_by_name' => $request->user()->name,
+                'changed_by_email' => $request->user()->email,
+                'note' => $request->validated('note'),
             ]);
         });
 
         return redirect()->route('employer.jobs.applicants.show', [
             'jobListing' => $jobListing->id,
-            'application' => $application->id
-        ])->with('success', 'Status updated to ' . ucfirst($newStatus) . '.');
+            'application' => $application->id,
+        ])->with('success', 'Status updated to '.ucfirst($newStatus).'.');
     }
 
     private function authorizeApplication(JobListing $jobListing, Application $application): void
