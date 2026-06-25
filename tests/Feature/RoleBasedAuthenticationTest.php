@@ -179,7 +179,7 @@ class RoleBasedAuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('logout'));
 
-        $response->assertRedirect(route('login', absolute: false));
+        $response->assertRedirect(route('home', absolute: false));
         $this->assertGuest();
     }
 
@@ -236,7 +236,7 @@ class RoleBasedAuthenticationTest extends TestCase
         $response->assertSee('Employer dashboard');
         $response->assertSee('Acme Careers');
         $response->assertSee(route('employer.dashboard'), false);
-        $response->assertSee(route('employer.onboarding.company'), false);
+        $response->assertSee(route('employer.company.edit'), false);
         $response->assertDontSee(route('applicant.dashboard'), false);
         $response->assertSee('Company profile');
         $response->assertDontSee('href="#"', false);

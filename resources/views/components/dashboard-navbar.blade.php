@@ -7,6 +7,29 @@
 ])
 
 @php
+    $resolvedNavItems = collect($navItems)
+        ->map(function (array $item): ?array {
+            $url = $item['url'] ?? null;
+
+            if (! $url && isset($item['route']) && \Illuminate\Support\Facades\Route::has($item['route'])) {
+                $url = route($item['route'], $item['parameters'] ?? []);
+            }
+
+            if (! $url) {
+                return null;
+            }
+
+            return [
+                ...$item,
+                'url' => $url,
+                'active' => $item['active'] ?? (isset($item['route'])
+                    ? request()->routeIs($item['route'])
+                    : request()->fullUrlIs($url)),
+            ];
+        })
+        ->filter()
+        ->values();
+
     $profileImagePath = match ($user?->role) {
         \App\Enums\UserRole::Employer->value => $user?->company?->logo_path,
         default => $user?->profile?->avatar_path,
@@ -26,18 +49,10 @@
             </a>
 
             {{-- DESKTOP NAV --}}
-            @if(count($navItems) > 0)
+            @if($resolvedNavItems->isNotEmpty())
                 <div class="hidden md:flex items-center gap-6 font-semibold text-sm tracking-wide">
-                    @foreach($navItems as $item)
-                        @php
-                            $url = $item['url'] ?? null;
-                            if (! $url && isset($item['route']) && \Illuminate\Support\Facades\Route::has($item['route'])) {
-                                $url = route($item['route'], $item['parameters'] ?? []);
-                            }
-                            if (! $url) continue;
-                            $active = $item['active'] ?? (isset($item['route']) ? request()->routeIs($item['route']) : request()->fullUrlIs($url));
-                        @endphp
-                        <a href="{{ $url }}" class="{{ $active ? 'text-[#91c93c]' : 'text-neutral-300 hover:text-white' }} transition">
+                    @foreach($resolvedNavItems as $item)
+                        <a href="{{ $item['url'] }}" class="{{ $item['active'] ? 'text-[#91c93c]' : 'text-neutral-300 hover:text-white' }} transition">
                             {{ $item['label'] }}
                         </a>
                     @endforeach
@@ -88,12 +103,8 @@
 
     {{-- MOBILE MENU DROPDOWN --}}
     <div id="mobile-menu" class="hidden md:hidden mt-4 pt-4 border-t border-neutral-700 flex flex-col gap-4">
-        @foreach($navItems as $item)
-            @php
-                $url = $item['url'] ?? (isset($item['route']) ? route($item['route']) : '#');
-                $active = request()->routeIs($item['route'] ?? '');
-            @endphp
-            <a href="{{ $url }}" class="{{ $active ? 'text-[#91c93c]' : 'text-neutral-300' }} block font-semibold">
+        @foreach($resolvedNavItems as $item)
+            <a href="{{ $item['url'] }}" class="{{ $item['active'] ? 'text-[#91c93c]' : 'text-neutral-300' }} block font-semibold">
                 {{ $item['label'] }}
             </a>
         @endforeach

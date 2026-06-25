@@ -181,7 +181,7 @@
             <div>
                 <h4 class="font-black text-sm mb-4">Platform</h4>
                 <a href="/jobs" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Browse jobs</a>
-                <a href="/post-job" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Post a job</a>
+                <a href="{{ route('register') }}" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Post a job</a>
             </div>
 
             <div>
