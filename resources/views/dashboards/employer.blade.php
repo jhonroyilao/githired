@@ -9,18 +9,44 @@
         <p class="mt-3 max-w-2xl font-bold leading-7 text-neutral-600">{{ $company?->description }}</p>
 
         <div class="mt-5 flex flex-col gap-3">
-            <a href="{{ route('employer.onboarding.company') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Edit company profile</a>
-
+            <a href="{{ route('employer.company.edit') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Edit Company Profile</a>
             <a href="{{ route('employer.jobs.create') }}" class="font-black text-neutral-900 underline decoration-primarygreen decoration-4 underline-offset-4">Create Job</a>
         </div>
     </div>
 
     <section class="mt-8">
-        <h2 class="text-3xl font-black text-neutral-950 tracking-tight mb-5">
-            Your Job Listings
-        </h2>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="pb-2">
+                <h2 class="text-3xl font-black text-neutral-950 tracking-tight">
+                    Your Job Listings
+                </h2>
+                <p class="mt-2 text-neutral-600">
+                    Search the listings attached to your company profile.
+                </p>
+            </div>
 
-        <div class="grid gap-4 sm:grid-cols-3">
+            <form method="GET" action="{{ route('employer.dashboard') }}" class="w-full sm:max-w-2xl">
+                <label for="search" class="sr-only">Search job listings</label>
+                <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-2 shadow-[0_1px_0_rgba(17,24,39,0.02)]">
+                    <input
+                        id="search"
+                        type="search"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search title, location, status..."
+                        class="h-11 min-w-0 flex-1 rounded-xl border-0 bg-transparent px-4 text-sm font-bold text-neutral-900 outline-none placeholder:text-neutral-400 focus:ring-0"
+                    >
+                    <button
+                        type="submit"
+                        class="inline-flex h-11 shrink-0 items-center justify-center rounded-xl border-2 border-primarygreen bg-primarygreen px-6 text-sm font-black text-neutral-900 shadow-pressed transition hover:-translate-y-0.5"
+                    >
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-8 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
             @forelse($jobs as $job)
                 <div class="bg-white border border-neutral-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition duration-200">
 
@@ -99,16 +125,22 @@
                 </div>
             @empty
                 <div class="col-span-3 bg-white border border-neutral-200 rounded-2xl p-8 text-center">
-                    <p class="font-bold text-neutral-500">
-                        You haven't created any job listings yet.
-                    </p>
+                    @if(request()->filled('search'))
+                        <p class="font-bold text-neutral-500">
+                            No job listings match "{{ request('search') }}".
+                        </p>
+                    @else
+                        <p class="font-bold text-neutral-500">
+                            You haven't created any job listings yet.
+                        </p>
 
-                    <a
-                        href="{{ route('employer.jobs.create') }}"
-                        class="mt-4 inline-flex bg-[#91c93c] text-neutral-950 px-4 py-2 rounded-lg font-black"
-                    >
-                        Create Your First Job
-                    </a>
+                        <a
+                            href="{{ route('employer.jobs.create') }}"
+                            class="mt-4 inline-flex bg-[#91c93c] text-neutral-950 px-4 py-2 rounded-lg font-black"
+                        >
+                            Create Your First Job
+                        </a>
+                    @endif
                 </div>
             @endforelse
         </div>

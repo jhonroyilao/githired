@@ -63,7 +63,7 @@
                 </p>
                 <div class="flex">
                     <a href="{{ route('register') }}" class="bg-[#1a2315] text-white px-8 py-4 rounded-xl font-bold hover:shadow-[4px_4px_0px_0px_#91c93c] transition">
-                        Create free account
+                        Create an account
                     </a>
                 </div>
             </div>
@@ -74,7 +74,7 @@
             </div>
         </section>
 
-        <section id="how" class=" max-w-7xl mx-auto px-6 py-20 bg-white py-20 px-15 rounded-3xl border border-neutral-800 border-3">
+        <section id="how-it-works" class=" max-w-7xl mx-auto px-6 py-20 bg-white py-20 px-15 rounded-3xl border border-neutral-800 border-3">
             <div class="max-w-7xl  mx-auto space-y-16">
                 <div class="text-center md:text-left">
                     <h2 class="text-5xl font-black text-[#1a2315]">How it works</h2>
@@ -103,8 +103,7 @@
             </div>
         </section>
 
-        <section class="max-w-7xl mx-auto px-20 space-y-10">
-            {{-- Job Seekers Section --}}
+        <section id="features" class="max-w-7xl mx-auto px-20 space-y-10">
             <div class="grid md:grid-cols-2 gap-12 items-center p-10 bg-white border-2 border-neutral-200 rounded-3xl hover:border-neutral-950 hover:shadow-[4px_4px_0px_0px_#1a2315] transition-all">
                 <div>
                     <h2 class="text-3xl font-black mb-6">For job seekers</h2>
@@ -173,20 +172,24 @@
     <footer class="bg-[#1a2315] text-white py-16 mt-20">
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
             <div>
-                <div>
-                    <a href="/" class="inline-flex items-center">
+                <a href="/" class="inline-flex items-center">
                     <img src="{{ asset('brand/logo-full.svg') }}" alt="GitHired" class="h-8 w-auto">
-                </a></div>
-                <p class="text-xs text-neutral-400">Connecting talent with opportunities.</p>
+                </a>
+                <p class="text-xs text-neutral-400 mt-2">Connecting talent with opportunities.</p>
             </div>
-            @foreach(['Platform' => ['Browse jobs', 'Post a job'], 'Useful links' => ['Features', 'How it works', 'Team'], 'Help' => ['FAQ', 'Privacy']] as $title => $links)
+
             <div>
-                <h4 class="font-black text-sm mb-4">{{ $title }}</h4>
-                @foreach($links as $link)
-                    <a href="#" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">{{ $link }}</a>
-                @endforeach
+                <h4 class="font-black text-sm mb-4">Platform</h4>
+                <a href="/jobs" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Browse jobs</a>
+                <a href="{{ route('register') }}" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Post a job</a>
             </div>
-            @endforeach
+
+            <div>
+                <h4 class="font-black text-sm mb-4">Useful links</h4>
+                <a href="/#features" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Features</a>
+                <a href="/#how-it-works" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">How it works</a>
+                <a href="/#team" class="block text-sm text-neutral-400 mb-2 hover:text-[#91c93c]">Team</a>
+            </div>
         </div>
     </footer>
 </body>
