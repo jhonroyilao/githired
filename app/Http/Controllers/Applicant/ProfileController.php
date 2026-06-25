@@ -11,6 +11,8 @@ use App\Http\Requests\Applicant\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 final class ProfileController extends Controller
 {
@@ -32,5 +34,29 @@ final class ProfileController extends Controller
         return redirect()
             ->route('applicant.profile.edit')
             ->with('status', 'Profile updated.');
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'current_password' => [
+                'required',
+                'current_password',
+            ],
+            'password' => [
+                'required',
+                'confirmed',
+                Password::defaults(),
+            ],
+        ]);
+
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with(
+            'success',
+            'Password updated successfully.'
+        );
     }
 }
