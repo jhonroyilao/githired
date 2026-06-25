@@ -10,9 +10,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Applicant\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
 
 final class ProfileController extends Controller
 {
@@ -38,7 +38,7 @@ final class ProfileController extends Controller
 
     public function updatePassword(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'current_password' => [
                 'required',
                 'current_password',
@@ -51,11 +51,11 @@ final class ProfileController extends Controller
         ]);
 
         $request->user()->update([
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($validated['password']),
         ]);
 
         return back()->with(
-            'success',
+            'status',
             'Password updated successfully.'
         );
     }

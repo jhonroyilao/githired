@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -162,6 +163,57 @@ class ApplicantProfileEditingTest extends TestCase
         $this->assertNull($user->profile()->first()->avatar_path);
     }
 
+    public function test_applicant_can_update_password_from_profile_editor(): void
+    {
+        $user = $this->applicantWithProfile();
+
+        $response = $this->actingAs($user)
+            ->from(route('applicant.profile.edit'))
+            ->put(route('applicant.password.update'), [
+                'current_password' => 'password',
+                'password' => 'new-secure-password',
+                'password_confirmation' => 'new-secure-password',
+            ]);
+
+        $response->assertRedirect(route('applicant.profile.edit', absolute: false));
+        $response->assertSessionHas('status', 'Password updated successfully.');
+        $this->assertTrue(Hash::check('new-secure-password', $user->refresh()->password));
+    }
+
+    public function test_applicant_password_update_requires_current_password(): void
+    {
+        $user = $this->applicantWithProfile();
+
+        $response = $this->actingAs($user)
+            ->from(route('applicant.profile.edit'))
+            ->put(route('applicant.password.update'), [
+                'current_password' => 'wrong-password',
+                'password' => 'new-secure-password',
+                'password_confirmation' => 'new-secure-password',
+            ]);
+
+        $response->assertRedirect(route('applicant.profile.edit', absolute: false));
+        $response->assertSessionHasErrors('current_password');
+        $this->assertTrue(Hash::check('password', $user->refresh()->password));
+    }
+
+    public function test_applicant_password_update_requires_confirmation(): void
+    {
+        $user = $this->applicantWithProfile();
+
+        $response = $this->actingAs($user)
+            ->from(route('applicant.profile.edit'))
+            ->put(route('applicant.password.update'), [
+                'current_password' => 'password',
+                'password' => 'new-secure-password',
+                'password_confirmation' => 'different-password',
+            ]);
+
+        $response->assertRedirect(route('applicant.profile.edit', absolute: false));
+        $response->assertSessionHasErrors('password');
+        $this->assertTrue(Hash::check('password', $user->refresh()->password));
+    }
+
     public function test_employer_cannot_access_applicant_profile_editor(): void
     {
         $user = User::factory()->create([
@@ -174,6 +226,14 @@ class ApplicantProfileEditingTest extends TestCase
 
         $this->actingAs($user)
             ->put(route('applicant.profile.update'), $this->validPayload())
+            ->assertRedirect(route('employer.onboarding.company', absolute: false));
+
+        $this->actingAs($user)
+            ->put(route('applicant.password.update'), [
+                'current_password' => 'password',
+                'password' => 'new-secure-password',
+                'password_confirmation' => 'new-secure-password',
+            ])
             ->assertRedirect(route('employer.onboarding.company', absolute: false));
     }
 

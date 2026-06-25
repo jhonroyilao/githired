@@ -12,7 +12,7 @@
 @endphp
 
 <x-dashboard-shell title="Edit applicant profile" eyebrow="Job seeker workspace" :user="$user">
-    <p class="mt-5 max-w-8xl text-lg font-bold leading-8 text-neutral-600">
+    <p class="mt-5 max-w-7xl text-lg font-bold leading-8 text-neutral-600">
         Keep the details employers and future matching features use to understand your work, preferences, and links.
     </p>
 
